@@ -3,6 +3,7 @@
 export default function VisionSection() {
   return (
     <section
+      id="vision"
       style={{
         position: "relative",
         background: "var(--bg-primary)",
