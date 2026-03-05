@@ -3,6 +3,7 @@
 import { useScrollReveal } from "./hooks/useScrollReveal";
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
+import TrustedBySection from "./components/TrustedBySection";
 import ShiftSection from "./components/ShiftSection";
 import MissionSection from "./components/MissionSection";
 import TIDSection from "./components/TIDSection";
@@ -21,6 +22,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <TrustedBySection />
         <ShiftSection />
         <MissionSection />
         <TIDSection />
