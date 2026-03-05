@@ -59,7 +59,10 @@ export default function Navbar() {
         </div>
 
         {/* Desktop CTA */}
-        <a href="#join" className="btn-primary hidden md:inline-flex shrink-0 py-[10px] px-6 text-[0.875rem]">
+        <a
+          href="#join"
+          className="relative overflow-hidden hidden md:inline-flex items-center justify-center gap-2 shrink-0 py-[10px] px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium no-underline hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
+        >
           Join Ecosystem
         </a>
 
@@ -93,7 +96,7 @@ export default function Navbar() {
         ))}
         <a
           href="#join"
-          className="btn-primary mt-2 w-full text-center py-3 px-6 text-[0.875rem]"
+          className="relative overflow-hidden inline-flex items-center justify-center gap-2 mt-2 w-full text-center py-3 px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium no-underline hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
           onClick={handleLinkClick}
         >
           Join Ecosystem
