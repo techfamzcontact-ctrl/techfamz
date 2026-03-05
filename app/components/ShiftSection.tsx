@@ -27,67 +27,40 @@ export default function ShiftSection() {
   return (
     <section
       id="shift"
-      style={{
-        position: "relative",
-        background: "linear-gradient(180deg, #060B18 0%, #080F24 100%)",
-      }}
+      className="relative bg-[linear-gradient(180deg,#060B18_0%,#080F24_100%)]"
     >
-      <div className="section">
-        <div className="reveal" style={{ textAlign: "center", marginBottom: 64 }}>
-          <span className="section-label">The Shift</span>
-          <h2 className="section-title">
+      <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto">
+        <div className="reveal text-center mb-16">
+          <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">The Shift</span>
+          <h2 className="mb-6">
             From Community to Technology Infrastructure
           </h2>
-          <p className="section-subtitle" style={{ margin: "0 auto" }}>
+          <p className="max-w-[680px] text-lg text-text-secondary mx-auto">
             Techfamz is no longer just a gathering place for tech enthusiasts. We are building a
             verified, structured, and scalable ecosystem.
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 24,
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
           {items.map((item, i) => (
             <div
               key={i}
-              className={`glass-card stagger-item`}
+              className="bg-bg-card border border-border-glass rounded-lg p-8 backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover stagger-item"
               style={{ transitionDelay: `${i * 0.1}s` }}
             >
               <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "var(--radius-md)",
-                  background: "var(--accent-blue-glow-soft)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.25rem",
-                  marginBottom: 20,
-                  border: "1px solid rgba(59, 130, 246, 0.2)",
-                }}
+                className="w-12 h-12 rounded-md bg-accent-blue-glow-soft flex items-center justify-center text-xl mb-5 border border-[rgba(59,130,246,0.2)]"
               >
                 {item.icon}
               </div>
-              <h3 style={{ fontSize: "1.125rem", marginBottom: 8, fontWeight: 600 }}>{item.title}</h3>
-              <p style={{ fontSize: "0.925rem", margin: 0 }}>{item.description}</p>
+              <h3 className="text-lg mb-2 font-semibold">{item.title}</h3>
+              <p className="text-[0.925rem] m-0">{item.description}</p>
             </div>
           ))}
         </div>
 
         <p
-          className="reveal reveal-delay-4"
-          style={{
-            textAlign: "center",
-            marginTop: 48,
-            color: "var(--text-muted)",
-            fontStyle: "italic",
-            fontSize: "1rem",
-          }}
+          className="reveal reveal-delay-4 text-center mt-12 text-text-muted italic text-base"
         >
           This is a deliberate transition — from informal connection to organized opportunity.
         </p>

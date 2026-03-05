@@ -2,42 +2,18 @@
 
 export default function Footer() {
   return (
-    <footer
-      style={{
-        borderTop: "1px solid var(--border-glass)",
-        padding: "32px 24px",
-        textAlign: "center",
-        background: "var(--bg-primary)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
+    <footer className="border-t border-border-glass py-8 px-6 text-center bg-bg-primary">
+      <div className="max-w-[1200px] mx-auto flex items-center justify-between flex-wrap gap-4">
+        <p className="text-[0.85rem] text-text-muted m-0">
           © {new Date().getFullYear()} Techfamz Limited. All rights reserved.
         </p>
 
-        <div style={{ display: "flex", gap: 24 }}>
+        <div className="flex gap-6">
           {["Privacy", "Terms", "Contact"].map((link) => (
             <a
               key={link}
               href="#"
-              style={{
-                fontSize: "0.85rem",
-                color: "var(--text-muted)",
-                textDecoration: "none",
-                transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent-blue-light)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              className="text-[0.85rem] text-text-muted no-underline transition-colors duration-300 hover:text-accent-blue-light"
             >
               {link}
             </a>

@@ -2,27 +2,14 @@
 
 export default function MissionSection() {
   return (
-    <section
-      style={{
-        position: "relative",
-        background: "var(--bg-primary)",
-      }}
-    >
+    <section className="relative bg-bg-primary">
       <div className="divider" />
-      <div className="section">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 64,
-            alignItems: "center",
-          }}
-          className="mission-grid"
-        >
+      <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
           {/* Left */}
           <div className="reveal">
-            <span className="section-label">Our Mission</span>
-            <h2 className="section-title" style={{ marginBottom: 20 }}>
+            <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">Our Mission</span>
+            <h2 className="mb-5">
               Empower Talent.
               <br />
               Engineer Systems.
@@ -33,31 +20,24 @@ export default function MissionSection() {
 
           {/* Right */}
           <div className="reveal reveal-delay-2">
-            <p style={{ fontSize: "1.125rem", marginBottom: 24 }}>
+            <p className="text-lg mb-6">
               Our mission is simple but ambitious: to design a platform that strengthens the identity,
               credibility, and global relevance of African tech talent.
             </p>
-            <p style={{ marginBottom: 24 }}>
+            <p className="mb-6">
               We are engineering systems that remove barriers between skilled developers and meaningful
               opportunities.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: 32,
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="flex gap-8 flex-wrap">
               {["Not noise.", "Not hype.", "But structure, access, and long-term value."].map(
                 (text, i) => (
                   <span
                     key={i}
-                    style={{
-                      fontSize: i === 2 ? "1rem" : "0.875rem",
-                      fontWeight: i === 2 ? 600 : 500,
-                      color: i === 2 ? "var(--accent-blue-light)" : "var(--text-muted)",
-                      letterSpacing: "0.01em",
-                    }}
+                    className={`tracking-[0.01em] ${
+                      i === 2
+                        ? "text-base font-semibold text-accent-blue-light"
+                        : "text-sm font-medium text-text-muted"
+                    }`}
                   >
                     {text}
                   </span>
@@ -67,15 +47,6 @@ export default function MissionSection() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .mission-grid {
-            grid-template-columns: 1fr !important;
-            gap: 32px !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

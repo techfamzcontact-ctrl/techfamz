@@ -4,83 +4,43 @@ export default function CTASection() {
   return (
     <section
       id="join"
-      style={{
-        position: "relative",
-        background: "linear-gradient(180deg, #060B18 0%, #0C1A3A 50%, #060B18 100%)",
-        overflow: "hidden",
-        padding: "120px 24px",
-        textAlign: "center",
-      }}
+      className="relative bg-[linear-gradient(180deg,#060B18_0%,#0C1A3A_50%,#060B18_100%)] overflow-hidden py-[120px] px-6 text-center"
     >
       {/* Moving Light Beam */}
       <div className="light-beam" />
 
       {/* Background Glow */}
       <div
-        className="bg-glow bg-glow-blue"
-        style={{ width: 500, height: 500, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+        className="bg-glow bg-accent-blue opacity-12 blur-[120px] animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
       />
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+      <div className="relative z-10 max-w-[700px] mx-auto">
         <div className="reveal">
-          <h2
-            style={{
-              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
-              fontWeight: 800,
-              lineHeight: 1.1,
-              marginBottom: 24,
-              letterSpacing: "-0.03em",
-            }}
-          >
+          <h2 className="font-[800] leading-[1.1] mb-6 tracking-[-0.03em] text-[clamp(2.25rem,5vw,3.5rem)]">
             The Next Phase
             <br />
-            <span style={{ color: "var(--accent-blue-light)" }}>Begins Now.</span>
+            <span className="text-accent-blue-light">Begins Now.</span>
           </h2>
         </div>
 
-        <p
-          className="reveal reveal-delay-1"
-          style={{
-            fontSize: "1.15rem",
-            color: "var(--text-secondary)",
-            marginBottom: 40,
-            lineHeight: 1.7,
-          }}
-        >
+        <p className="reveal reveal-delay-1 text-[1.15rem] text-text-secondary mb-10 leading-[1.7]">
           Join a platform built for serious builders.
         </p>
 
         <div className="reveal reveal-delay-2">
           <a
             href="#"
-            className="btn-primary"
-            style={{
-              padding: "18px 48px",
-              fontSize: "1.1rem",
-              borderRadius: "var(--radius-md)",
-            }}
+            className="relative overflow-hidden inline-flex items-center justify-center gap-2 py-[18px] px-12 text-[1.1rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
           >
             Join the Ecosystem
           </a>
         </div>
 
-        <div className="reveal reveal-delay-3" style={{ marginTop: 56 }}>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              color: "var(--text-muted)",
-              letterSpacing: "0.05em",
-            }}
-          >
-            <strong style={{ color: "var(--text-secondary)" }}>Techfamz Limited</strong>
+        <div className="reveal reveal-delay-3 mt-14">
+          <p className="text-[0.85rem] text-text-muted tracking-[0.05em]">
+            <strong className="text-text-secondary">Techfamz Limited</strong>
           </p>
-          <p
-            style={{
-              fontSize: "0.8rem",
-              color: "var(--text-muted)",
-              marginTop: 4,
-            }}
-          >
+          <p className="text-[0.8rem] text-text-muted mt-1">
             Empowering minds. Engineering solutions. Shaping the future.
           </p>
         </div>
