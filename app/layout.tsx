@@ -109,7 +109,7 @@ export default function RootLayout({
     description:
       "Techfamz is building a structured technology ecosystem designed to unify developers, engineers, and forward-thinking companies across Africa and beyond.",
     foundingDate: "2024",
-    sameAs: [],
+    sameAs: ["https://chat.whatsapp.com/KLihH50meiH8XxvjGsS1cf"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "General Inquiry",

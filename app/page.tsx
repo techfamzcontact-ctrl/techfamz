@@ -11,6 +11,7 @@ import LegalSection from "./components/LegalSection";
 import VisionSection from "./components/VisionSection";
 import CTASection from "./components/CTASection";
 import Footer from "./components/Footer";
+import WhatsAppPopup from "./components/WhatsAppPopup";
 
 export default function Home() {
   useScrollReveal();
@@ -29,6 +30,7 @@ export default function Home() {
         <CTASection />
       </main>
       <Footer />
+      <WhatsAppPopup />
     </>
   );
 }
