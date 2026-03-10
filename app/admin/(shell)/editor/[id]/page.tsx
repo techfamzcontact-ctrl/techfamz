@@ -6,6 +6,7 @@ import TiptapImage from "@tiptap/extension-image";
 import TiptapLink from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
+import Image from "next/image";
 import {
   ImageIcon, Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, Quote, Code, Heading1, Heading2, Heading3,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getPost, savePost } from "../../actions";
+import { getPost, savePost } from "../../../actions";
 
 const CATEGORIES = [
   "Tutorial",
@@ -33,6 +34,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const [excerpt, setExcerpt] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [category, setCategory] = useState("");
+  const [saveError, setSaveError] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -104,12 +106,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       return;
     }
     
-    // Auto-prepend https:// if not present and not a mailto/tel link
     const fixedUrl = /^https?:\/\//.test(linkInputUrl) || /^(mailto|tel):/.test(linkInputUrl) ? linkInputUrl : `https://${linkInputUrl}`;
     
     editor.chain().focus().extendMarkRange("link").setLink({ href: fixedUrl }).run();
-    
-    // Move cursor to the end to prevent typing inside the link mark
     editor.commands.setTextSelection(editor.state.selection.to);
     
     setShowLinkInput(false);
@@ -118,9 +117,10 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
   const handleSave = async (publish: boolean) => {
     if (!title) {
-      alert("Title is required");
+      setSaveError("Title is required before saving.");
       return;
     }
+    setSaveError("");
     setSaving(true);
     try {
       await savePost({
@@ -136,7 +136,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       router.refresh();
     } catch (e) {
       console.error(e);
-      alert("Failed to save post");
+      setSaveError("Failed to save post. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -157,8 +157,8 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     try {
       const url = await uploadImage(file);
       setCoverImage(url);
-    } catch (e) {
-      alert("Failed to upload cover image");
+    } catch {
+      setSaveError("Failed to upload cover image.");
     }
   };
 
@@ -172,8 +172,8 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       try {
         const url = await uploadImage(file);
         editor.chain().focus().setImage({ src: url }).run();
-      } catch (e) {
-        alert("Failed to upload image into post");
+      } catch {
+        setSaveError("Failed to upload image into post.");
       }
     };
     input.click();
@@ -187,7 +187,13 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     );
   }
 
-  const ToolbarButton = ({ onClick, isActive, icon: Icon, title, disabled = false }: any) => (
+  const ToolbarButton = ({ onClick, isActive, icon: Icon, title, disabled = false }: {
+    onClick: () => void;
+    isActive?: boolean;
+    icon: React.ElementType;
+    title: string;
+    disabled?: boolean;
+  }) => (
     <button
       onClick={onClick}
       disabled={disabled}
@@ -230,6 +236,16 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           </button>
         </div>
       </div>
+
+      {/* Inline error banner */}
+      {saveError && (
+        <div className="mb-6 px-4 py-3 rounded-lg border border-red-500/30 bg-red-900/20 text-sm text-red-300 flex items-center justify-between gap-3">
+          <span>{saveError}</span>
+          <button onClick={() => setSaveError("")} className="text-red-400 hover:text-red-200 transition-colors shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Editor Column */}
@@ -309,8 +325,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             <label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest mb-3">Cover Image</label>
             {coverImage ? (
               <div className="relative rounded-lg overflow-hidden aspect-video border border-border-glass group">
-                <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Fixed: use next/image instead of plain <img> */}
+                <Image src={coverImage} alt="Cover" fill className="object-cover" />
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <label className="cursor-pointer bg-[rgba(255,255,255,0.1)] hover:bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                     Change Image
                     <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
@@ -367,4 +384,3 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     </div>
   );
 }
-

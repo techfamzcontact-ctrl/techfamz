@@ -7,6 +7,8 @@ import Image from "next/image";
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import sanitizeHtml from "sanitize-html";
+
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -140,7 +142,28 @@ export default async function BlogPostPage({ params }: Props) {
 
           <div 
             className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-blue-light hover:prose-a:text-accent-blue prose-img:rounded-none prose-img:border prose-img:border-border-glass prose-hr:border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em]"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(post.content, {
+                allowedTags: [
+                  "h1","h2","h3","h4","h5","h6",
+                  "p","br","strong","em","u","s","del","mark","code","pre","blockquote","hr",
+                  "ul","ol","li",
+                  "a","img",
+                  "table","thead","tbody","tr","th","td",
+                  "div","span",
+                ],
+                allowedAttributes: {
+                  a: ["href", "target", "rel", "class"],
+                  img: ["src", "alt", "class", "width", "height"],
+                  "*": ["class", "style"],
+                },
+                allowedStyles: {
+                  "*": {
+                    "text-align": [/^(left|right|center|justify)$/],
+                  },
+                },
+              }),
+            }}
           />
 
         </article>

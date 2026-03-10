@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPosts, togglePublishStatus, deletePost } from "./actions";
+import { getPosts, togglePublishStatus, deletePost } from "../actions";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Edit, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
@@ -11,6 +11,7 @@ type Post = {
   title: string;
   slug: string;
   published: boolean;
+  category: string | null;
   createdAt: Date;
 };
 
