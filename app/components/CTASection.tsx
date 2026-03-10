@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import ComingSoonDialog from "./ComingSoonDialog";
+
 export default function CTASection() {
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
   return (
     <section
       id="join"
@@ -28,12 +33,12 @@ export default function CTASection() {
         </p>
 
         <div className="reveal reveal-delay-2">
-          <a
-            href="#"
-            className="relative overflow-hidden inline-flex items-center justify-center gap-2 py-[18px] px-12 text-[1.1rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
+          <button
+            onClick={() => setShowComingSoon(true)}
+            className="relative overflow-hidden inline-flex items-center justify-center gap-2 py-[18px] px-12 text-[1.1rem] font-semibold text-bg-primary bg-cta-yellow rounded-md border-none cursor-pointer transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
           >
             Join the Ecosystem
-          </a>
+          </button>
         </div>
 
         <div className="reveal reveal-delay-3 mt-14">
@@ -45,6 +50,13 @@ export default function CTASection() {
           </p>
         </div>
       </div>
+
+      <ComingSoonDialog
+        open={showComingSoon}
+        onClose={() => setShowComingSoon(false)}
+        title="Join Ecosystem — Coming Soon"
+        description="The Techfamz Ecosystem portal is currently under development. We're building a platform where developers can claim their identity, connect with companies, and unlock opportunities."
+      />
     </section>
   );
 }

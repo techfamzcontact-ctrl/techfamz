@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import ComingSoonDialog from "./ComingSoonDialog";
 
 const navLinks = [
-  { label: "About", href: "#shift" },
-  { label: "TID", href: "#tid" },
-  { label: "Partners", href: "#partners" },
-  { label: "Vision", href: "#vision" },
+  { label: "About", href: "/about" },
+  { label: "TID", href: "/identity" },
+  { label: "Partners", href: "/partners" },
+  { label: "Blog", href: "/blog" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +28,12 @@ export default function Navbar() {
     setMenuOpen(false);
   };
 
+  const handleJoinClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setMenuOpen(false);
+    setShowComingSoon(true);
+  }, []);
+
   return (
     <>
       <nav
@@ -35,8 +43,8 @@ export default function Navbar() {
             : "py-[14px] px-5 md:py-4 md:px-8"
         }`}
       >
-        {/* Logo + Text */}
-        <a href="#" className="flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.02em] text-text-primary no-underline">
+        {/* Logo + Text — always links home */}
+        <a href="/" className="flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.02em] text-text-primary no-underline">
           <div className="flex items-center justify-center w-[36px] h-[36px] rounded-full border-[1.5px] border-[rgba(255,255,255,0.9)] overflow-hidden bg-[rgba(255,255,255,0.05)] shrink-0">
             <Image src="/logo.png" alt="Techfamz logo" width={32} height={32} priority className="object-contain" />
           </div>
@@ -59,12 +67,12 @@ export default function Navbar() {
         </div>
 
         {/* Desktop CTA */}
-        <a
-          href="#join"
-          className="relative overflow-hidden hidden md:inline-flex items-center justify-center gap-2 shrink-0 py-[10px] px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium no-underline hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
+        <button
+          onClick={handleJoinClick}
+          className="relative overflow-hidden hidden md:inline-flex items-center justify-center gap-2 shrink-0 py-[10px] px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md cursor-pointer border-none transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)]"
         >
           Join Ecosystem
-        </a>
+        </button>
 
         {/* Mobile Hamburger */}
         <button
@@ -94,14 +102,21 @@ export default function Navbar() {
             {link.label}
           </a>
         ))}
-        <a
-          href="#join"
-          className="relative overflow-hidden inline-flex items-center justify-center gap-2 mt-2 w-full text-center py-3 px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md transition-all duration-400 ease-premium no-underline hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
-          onClick={handleLinkClick}
+        <button
+          onClick={handleJoinClick}
+          className="relative overflow-hidden inline-flex items-center justify-center gap-2 mt-2 w-full text-center py-3 px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md cursor-pointer border-none transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)]"
         >
           Join Ecosystem
-        </a>
+        </button>
       </div>
+
+      {/* Coming Soon Dialog */}
+      <ComingSoonDialog
+        open={showComingSoon}
+        onClose={() => setShowComingSoon(false)}
+        title="Join Ecosystem — Coming Soon"
+        description="The Techfamz Ecosystem portal is currently under development. We're building a platform where developers can claim their identity, connect with companies, and unlock opportunities."
+      />
     </>
   );
 }

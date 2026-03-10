@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@plugin "@tailwindcss/typography";
 @theme {
   --color-bg-primary: #060b18;
   --color-bg-secondary: #0c1a3a;
@@ -28,7 +28,7 @@
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
   --font-sans: "Inter", sans-serif;
-  
+
   --animate-pulse-glow: pulseGlow 6s ease-in-out infinite;
   --animate-pulse-glow-navy: pulseGlow 8s ease-in-out infinite 2s;
   --animate-fade-in-up-delay-1: fadeInUp 0.7s var(--ease-premium) 0.2s both;
@@ -41,32 +41,71 @@
   --animate-expand-width: expandWidth 1s var(--ease-premium) forwards;
 
   @keyframes pulseGlow {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.05); }
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.05);
+    }
   }
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
   @keyframes badgePulse {
-    0%, 100% { box-shadow: 0 0 20px var(--color-accent-blue-glow), 0 0 60px var(--color-accent-blue-glow-soft); }
-    50% { box-shadow: 0 0 30px var(--color-accent-blue-glow), 0 0 90px var(--color-accent-blue-glow-soft); }
+    0%,
+    100% {
+      box-shadow: 0 0 20px var(--color-accent-blue-glow),
+        0 0 60px var(--color-accent-blue-glow-soft);
+    }
+    50% {
+      box-shadow: 0 0 30px var(--color-accent-blue-glow),
+        0 0 90px var(--color-accent-blue-glow-soft);
+    }
   }
   @keyframes lightBeam {
-    0% { transform: translateX(-100%) skewX(-15deg); }
-    100% { transform: translateX(200vw) skewX(-15deg); }
+    0% {
+      transform: translateX(-100%) skewX(-15deg);
+    }
+    100% {
+      transform: translateX(200vw) skewX(-15deg);
+    }
   }
   @keyframes networkPulse {
-    0%, 100% { opacity: 0.15; }
-    50% { opacity: 0.35; }
+    0%,
+    100% {
+      opacity: 0.15;
+    }
+    50% {
+      opacity: 0.35;
+    }
   }
   @keyframes expandWidth {
-    from { width: 0; }
-    to { width: 100%; }
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
   }
 }
 
@@ -80,19 +119,29 @@
   }
 
   /* ─── Typography ─── */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-bold leading-[1.15] tracking-tight text-text-primary;
   }
 
-  h1 { @apply text-[clamp(2.5rem,5vw,4rem)]; }
-  h2 { @apply text-[clamp(2rem,4vw,3rem)]; }
-  h3 { @apply text-[clamp(1.25rem,2.5vw,1.5rem)]; }
+  h1 {
+    @apply text-[clamp(2.5rem,5vw,4rem)];
+  }
+  h2 {
+    @apply text-[clamp(2rem,4vw,3rem)];
+  }
+  h3 {
+    @apply text-[clamp(1.25rem,2.5vw,1.5rem)];
+  }
 
   p {
     @apply leading-relaxed text-text-secondary;
   }
 }
-
 
 @layer utilities {
   /* ─── Scroll Reveal Animations ─── */
@@ -104,12 +153,24 @@
     @apply opacity-100 translate-y-0;
   }
 
-  .reveal-delay-1 { transition-delay: 0.1s; }
-  .reveal-delay-2 { transition-delay: 0.2s; }
-  .reveal-delay-3 { transition-delay: 0.3s; }
-  .reveal-delay-4 { transition-delay: 0.4s; }
-  .reveal-delay-5 { transition-delay: 0.5s; }
-  .reveal-delay-6 { transition-delay: 0.6s; }
+  .reveal-delay-1 {
+    transition-delay: 0.1s;
+  }
+  .reveal-delay-2 {
+    transition-delay: 0.2s;
+  }
+  .reveal-delay-3 {
+    transition-delay: 0.3s;
+  }
+  .reveal-delay-4 {
+    transition-delay: 0.4s;
+  }
+  .reveal-delay-5 {
+    transition-delay: 0.5s;
+  }
+  .reveal-delay-6 {
+    transition-delay: 0.6s;
+  }
 
   /* Stagger for cards */
   .stagger-item {
@@ -121,10 +182,18 @@
   }
 
   /* ─── Hero Animations ─── */
-  .hero-headline { @apply animate-fade-in-up-delay-1; }
-  .hero-sub { @apply animate-fade-in-up-delay-2; }
-  .hero-cta { @apply animate-slide-up-1; }
-  .hero-cta-2 { @apply animate-slide-up-2; }
+  .hero-headline {
+    @apply animate-fade-in-up-delay-1;
+  }
+  .hero-sub {
+    @apply animate-fade-in-up-delay-2;
+  }
+  .hero-cta {
+    @apply animate-slide-up-1;
+  }
+  .hero-cta-2 {
+    @apply animate-slide-up-2;
+  }
 
   /* ─── Background Effects ─── */
   .bg-glow {
@@ -142,7 +211,12 @@
   /* ─── Light Beam (Final CTA) ─── */
   .light-beam {
     @apply absolute top-0 left-0 w-[200px] h-full animate-light-beam pointer-events-none;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.06), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(59, 130, 246, 0.06),
+      transparent
+    );
   }
 
   /* ─── Network Animation ─── */
@@ -160,26 +234,39 @@
   /* ─── TID Badge ─── */
   .tid-badge {
     @apply inline-flex items-center gap-3 py-4 px-7 font-sans text-xl font-bold tracking-[0.08em] text-accent-blue-light border border-accent-blue rounded-md animate-badge-pulse relative;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.02));
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.1),
+      rgba(59, 130, 246, 0.02)
+    );
   }
 
   .tid-badge::before {
     content: "";
     @apply absolute -inset-0.5 rounded-md -z-10 opacity-30 blur-[8px];
-    background: linear-gradient(135deg, var(--color-accent-blue), transparent, var(--color-accent-blue-light));
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-blue),
+      transparent,
+      var(--color-accent-blue-light)
+    );
   }
 
   /* ─── Divider ─── */
   .divider {
     @apply h-px mx-auto max-w-[600px];
-    background: linear-gradient(90deg, transparent, var(--color-border-glass), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-border-glass),
+      transparent
+    );
   }
 
   .divider.in-view {
     @apply animate-expand-width;
   }
 }
-
 
 @layer base {
   /* ─── Reduced Motion ─── */

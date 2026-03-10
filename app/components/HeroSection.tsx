@@ -124,7 +124,7 @@ export default function HeroSection() {
         {/* CTA buttons */}
         <div className="flex justify-center gap-4 flex-wrap animate-slide-up-1">
           <a
-            href="#join"
+            href="/identity"
             className="group relative overflow-hidden inline-flex items-center justify-center gap-2.5 py-[14px] px-8 text-[0.95rem] font-semibold text-bg-primary bg-cta-yellow rounded-lg transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
           >
             Claim Your Techfamz Identity
