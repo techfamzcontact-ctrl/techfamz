@@ -17,18 +17,25 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    if (res?.error) {
-      setError("Invalid email or password");
+      if (res?.error) {
+        setError("Invalid email or password");
+        setLoading(false);
+      } else if (res?.ok) {
+        window.location.href = "/admin";
+      } else {
+        setError("Something went wrong. Please try again.");
+        setLoading(false);
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-    } else {
-      router.push("/admin");
-      router.refresh();
     }
   };
 
