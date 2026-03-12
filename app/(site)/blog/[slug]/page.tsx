@@ -1,13 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import Image from "next/image";
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
+import { SharePost } from "@/components/blog/SharePost";
 
 
 interface Props {
@@ -90,9 +89,7 @@ export default async function BlogPostPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
-      <Navbar />
-      
-      <main className="min-h-screen bg-[linear-gradient(180deg,#040810_0%,#0C1A3A_50%,#060B18_100%)] pt-24 pb-20">
+      <main className="min-h-screen pt-24 pb-20" style={{ background: "var(--gradient-hero)" }}>
         <article className="max-w-[800px] mx-auto px-5 md:px-8">
           
           <Link 
@@ -127,6 +124,8 @@ export default async function BlogPostPage({ params }: Props) {
             )}
           </header>
 
+          <SharePost title={post.title} slug={post.slug} className="pb-4 mb-4 border-b border-border-glass" />
+
           {post.coverImage && (
             <div className="relative aspect-[16/9] w-full rounded-none overflow-hidden mb-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-border-glass">
               <Image 
@@ -136,12 +135,11 @@ export default async function BlogPostPage({ params }: Props) {
                 priority
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#040810] via-transparent to-transparent opacity-40" />
             </div>
           )}
 
           <div 
-            className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-blue-light hover:prose-a:text-accent-blue prose-img:rounded-none prose-img:border prose-img:border-border-glass prose-hr:border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em]"
+            className="prose dark:prose-invert prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-blue-light hover:prose-a:text-accent-blue prose-img:rounded-none prose-img:border prose-img:border-border-glass prose-hr:border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em]"
             dangerouslySetInnerHTML={{
               __html: sanitizeHtml(post.content, {
                 allowedTags: [
@@ -166,9 +164,10 @@ export default async function BlogPostPage({ params }: Props) {
             }}
           />
 
+          <SharePost title={post.title} slug={post.slug} />
+
         </article>
       </main>
-      <Footer />
     </>
   );
 }

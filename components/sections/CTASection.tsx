@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import ComingSoonDialog from "./ComingSoonDialog";
+import ComingSoonDialog from "@/components/shared/ComingSoonDialog";
+import { Button } from "@/components/ui/button";
 
 export default function CTASection() {
   const [showComingSoon, setShowComingSoon] = useState(false);
@@ -9,7 +10,8 @@ export default function CTASection() {
   return (
     <section
       id="join"
-      className="relative bg-[linear-gradient(180deg,#060B18_0%,#0C1A3A_50%,#060B18_100%)] overflow-hidden py-[120px] px-6 text-center"
+      className="relative overflow-hidden py-[120px] px-6 text-center"
+      style={{ background: "var(--gradient-cta)" }}
     >
       {/* Moving Light Beam */}
       <div className="light-beam" />
@@ -33,12 +35,13 @@ export default function CTASection() {
         </p>
 
         <div className="reveal reveal-delay-2">
-          <button
+          <Button
+            variant="cta"
             onClick={() => setShowComingSoon(true)}
-            className="relative overflow-hidden inline-flex items-center justify-center gap-2 py-[18px] px-12 text-[1.1rem] font-semibold text-bg-primary bg-cta-yellow rounded-md border-none cursor-pointer transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
+            className="relative overflow-hidden py-[18px] px-12 text-[1.1rem] h-auto rounded-md after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
           >
             Join the Ecosystem
-          </button>
+          </Button>
         </div>
 
         <div className="reveal reveal-delay-3 mt-14">

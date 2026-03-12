@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useScrollReveal } from "../hooks/useScrollReveal";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import ComingSoonDialog from "../components/ComingSoonDialog";
+import ComingSoonDialog from "@/components/shared/ComingSoonDialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const benefits = [
   {
@@ -53,15 +52,13 @@ const steps = [
 ];
 
 export default function PartnersPage() {
-  useScrollReveal();
   const [showComingSoon, setShowComingSoon] = useState(false);
 
   return (
     <>
-      <Navbar />
       <main>
         {/* ═══ Hero ═══ */}
-        <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#040810_0%,#0C1A3A_50%,#060B18_100%)]">
+        <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-[140px]" />
             <div className="absolute bottom-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-[120px]" />
@@ -115,24 +112,26 @@ export default function PartnersPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {benefits.map((b, i) => (
-                <div
+                <Card
                   key={i}
-                  className="stagger-item bg-bg-card border border-border-glass rounded-xl p-7 backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover"
+                  className="bg-bg-card border-border-glass rounded-xl backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover p-0"
                   style={{ transitionDelay: `${i * 0.1}s` }}
                 >
-                  <div className="w-10 h-10 rounded-lg bg-accent-blue-glow-soft border border-accent-blue-glow flex items-center justify-center text-accent-blue-light mb-4">
-                    {b.icon}
-                  </div>
-                  <h3 className="text-[1.05rem] font-semibold mb-2 text-text-primary">{b.title}</h3>
-                  <p className="text-[0.9rem] m-0 text-text-secondary">{b.desc}</p>
-                </div>
+                  <CardContent className="p-7">
+                    <div className="w-10 h-10 rounded-lg bg-accent-blue-glow-soft border border-accent-blue-glow flex items-center justify-center text-accent-blue-light mb-4">
+                      {b.icon}
+                    </div>
+                    <h3 className="text-[1.05rem] font-semibold mb-2 text-text-primary">{b.title}</h3>
+                    <p className="text-[0.9rem] m-0 text-text-secondary">{b.desc}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         </section>
 
         {/* ═══ How It Works ═══ */}
-        <section className="relative bg-[linear-gradient(180deg,#060B18_0%,#080F24_100%)]">
+        <section className="relative" style={{ background: "var(--gradient-section-alt)" }}>
           <div className="divider" />
           <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[900px] mx-auto">
             <div className="reveal text-center mb-14">
@@ -169,17 +168,17 @@ export default function PartnersPage() {
               <p className="text-text-secondary mb-8 max-w-[500px] mx-auto">
                 Join the growing network of organizations investing in structured African tech talent.
               </p>
-              <button
+              <Button
+                variant="cta"
                 onClick={() => setShowComingSoon(true)}
-                className="relative overflow-hidden inline-flex items-center justify-center gap-2 py-4 px-10 text-base font-semibold text-bg-primary bg-cta-yellow rounded-lg border-none cursor-pointer transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)]"
+                className="relative overflow-hidden py-4 px-10 text-[1rem] h-auto rounded-lg after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
               >
                 Apply for Partnership
-              </button>
+              </Button>
             </div>
           </div>
         </section>
       </main>
-      <Footer />
       <ComingSoonDialog
         open={showComingSoon}
         onClose={() => setShowComingSoon(false)}

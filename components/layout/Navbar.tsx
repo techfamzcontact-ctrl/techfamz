@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
-import ComingSoonDialog from "./ComingSoonDialog";
+import ComingSoonDialog from "@/components/shared/ComingSoonDialog";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const navLinks = [
   { label: "About", href: "/about" },
@@ -39,9 +41,10 @@ export default function Navbar() {
       <nav
         className={`fixed top-0 inset-x-0 z-[100] transition-all duration-400 ease-smooth flex items-center justify-between ${
           scrolled
-            ? "py-2.5 px-5 md:py-3 md:px-8 border-b border-border-glass bg-[rgba(6,11,24,0.85)] backdrop-blur-[20px]"
+            ? "py-2.5 px-5 md:py-3 md:px-8 border-b border-border-glass backdrop-blur-[20px]"
             : "py-[14px] px-5 md:py-4 md:px-8"
         }`}
+        style={scrolled ? { backgroundColor: "var(--surface-glass)" } : undefined}
       >
         {/* Logo + Text — always links home */}
         <a href="/" className="flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.02em] text-text-primary no-underline">
@@ -66,13 +69,17 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <button
-          onClick={handleJoinClick}
-          className="relative overflow-hidden hidden md:inline-flex items-center justify-center gap-2 shrink-0 py-[10px] px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md cursor-pointer border-none transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)]"
-        >
-          Join Ecosystem
-        </button>
+        {/* Desktop CTA + Theme Toggle */}
+        <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
+          <Button
+            onClick={handleJoinClick}
+            variant="cta"
+            className="py-[10px] px-6 text-[0.875rem] font-semibold h-auto rounded-md"
+          >
+            Join Ecosystem
+          </Button>
+        </div>
 
         {/* Mobile Hamburger */}
         <button
@@ -88,9 +95,10 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Menu */}
       <div
-        className={`flex md:hidden fixed top-[60px] right-4 z-[99] w-[220px] bg-[rgba(10,16,34,0.95)] backdrop-blur-[20px] border border-border-glass rounded-md p-2 flex-col gap-0.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 ease-premium ${
+        className={`flex md:hidden fixed top-[60px] right-4 z-[99] w-[220px] backdrop-blur-[20px] border border-border-glass rounded-md p-2 flex-col gap-0.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 ease-premium ${
           menuOpen ? "opacity-100 translate-y-0 scale-100 pointer-events-auto" : "opacity-0 -translate-y-2 scale-[0.97] pointer-events-none"
         }`}
+        style={{ backgroundColor: "var(--surface-dialog)" }}
       >
         {navLinks.map((link) => (
           <a
@@ -102,12 +110,13 @@ export default function Navbar() {
             {link.label}
           </a>
         ))}
-        <button
+        <Button
           onClick={handleJoinClick}
-          className="relative overflow-hidden inline-flex items-center justify-center gap-2 mt-2 w-full text-center py-3 px-6 text-[0.875rem] font-semibold text-bg-primary bg-cta-yellow rounded-md cursor-pointer border-none transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)]"
+          variant="cta"
+          className="mt-2 w-full py-3 px-6 text-[0.875rem] font-semibold h-auto rounded-md"
         >
           Join Ecosystem
-        </button>
+        </Button>
       </div>
 
       {/* Coming Soon Dialog */}

@@ -62,6 +62,7 @@ export async function getPost(id: string) {
 export async function savePost(data: {
   id: string;
   title: string;
+  slug?: string;
   content: string;
   excerpt: string;
   coverImage: string;
@@ -76,7 +77,9 @@ export async function savePost(data: {
   });
   if (!user) throw new Error("User not found");
 
-  const slug = slugify(data.title, { lower: true, strict: true });
+  const finalSlug = data.slug 
+    ? slugify(data.slug, { lower: true, strict: true }) 
+    : slugify(data.title, { lower: true, strict: true });
 
   let savedPost;
 
@@ -84,7 +87,7 @@ export async function savePost(data: {
     savedPost = await prisma.post.create({
       data: {
         title: data.title,
-        slug,
+        slug: finalSlug,
         content: data.content,
         excerpt: data.excerpt,
         coverImage: data.coverImage,
@@ -98,7 +101,7 @@ export async function savePost(data: {
       where: { id: data.id },
       data: {
         title: data.title,
-        slug,
+        slug: finalSlug,
         content: data.content,
         excerpt: data.excerpt,
         coverImage: data.coverImage,
@@ -110,7 +113,7 @@ export async function savePost(data: {
 
   revalidatePath("/admin");
   revalidatePath("/blog");
-  revalidatePath(`/blog/${slug}`);
+  revalidatePath(`/blog/${finalSlug}`);
 
   return savedPost;
 }

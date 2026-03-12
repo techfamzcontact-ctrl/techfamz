@@ -1,23 +1,27 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
 export default function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#040810_0%,#060B18_30%,#0C1A3A_60%,#060B18_100%)]"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ background: "var(--gradient-hero)" }}
     >
       {/* ═══ LAYER 1: Deep space fog ═══ */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-15%] w-[700px] h-[700px] rounded-full bg-accent-blue opacity-[0.06] blur-[160px] animate-pulse-glow" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-[140px] animate-pulse-glow-navy" />
+        <div className="absolute top-[-20%] right-[-15%] w-[700px] h-[700px] rounded-full bg-accent-blue blur-[160px] animate-pulse-glow" style={{ opacity: "var(--glow-opacity)" }} />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#1e3a8a] blur-[140px] animate-pulse-glow-navy" style={{ opacity: "var(--glow-opacity)" }} />
         <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-[120px]" />
       </div>
 
       {/* ═══ LAYER 2: Subtle grid ═══ */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--grid-opacity)" }}>
         <defs>
           <pattern id="heroGrid" width="80" height="80" patternUnits="userSpaceOnUse">
-            <path d="M 80 0 L 0 0 0 80" fill="none" stroke="white" strokeWidth="0.5" />
+            <path d="M 80 0 L 0 0 0 80" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-text-muted" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#heroGrid)" />
@@ -27,8 +31,8 @@ export default function HeroSection() {
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Outer ring */}
         <div
-          className="absolute w-[600px] h-[600px] md:w-[800px] md:h-[800px] rounded-full border border-accent-blue opacity-[0.06]"
-          style={{ animation: "spin 80s linear infinite" }}
+          className="absolute w-[600px] h-[600px] md:w-[800px] md:h-[800px] rounded-full border border-accent-blue"
+          style={{ opacity: "var(--ring-opacity)", animation: "spin 80s linear infinite" }}
         />
         {/* Middle ring */}
         <div
@@ -37,13 +41,13 @@ export default function HeroSection() {
         />
         {/* Inner ring */}
         <div
-          className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-accent-blue opacity-[0.08]"
-          style={{ animation: "spin 40s linear infinite" }}
+          className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-accent-blue"
+          style={{ opacity: "var(--ring-opacity)", animation: "spin 40s linear infinite" }}
         />
       </div>
 
       {/* ═══ LAYER 4: Floating particles ═══ */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--particle-opacity)" }}>
         {[
           { cx: "12%", cy: "18%", r: 1.5, delay: "0s" },
           { cx: "25%", cy: "72%", r: 2, delay: "1.5s" },
@@ -73,7 +77,7 @@ export default function HeroSection() {
       </svg>
 
       {/* ═══ LAYER 5: Connector lines ═══ */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.08]">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--ring-opacity)" }}>
         <line x1="12%" y1="18%" x2="38%" y2="28%" className="stroke-accent-blue stroke-[0.5]" />
         <line x1="38%" y1="28%" x2="65%" y2="15%" className="stroke-accent-blue stroke-[0.5]" />
         <line x1="65%" y1="15%" x2="88%" y2="35%" className="stroke-accent-blue stroke-[0.5]" />
@@ -84,20 +88,20 @@ export default function HeroSection() {
       </svg>
 
       {/* ═══ LAYER 6: Top vignette & bottom fade ═══ */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,transparent,#040810_100%)]" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-[linear-gradient(to_top,#060B18,transparent)] pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "var(--gradient-vignette)" }} />
+      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: "var(--gradient-bottom-fade)" }} />
 
       {/* ═══ CONTENT ═══ */}
       <div className="relative z-10 text-center max-w-[860px] px-6 py-20">
         {/* Status badge */}
-        <div className="animate-fade-in-up-delay-1 mb-8">
-          <span className="inline-flex items-center gap-2 py-1.5 px-4 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-accent-blue-light border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
+        <div className="animate-fade-in-up-delay-1 mb-8 flex justify-center">
+          <Badge variant="glow">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue-light opacity-75 animate-ping" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-blue-light" />
             </span>
             Building the Future
-          </span>
+          </Badge>
         </div>
 
         {/* Main headline */}
@@ -123,21 +127,17 @@ export default function HeroSection() {
 
         {/* CTA buttons */}
         <div className="flex justify-center gap-4 flex-wrap animate-slide-up-1">
-          <a
-            href="/identity"
-            className="group relative overflow-hidden inline-flex items-center justify-center gap-2.5 py-[14px] px-8 text-[0.95rem] font-semibold text-bg-primary bg-cta-yellow rounded-lg transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:bg-cta-yellow-hover hover:shadow-[0_0_30px_var(--color-cta-yellow-glow)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]"
-          >
-            Claim Your Techfamz Identity
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 ease-premium group-hover:translate-x-0.5">
-              <path d="M3.333 8h9.334M8.667 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-          <a
-            href="#shift"
-            className="inline-flex items-center justify-center gap-2 py-[14px] px-8 text-[0.95rem] font-semibold text-text-primary bg-transparent border border-border-glass rounded-lg transition-all duration-400 ease-premium hover:-translate-y-0.5 hover:border-accent-blue hover:shadow-[0_0_20px_var(--color-accent-blue-glow-soft)] animate-slide-up-2"
-          >
-            Explore the Vision
-          </a>
+          <Button variant="cta" asChild className="relative overflow-hidden group py-[14px] px-8 text-[0.95rem] h-auto rounded-lg after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
+            <a href="/identity">
+              Claim Your Techfamz Identity
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 ease-premium group-hover:translate-x-0.5">
+                <path d="M3.333 8h9.334M8.667 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </Button>
+          <Button variant="outline-glow" asChild className="py-[14px] px-8 text-[0.95rem] h-auto rounded-lg">
+            <a href="#shift">Explore the Vision</a>
+          </Button>
         </div>
 
         {/* Scroll indicator */}

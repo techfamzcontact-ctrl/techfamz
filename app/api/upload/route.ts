@@ -33,10 +33,16 @@ export async function POST(req: NextRequest) {
     const uploadResult = await new Promise<UploadApiResponse>(
       (resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "techfamz_blog" },
+          { folder: "techfamz_blog", resource_type: "auto" },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result as UploadApiResponse);
+            if (error) {
+              console.error("Cloudinary Stream Error:", error);
+              return reject(error);
+            }
+            if (!result) {
+               return reject(new Error("No result from Cloudinary"));
+            }
+            resolve(result);
           }
         );
         uploadStream.end(buffer);

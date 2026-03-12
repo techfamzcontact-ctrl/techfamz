@@ -27,7 +27,8 @@ export default function ShiftSection() {
   return (
     <section
       id="shift"
-      className="relative bg-[linear-gradient(180deg,#060B18_0%,#080F24_100%)]"
+      className="relative"
+      style={{ background: "var(--gradient-section-alt)" }}
     >
       <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto">
         <div className="reveal text-center mb-16">

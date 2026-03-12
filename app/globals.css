@@ -5,29 +5,6 @@
 @custom-variant dark (&:is(.dark *));
 @plugin "@tailwindcss/typography";
 @theme {
-  --color-bg-primary: #060b18;
-  --color-bg-secondary: #0c1a3a;
-  --color-bg-card: rgba(255, 255, 255, 0.04);
-  --color-border-glass: rgba(255, 255, 255, 0.08);
-  --color-border-glass-hover: rgba(255, 255, 255, 0.15);
-
-  --color-accent-blue: #3b82f6;
-  --color-accent-blue-light: #60a5fa;
-  --color-accent-blue-glow: rgba(59, 130, 246, 0.35);
-  --color-accent-blue-glow-soft: rgba(59, 130, 246, 0.15);
-
-  --color-cta-yellow: #d4a84b;
-  --color-cta-yellow-hover: #e4bc63;
-  --color-cta-yellow-glow: rgba(212, 168, 75, 0.25);
-
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -111,6 +88,102 @@
       width: 100%;
     }
   }
+}
+
+/* ─── Theme-aware custom tokens ─── */
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card-custom);
+  --color-border-glass: var(--border-glass);
+  --color-border-glass-hover: var(--border-glass-hover);
+
+  --color-accent-blue: #3b82f6;
+  --color-accent-blue-light: var(--accent-blue-light);
+  --color-accent-blue-glow: var(--accent-blue-glow);
+  --color-accent-blue-glow-soft: var(--accent-blue-glow-soft);
+
+  --color-cta-yellow: #d4a84b;
+  --color-cta-yellow-hover: #e4bc63;
+  --color-cta-yellow-glow: rgba(212, 168, 75, 0.25);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* ─── Light mode (default) ─── */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-card-custom: rgba(0, 0, 0, 0.03);
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --border-glass-hover: rgba(0, 0, 0, 0.15);
+
+  --accent-blue-light: #2563eb;
+  --accent-blue-glow: rgba(59, 130, 246, 0.2);
+  --accent-blue-glow-soft: rgba(59, 130, 246, 0.08);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Section gradients */
+  --gradient-hero: linear-gradient(180deg, #f0f4ff 0%, #dbeafe 30%, #eff6ff 60%, #f8fafc 100%);
+  --gradient-section-alt: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
+  --gradient-cta: linear-gradient(180deg, #f8fafc 0%, #dbeafe 50%, #f8fafc 100%);
+  --gradient-vignette: radial-gradient(ellipse 60% 50% at 50% 50%, transparent, #f8fafc 100%);
+  --gradient-bottom-fade: linear-gradient(to top, #f8fafc, transparent);
+
+  /* Surfaces */
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  --surface-elevated: rgba(255, 255, 255, 0.9);
+  --surface-dialog: rgba(255, 255, 255, 0.97);
+
+  /* Glow intensity (reduced in light mode) */
+  --glow-opacity: 0.08;
+  --particle-opacity: 0.3;
+  --grid-opacity: 0.06;
+  --ring-opacity: 0.1;
+}
+
+/* ─── Dark mode ─── */
+.dark {
+  --bg-primary: #060b18;
+  --bg-secondary: #0c1a3a;
+  --bg-card-custom: rgba(255, 255, 255, 0.04);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-hover: rgba(255, 255, 255, 0.15);
+
+  --accent-blue-light: #60a5fa;
+  --accent-blue-glow: rgba(59, 130, 246, 0.35);
+  --accent-blue-glow-soft: rgba(59, 130, 246, 0.15);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Section gradients */
+  --gradient-hero: linear-gradient(180deg, #040810 0%, #060B18 30%, #0C1A3A 60%, #060B18 100%);
+  --gradient-section-alt: linear-gradient(180deg, #060B18 0%, #080F24 100%);
+  --gradient-cta: linear-gradient(180deg, #060B18 0%, #0C1A3A 50%, #060B18 100%);
+  --gradient-vignette: radial-gradient(ellipse 60% 50% at 50% 50%, transparent, #040810 100%);
+  --gradient-bottom-fade: linear-gradient(to top, #060B18, transparent);
+
+  /* Surfaces */
+  --surface-glass: rgba(10, 16, 34, 0.85);
+  --surface-elevated: rgba(10, 16, 34, 0.6);
+  --surface-dialog: rgba(8, 14, 30, 0.97);
+
+  /* Glow intensity */
+  --glow-opacity: 0.06;
+  --particle-opacity: 1;
+  --grid-opacity: 0.03;
+  --ring-opacity: 0.06;
 }
 
 @layer base {

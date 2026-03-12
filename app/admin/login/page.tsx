@@ -4,6 +4,10 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -40,61 +44,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#040810] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
       {/* BG glows */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-blue opacity-[0.05] blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#1e3a8a] opacity-[0.05] blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="w-full max-w-[400px] p-8 md:p-10 bg-[rgba(10,16,34,0.6)] backdrop-blur-xl border border-border-glass rounded-2xl relative z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.05)] flex items-center justify-center">
-            <Image src="/logo.png" alt="Logo" width={24} height={24} className="opacity-90" />
+      <Card className="w-full max-w-[400px] border-border-glass backdrop-blur-xl relative z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]" style={{ backgroundColor: "var(--surface-dialog)" }}>
+        <CardHeader className="pb-8">
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-12 rounded-full border border-border-glass bg-bg-card flex items-center justify-center">
+              <Image src="/logo.png" alt="Logo" width={24} height={24} className="opacity-90" />
+            </div>
           </div>
-        </div>
-        
-        <h1 className="text-2xl font-bold text-center text-text-primary mb-2">Admin Login</h1>
-        <p className="text-center text-sm text-text-muted mb-8">Sign in to manage Techfamz</p>
+          
+          <CardTitle className="text-2xl font-bold text-center text-text-primary">Admin Login</CardTitle>
+          <CardDescription className="text-center">Sign in to manage Techfamz</CardDescription>
+        </CardHeader>
 
-        {error && (
-          <div className="mb-4 p-3 text-sm text-red-200 bg-red-900/30 border border-red-500/30 rounded-lg text-center">
-            {error}
-          </div>
-        )}
+        <CardContent>
+          {error && (
+            <div className="mb-6 p-3 text-sm text-red-200 bg-red-900/30 border border-red-500/30 rounded-lg text-center">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 bg-[rgba(0,0,0,0.3)] border border-border-glass rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue placeholder:text-text-muted/50 transition-all"
-              placeholder="admin@techfamz.com"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-semibold text-text-muted uppercase tracking-wider">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@techfamz.com"
+                className="bg-bg-primary border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 bg-[rgba(0,0,0,0.3)] border border-border-glass rounded-lg text-text-primary text-sm focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue placeholder:text-text-muted/50 transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-xs font-semibold text-text-muted uppercase tracking-wider">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="bg-bg-primary border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-4 py-3 px-4 bg-accent-blue text-white font-semibold rounded-lg text-sm hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_var(--color-accent-blue-glow-soft)]"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
-      </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-2 py-6 bg-accent-blue text-white font-semibold shadow-[0_0_20px_var(--color-accent-blue-glow-soft)] hover:bg-blue-600 hover:shadow-[0_0_30px_var(--color-accent-blue-glow-soft)] transition-all"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
