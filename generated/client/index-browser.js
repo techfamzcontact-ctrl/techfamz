@@ -142,6 +142,23 @@ exports.Prisma.PostScalarFieldEnum = {
   authorId: 'authorId'
 };
 
+exports.Prisma.JobScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  company: 'company',
+  location: 'location',
+  type: 'type',
+  salary: 'salary',
+  description: 'description',
+  applyUrl: 'applyUrl',
+  category: 'category',
+  published: 'published',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  postedById: 'postedById'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -160,7 +177,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  Post: 'Post'
+  Post: 'Post',
+  Job: 'Job'
 };
 
 /**

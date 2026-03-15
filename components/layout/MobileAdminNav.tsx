@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Plus, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Plus, Menu, X, Briefcase } from "lucide-react";
 
 export function MobileAdminNav() {
   const [open, setOpen] = useState(false);
@@ -24,10 +24,6 @@ export function MobileAdminNav() {
       {open && (
         <div className="fixed inset-0 z-40 bg-bg-primary/95 backdrop-blur-xl border-t border-border-glass mt-[73px] flex flex-col p-4 h-[calc(100vh-73px)] overflow-y-auto">
           <nav className="flex-1 flex flex-col gap-2 relative z-50">
-            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-2">
-              Menu
-            </div>
-            
             <Link
               href="/admin"
               onClick={closeMenu}
@@ -37,6 +33,21 @@ export function MobileAdminNav() {
             >
               <LayoutDashboard size={20} />
               Dashboard
+            </Link>
+
+            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">
+              Blog
+            </div>
+            
+            <Link
+              href="/admin/posts"
+              onClick={closeMenu}
+              className={`flex items-center gap-3 px-3 py-4 rounded-lg text-base transition-colors ${
+                pathname === '/admin/posts' ? 'bg-bg-card text-accent-blue-light font-medium' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card'
+              }`}
+            >
+              <FileText size={20} />
+              Posts
             </Link>
             
             <Link
@@ -48,6 +59,32 @@ export function MobileAdminNav() {
             >
               <Plus size={20} />
               New Post
+            </Link>
+
+            <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">
+              Jobs
+            </div>
+
+            <Link
+              href="/admin/jobs"
+              onClick={closeMenu}
+              className={`flex items-center gap-3 px-3 py-4 rounded-lg text-base transition-colors ${
+                pathname === '/admin/jobs' ? 'bg-bg-card text-accent-blue-light font-medium' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card'
+              }`}
+            >
+              <Briefcase size={20} />
+              Tech Jobs
+            </Link>
+
+            <Link
+              href="/admin/jobs/editor/new"
+              onClick={closeMenu}
+              className={`flex items-center gap-3 px-3 py-4 rounded-lg text-base transition-colors ${
+                pathname === '/admin/jobs/editor/new' ? 'bg-bg-card text-accent-blue-light font-medium' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card'
+              }`}
+            >
+              <Plus size={20} />
+              Post Job
             </Link>
             
             <div className="mt-auto pt-8 pb-4">

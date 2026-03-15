@@ -6,6 +6,22 @@ export const metadata: Metadata = {
   title: "Techfamz Identity (TID) — Your Developer Passport",
   description:
     "Get verified and recognized in the African tech ecosystem with the Techfamz Identity (TID) system.",
+  openGraph: {
+    title: "Techfamz Identity (TID) — Your Developer Passport",
+    description: "Get verified and recognized in the African tech ecosystem with the Techfamz Identity (TID) system.",
+    url: "https://techfamz.com/identity",
+    type: "website",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Techfamz Identity (TID) — Your Developer Passport",
+    description: "Get verified and recognized in the African tech ecosystem with the Techfamz Identity (TID) system.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://techfamz.com/identity",
+  },
 };
 
 const features = [

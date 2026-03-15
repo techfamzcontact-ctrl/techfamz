@@ -12,6 +12,7 @@ model User {
     email     String   @unique
     password  String
     posts     Post[]
+    jobs      Job[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -29,4 +30,22 @@ model Post {
     updatedAt  DateTime @updatedAt
     authorId   String
     author     User     @relation(fields: [authorId], references: [id])
+}
+
+model Job {
+    id          String   @id @default(cuid())
+    title       String
+    slug        String   @unique
+    company     String
+    location    String
+    type        String
+    salary      String?
+    description String   @db.Text
+    applyUrl    String
+    category    String?
+    published   Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    postedById  String
+    postedBy    User     @relation(fields: [postedById], references: [id])
 }

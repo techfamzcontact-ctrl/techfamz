@@ -36,9 +36,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/jobs`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
   ];
 
-  // Dynamic Blog Posts
+  // Dynamic Blog Posts & Job Listings
   try {
     const posts = await prisma.post.findMany({
       where: { published: true },
@@ -52,7 +58,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...routes, ...postRoutes];
+    const jobs = await prisma.job.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
+
+    const jobRoutes = jobs.map((job) => ({
+      url: `${baseUrl}/jobs/${job.slug}`,
+      lastModified: job.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+
+    return [...routes, ...postRoutes, ...jobRoutes];
   } catch (error) {
     console.error("Failed to generate dynamic sitemap routes:", error);
     return routes;

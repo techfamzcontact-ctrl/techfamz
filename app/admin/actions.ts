@@ -117,3 +117,139 @@ export async function savePost(data: {
 
   return savedPost;
 }
+
+// ───────────────────────────────────────────
+// Jobs CRUD
+// ───────────────────────────────────────────
+
+export async function getJobs() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  return await prisma.job.findMany({
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      company: true,
+      type: true,
+      location: true,
+      published: true,
+      createdAt: true,
+    },
+  });
+}
+
+export async function getJob(id: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  if (id === "new") return null;
+
+  return await prisma.job.findUnique({
+    where: { id },
+  });
+}
+
+export async function saveJob(data: {
+  id: string;
+  title: string;
+  slug?: string;
+  company: string;
+  location: string;
+  type: string;
+  salary: string;
+  description: string;
+  applyUrl: string;
+  category: string;
+  published: boolean;
+}) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Unauthorized");
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+  if (!user) throw new Error("User not found");
+
+  const finalSlug = data.slug
+    ? slugify(data.slug, { lower: true, strict: true })
+    : slugify(data.title, { lower: true, strict: true });
+
+  // Normalize applyUrl: auto-prepend mailto: for email addresses
+  const trimmedApply = data.applyUrl.trim();
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedApply);
+  const finalApplyUrl = isEmail
+    ? `mailto:${trimmedApply}`
+    : trimmedApply.startsWith("http") || trimmedApply.startsWith("mailto:")
+      ? trimmedApply
+      : `https://${trimmedApply}`;
+
+  let savedJob;
+
+  if (data.id === "new") {
+    savedJob = await prisma.job.create({
+      data: {
+        title: data.title,
+        slug: finalSlug,
+        company: data.company,
+        location: data.location,
+        type: data.type,
+        salary: data.salary || null,
+        description: data.description,
+        applyUrl: finalApplyUrl,
+        category: data.category || null,
+        published: data.published,
+        postedById: user.id,
+      },
+    });
+  } else {
+    savedJob = await prisma.job.update({
+      where: { id: data.id },
+      data: {
+        title: data.title,
+        slug: finalSlug,
+        company: data.company,
+        location: data.location,
+        type: data.type,
+        salary: data.salary || null,
+        description: data.description,
+        applyUrl: finalApplyUrl,
+        category: data.category || null,
+        published: data.published,
+      },
+    });
+  }
+
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+  revalidatePath(`/jobs/${finalSlug}`);
+
+  return savedJob;
+}
+
+export async function deleteJob(id: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  await prisma.job.delete({
+    where: { id },
+  });
+
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+}
+
+export async function toggleJobPublish(id: string, currentStatus: boolean) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  await prisma.job.update({
+    where: { id },
+    data: { published: !currentStatus },
+  });
+
+  revalidatePath("/admin/jobs");
+  revalidatePath("/jobs");
+}

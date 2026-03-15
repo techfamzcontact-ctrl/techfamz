@@ -1,157 +1,119 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { getPosts, togglePublishStatus, deletePost } from "../actions";
 import Link from "next/link";
-import { format } from "date-fns";
-import { Edit, Trash2, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Plus, FileText, Briefcase, ChevronRight, CheckCircle, Clock } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-type Post = {
-  id: string;
-  title: string;
-  slug: string;
-  published: boolean;
-  category: string | null;
-  createdAt: Date;
-};
+export const dynamic = "force-dynamic";
 
-export default function AdminDashboard() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function AdminDashboard() {
+  const [
+    totalPosts, publishedPosts,
+    totalJobs, publishedJobs
+  ] = await Promise.all([
+    prisma.post.count(),
+    prisma.post.count({ where: { published: true } }),
+    prisma.job.count(),
+    prisma.job.count({ where: { published: true } })
+  ]);
 
-  const fetchPosts = async () => {
-    try {
-      const data = await getPosts();
-      setPosts(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const handleToggle = async (id: string, status: boolean) => {
-    // Optimistic update
-    setPosts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, published: !status } : p))
-    );
-    await togglePublishStatus(id, status);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
-    setPosts((prev) => prev.filter((p) => p.id !== id));
-    await deletePost(id);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-accent-blue border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  const draftPosts = totalPosts - publishedPosts;
+  const draftJobs = totalJobs - publishedJobs;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary mb-1">Posts</h1>
-          <p className="text-sm text-text-muted">Manage your blog content</p>
+          <h1 className="text-2xl font-bold text-text-primary mb-1">Dashboard</h1>
+          <p className="text-sm text-text-muted">Welcome to the Techfamz admin panel.</p>
         </div>
-        <Link
-          href="/admin/editor/new"
-          className="bg-accent-blue text-white py-2 px-4 flex items-center gap-2 rounded-lg font-medium hover:bg-blue-600 transition-colors shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]"
-        >
-          Write Post
+      </div>
+
+      <h2 className="text-lg font-bold text-text-primary mb-4">Platform Overview</h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {/* Published Posts */}
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+          <div className="absolute -right-4 -top-4 text-green-400/5 group-hover:text-green-400/10 transition-colors">
+            <FileText size={80} />
+          </div>
+          <div className="text-text-muted text-[0.65rem] font-bold uppercase tracking-wider mb-2 relative z-10">Published Posts</div>
+          <div className="text-3xl font-bold text-text-primary mb-1 relative z-10">{publishedPosts}</div>
+          <div className="text-xs text-green-400 flex items-center gap-1 relative z-10"><CheckCircle size={12}/> Live on Blog</div>
+        </div>
+
+        {/* Draft Posts */}
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+          <div className="absolute -right-4 -top-4 text-amber-400/5 group-hover:text-amber-400/10 transition-colors">
+            <FileText size={80} />
+          </div>
+          <div className="text-text-muted text-[0.65rem] font-bold uppercase tracking-wider mb-2 relative z-10">Draft Posts</div>
+          <div className="text-3xl font-bold text-text-primary mb-1 relative z-10">{draftPosts}</div>
+          <div className="text-xs text-amber-400 flex items-center gap-1 relative z-10"><Clock size={12}/> Needs Review</div>
+        </div>
+
+        {/* Active Jobs */}
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+          <div className="absolute -right-4 -top-4 text-green-400/5 group-hover:text-green-400/10 transition-colors">
+            <Briefcase size={80} />
+          </div>
+          <div className="text-text-muted text-[0.65rem] font-bold uppercase tracking-wider mb-2 relative z-10">Active Jobs</div>
+          <div className="text-3xl font-bold text-text-primary mb-1 relative z-10">{publishedJobs}</div>
+          <div className="text-xs text-green-400 flex items-center gap-1 relative z-10"><CheckCircle size={12}/> Accepting Applicants</div>
+        </div>
+
+        {/* Draft Jobs */}
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+          <div className="absolute -right-4 -top-4 text-amber-400/5 group-hover:text-amber-400/10 transition-colors">
+            <Briefcase size={80} />
+          </div>
+          <div className="text-text-muted text-[0.65rem] font-bold uppercase tracking-wider mb-2 relative z-10">Draft Jobs</div>
+          <div className="text-3xl font-bold text-text-primary mb-1 relative z-10">{draftJobs}</div>
+          <div className="text-xs text-amber-400 flex items-center gap-1 relative z-10"><Clock size={12}/> Unpublished</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <Link href="/admin/posts" className="bg-bg-card border border-border-glass rounded-xl p-6 backdrop-blur-md hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
+          <div className="w-12 h-12 rounded-xl bg-[rgba(59,130,246,0.1)] text-accent-blue-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]">
+            <FileText size={24} />
+          </div>
+          <h3 className="text-xl font-bold text-text-primary mb-2 flex items-center justify-between">
+            Manage Blog
+            <ChevronRight size={20} className="text-text-muted group-hover:text-accent-blue-light transition-colors group-hover:translate-x-1" />
+          </h3>
+          <p className="text-sm text-text-secondary">View, edit, toggle publishing status, or delete existing articles from the blog.</p>
+        </Link>
+        
+        <Link href="/admin/jobs" className="bg-bg-card border border-border-glass rounded-xl p-6 backdrop-blur-md hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
+          <div className="w-12 h-12 rounded-xl bg-[rgba(59,130,246,0.1)] text-accent-blue-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]">
+            <Briefcase size={24} />
+          </div>
+          <h3 className="text-xl font-bold text-text-primary mb-2 flex items-center justify-between">
+            Manage Jobs
+            <ChevronRight size={20} className="text-text-muted group-hover:text-accent-blue-light transition-colors group-hover:translate-x-1" />
+          </h3>
+          <p className="text-sm text-text-secondary">View, edit, toggle active status, or delete technical job listings.</p>
         </Link>
       </div>
 
-      <div className="bg-bg-card border border-border-glass rounded-xl overflow-hidden backdrop-blur-md">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b border-border-glass">
-                <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Title</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-glass/50">
-              {posts.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-text-muted">
-                    No posts yet. Start writing!
-                  </td>
-                </tr>
-              ) : (
-                posts.map((post) => (
-                  <tr key={post.id} className="hover:bg-bg-primary/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-text-primary mb-1">{post.title}</p>
-                      <p className="text-xs text-text-muted">/{post.slug}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.7rem] font-bold uppercase tracking-wider border ${
-                          post.published
-                            ? "text-green-400 bg-green-400/10 border-green-400/20"
-                            : "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                        }`}
-                      >
-                        {post.published ? "Published" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
-                      {format(new Date(post.createdAt), "MMM d, yyyy")}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleToggle(post.id, post.published)}
-                          className="p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors"
-                          title={post.published ? "Unpublish" : "Publish"}
-                        >
-                          {post.published ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                        {post.published && (
-                          <a
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 rounded-md text-text-muted hover:text-accent-blue-light hover:bg-[rgba(59,130,246,0.1)] transition-colors"
-                            title="View Live"
-                          >
-                            <ExternalLink size={16} />
-                          </a>
-                        )}
-                        <Link
-                          href={`/admin/editor/${post.id}`}
-                          className="p-2 rounded-md text-text-muted hover:text-cta-yellow hover:bg-[rgba(245,197,66,0.1)] transition-colors"
-                          title="Edit"
-                        >
-                          <Edit size={16} />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(post.id)}
-                          className="p-2 rounded-md text-text-muted hover:text-red-400 hover:bg-[rgba(248,113,113,0.1)] transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <h2 className="text-lg font-bold text-text-primary mb-4">Quick Actions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link href="/admin/editor/new" className="flex items-center gap-4 p-5 bg-bg-card border border-border-glass rounded-xl hover:bg-bg-primary/50 transition-colors group">
+          <div className="w-10 h-10 rounded-full bg-border-glass text-text-primary group-hover:text-accent-blue group-hover:bg-[rgba(59,130,246,0.1)] flex items-center justify-center transition-colors">
+            <Plus size={20} />
+          </div>
+          <div>
+            <div className="font-semibold text-text-primary mb-0.5">Write New Post</div>
+            <div className="text-xs text-text-muted">Open the rich-text editor for a new article</div>
+          </div>
+        </Link>
+        <Link href="/admin/jobs/editor/new" className="flex items-center gap-4 p-5 bg-bg-card border border-border-glass rounded-xl hover:bg-bg-primary/50 transition-colors group">
+          <div className="w-10 h-10 rounded-full bg-border-glass text-text-primary group-hover:text-amber-400 group-hover:bg-[rgba(245,197,66,0.1)] flex items-center justify-center transition-colors">
+            <Plus size={20} />
+          </div>
+          <div>
+            <div className="font-semibold text-text-primary mb-0.5">Post New Job</div>
+            <div className="text-xs text-text-muted">List a new opportunity for the community</div>
+          </div>
+        </Link>
       </div>
     </div>
   );

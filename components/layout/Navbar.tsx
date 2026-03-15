@@ -10,6 +10,7 @@ const navLinks = [
   { label: "About", href: "/about" },
   { label: "TID", href: "/identity" },
   { label: "Partners", href: "/partners" },
+  { label: "Tech Jobs", href: "/jobs" },
   { label: "Blog", href: "/blog" },
 ];
 
@@ -110,6 +111,11 @@ export default function Navbar() {
             {link.label}
           </a>
         ))}
+        
+        <div className="flex items-center justify-between py-2.5 px-3.5 mt-2 mb-2 border-t border-border-glass">
+          <span className="text-sm font-medium text-text-secondary">Theme</span>
+          <ThemeToggle />
+        </div>
         <Button
           onClick={handleJoinClick}
           variant="cta"

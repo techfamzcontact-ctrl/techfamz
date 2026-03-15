@@ -1,9 +1,51 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export default function HeroSection() {
+  const particlesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = particlesRef.current;
+    if (!container) return;
+
+    const PARTICLE_COUNT = 24;
+    const colors = ["#4A9EFF", "#E8A427"];
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const particle = document.createElement("div");
+      particle.className = "particle";
+
+      const size = Math.random() * 2 + 2; // 2px – 4px
+      const left = Math.random() * 100; // 0% – 100%
+      const duration = Math.random() * 10 + 6; // 6s – 16s
+      const delay = -(Math.random() * duration); // negative so mid-flight on load
+      const dx = Math.random() * 120 - 60; // -60px to 60px
+      const color = i < Math.round(PARTICLE_COUNT * 0.6) ? colors[0] : colors[1];
+
+      particle.style.cssText = `
+        position: absolute;
+        bottom: -10px;
+        left: ${left}%;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: 50%;
+        background: ${color};
+        --dx: ${dx}px;
+        animation: floatUp ${duration}s linear ${delay}s infinite;
+        will-change: transform, opacity;
+      `;
+
+      container.appendChild(particle);
+    }
+
+    return () => {
+      container.innerHTML = "";
+    };
+  }, []);
+
   return (
     <section
       id="hero"
@@ -91,6 +133,14 @@ export default function HeroSection() {
       <div className="absolute inset-0 pointer-events-none" style={{ background: "var(--gradient-vignette)" }} />
       <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: "var(--gradient-bottom-fade)" }} />
 
+      {/* ═══ LAYER 7: Dynamic floating particles ═══ */}
+      <div
+        ref={particlesRef}
+        id="particles"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 2 }}
+      />
+
       {/* ═══ CONTENT ═══ */}
       <div className="relative z-10 text-center max-w-[860px] px-6 py-20">
         {/* Status badge */}
@@ -154,6 +204,22 @@ export default function HeroSection() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes floatUp {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          8% {
+            opacity: 0.8;
+          }
+          90% {
+            opacity: 0.6;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(var(--dx, 0px));
+            opacity: 0;
+          }
         }
       `}</style>
     </section>
