@@ -12,7 +12,6 @@ export default function HeroSection() {
     if (!container) return;
 
     const PARTICLE_COUNT = 24;
-    const colors = ["#4A9EFF", "#E8A427"];
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const particle = document.createElement("div");
@@ -23,7 +22,7 @@ export default function HeroSection() {
       const duration = Math.random() * 10 + 6; // 6s – 16s
       const delay = -(Math.random() * duration); // negative so mid-flight on load
       const dx = Math.random() * 120 - 60; // -60px to 60px
-      const color = i < Math.round(PARTICLE_COUNT * 0.6) ? colors[0] : colors[1];
+      const color = "#4A9EFF";
 
       particle.style.cssText = `
         position: absolute;

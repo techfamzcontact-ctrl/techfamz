@@ -24,6 +24,53 @@ async function getPostBySlug(slug: string) {
   }
 }
 
+async function getRelatedPosts(currentSlug: string, category: string | null) {
+  try {
+    // Try same-category posts first, fallback to latest posts
+    const posts = await prisma.post.findMany({
+      where: {
+        published: true,
+        slug: { not: currentSlug },
+        ...(category ? { category } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        coverImage: true,
+        category: true,
+        createdAt: true,
+      },
+    });
+
+    // If no same-category posts, get latest from any category
+    if (posts.length === 0 && category) {
+      return await prisma.post.findMany({
+        where: {
+          published: true,
+          slug: { not: currentSlug },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          coverImage: true,
+          category: true,
+          createdAt: true,
+        },
+      });
+    }
+
+    return posts;
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
@@ -53,6 +100,9 @@ export async function generateMetadata(
       title: post.title,
       description: post.excerpt || "",
       images: post.coverImage ? [post.coverImage] : [],
+    },
+    alternates: {
+      canonical: `https://techfamz.com/blog/${resolvedParams.slug}`,
     },
   };
 }
@@ -93,13 +143,25 @@ async function PostDetail({ slug }: { slug: string }) {
       
       <article className="max-w-[800px] mx-auto px-5 md:px-8">
         
-        <Link 
-          href="/blog"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted hover:text-accent-blue-light transition-colors mb-6 group"
-        >
-          <ArrowLeft size={16} className="transform transition-transform group-hover:-translate-x-1" />
-          Back to Blog
-        </Link>
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-2 text-sm text-text-muted mb-8 flex-wrap" aria-label="Breadcrumb">
+          <Link href="/blog" className="hover:text-accent-blue-light transition-colors font-medium">
+            Blog
+          </Link>
+          {post.category && (
+            <>
+              <span className="text-border-glass">/</span>
+              <Link 
+                href={`/blog?category=${encodeURIComponent(post.category)}`} 
+                className="hover:text-accent-blue-light transition-colors font-medium"
+              >
+                {post.category}
+              </Link>
+            </>
+          )}
+          <span className="text-border-glass">/</span>
+          <span className="text-text-secondary truncate max-w-[200px]">{post.title}</span>
+        </nav>
 
         <header className="mb-8">
           <div className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-accent-blue-light mb-3">
@@ -180,6 +242,61 @@ export default async function BlogPostPage({ params }: Props) {
       <Suspense fallback={<PostDetailSkeleton />}>
         <PostDetail slug={resolvedParams.slug} />
       </Suspense>
+      <Suspense>
+        <RelatedPosts slug={resolvedParams.slug} />
+      </Suspense>
     </main>
+  );
+}
+
+async function RelatedPosts({ slug }: { slug: string }) {
+  const post = await getPostBySlug(slug);
+  if (!post) return null;
+
+  const related = await getRelatedPosts(slug, post.category);
+  if (related.length === 0) return null;
+
+  return (
+    <section className="max-w-[1200px] mx-auto px-5 md:px-8 mt-16 pt-12 border-t border-border-glass/50">
+      <h2 className="text-2xl font-bold text-text-primary mb-8">
+        {post.category ? `More in ${post.category}` : "More Articles"}
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {related.map((relatedPost) => (
+          <Link
+            key={relatedPost.id}
+            href={`/blog/${relatedPost.slug}`}
+            className="group flex flex-col bg-bg-card border border-border-glass rounded-xl overflow-hidden backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:border-border-glass-hover"
+          >
+            <div className="relative aspect-[16/10] overflow-hidden bg-[rgba(0,0,0,0.3)]">
+              {relatedPost.coverImage ? (
+                <Image
+                  src={relatedPost.coverImage}
+                  alt={relatedPost.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/50">
+                  <Image src="/logo.png" alt="Techfamz" width={36} height={36} className="object-contain opacity-30 grayscale" />
+                </div>
+              )}
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent-blue-light mb-3">
+                {relatedPost.category && <span>{relatedPost.category}</span>}
+                {relatedPost.category && <span className="w-1 h-1 rounded-full bg-border-glass" />}
+                <time dateTime={relatedPost.createdAt.toISOString()}>
+                  {format(new Date(relatedPost.createdAt), "MMM d, yyyy")}
+                </time>
+              </div>
+              <h3 className="text-base font-bold text-text-primary leading-snug group-hover:text-accent-blue-light transition-colors line-clamp-2">
+                {relatedPost.title}
+              </h3>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

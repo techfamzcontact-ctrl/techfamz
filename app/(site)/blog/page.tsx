@@ -4,6 +4,9 @@ import Image from "next/image";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
 import { Metadata } from "next";
+import { Suspense } from "react";
+import { PostsListSkeleton } from "@/components/blog/PostCardSkeleton";
+import { CategoryFilter } from "@/components/blog/CategoryFilter";
 
 export const metadata: Metadata = {
   title: "Ecosystem Insights & Updates — Techfamz Blog",
@@ -26,7 +29,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Server Component (RSC) to directly fetch published posts from DB
 export const dynamic = "force-dynamic";
 
 async function getPublishedPosts() {
@@ -53,10 +55,23 @@ async function getPublishedPosts() {
   }
 }
 
-import { Suspense } from "react";
-import { PostsListSkeleton } from "@/components/blog/PostCardSkeleton";
+async function getCategories(): Promise<string[]> {
+  try {
+    const posts = await prisma.post.findMany({
+      where: { published: true, category: { not: null } },
+      select: { category: true },
+      distinct: ["category"],
+      orderBy: { category: "asc" },
+    });
+    return posts
+      .map((p) => p.category)
+      .filter((c): c is string => c !== null);
+  } catch {
+    return [];
+  }
+}
 
-async function PostsList() {
+async function PostsList({ category }: { category?: string }) {
   const posts = await getPublishedPosts();
 
   if (posts === null) {
@@ -68,24 +83,38 @@ async function PostsList() {
           href="/blog" 
           className="inline-flex items-center gap-2 py-2.5 px-5 bg-accent-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
         >
-          Try Again
+          Retry
         </Link>
       </div>
     );
   }
 
-  if (posts.length === 0) {
+  // Filter by category if specified
+  const filteredPosts = category
+    ? posts.filter((post) => post.category === category)
+    : posts;
+
+  if (filteredPosts.length === 0) {
     return (
-      <div className="text-center py-20 border border-border-glass rounded-2xl bg-bg-card backdrop-blur-md">
-        <h3 className="text-xl font-semibold text-text-primary mb-2">No posts yet</h3>
-        <p className="text-text-secondary">We&apos;re brewing some great content. Check back soon.</p>
+      <div className="text-center py-20">
+        <p className="text-text-muted text-lg mb-4">
+          {category ? `No articles found in "${category}".` : "No articles yet. Stay tuned!"}
+        </p>
+        {category && (
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 py-2.5 px-5 bg-accent-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            View All Articles
+          </Link>
+        )}
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {posts.map((post) => (
+      {filteredPosts.map((post) => (
         <Link 
           href={`/blog/${post.slug}`} 
           key={post.id}
@@ -107,14 +136,13 @@ async function PostsList() {
           </div>
           
           <div className="flex flex-col flex-1 p-6 md:p-8 relative">
-            {/* Floating glow */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent-blue opacity-0 group-hover:opacity-10 blur-[50px] transition-opacity duration-500 rounded-full" />
             
             <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-accent-blue-light mb-4">
               {post.category && <span>{post.category}</span>}
               {post.category && <span className="w-1 h-1 rounded-full bg-border-glass" />}
               <time dateTime={post.createdAt.toISOString()}>
-                {format(post.createdAt, "MMM d, yyyy")}
+                {format(new Date(post.createdAt), "MMM d, yyyy")}
               </time>
             </div>
             
@@ -133,26 +161,40 @@ async function PostsList() {
   );
 }
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const categories = await getCategories();
+
   return (
     <main className="min-h-screen pt-32 pb-20" style={{ background: "var(--gradient-hero)" }}>
       <div className="max-w-[1200px] mx-auto px-5 md:px-8">
         
         {/* Header */}
-        <div className="text-center mb-16 max-w-[800px] mx-auto">
+        <div className="text-center mb-12 max-w-[800px] mx-auto">
           <span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-accent-blue-light mb-5 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
             Ecosystem Insights
           </span>
           <h1 className="text-[clamp(2.2rem,5vw,4rem)] font-[800] leading-[1.1] tracking-[-0.02em] text-text-primary mb-6">
             The Techfamz <span className="bg-[linear-gradient(135deg,#60a5fa,#3b82f6,#93c5fd)] bg-clip-text text-transparent">Blog</span>
           </h1>
-          <p className="text-lg text-text-secondary leading-relaxed max-w-[600px] mx-auto">
-            Deep dives, tutorials, and updates from the network building the infrastructure for African tech talent.
-          </p>
+          
         </div>
 
+        {/* Category Filters */}
+        {categories.length > 0 && (
+          <div className="mb-12">
+            <Suspense>
+              <CategoryFilter categories={categories} />
+            </Suspense>
+          </div>
+        )}
+
         <Suspense fallback={<PostsListSkeleton />}>
-          <PostsList />
+          <PostsList category={resolvedParams.category} />
         </Suspense>
 
       </div>

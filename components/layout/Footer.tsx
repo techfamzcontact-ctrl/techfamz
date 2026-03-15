@@ -119,7 +119,7 @@ export default function Footer() {
           <div className="flex items-center gap-6">
             <a href="#" className="text-[0.85rem] text-text-muted hover:text-text-primary transition-colors flex items-center gap-2">
               <Mail size={14} />
-              hello@techfamz.com
+              contact@techfamz.com
             </a>
           </div>
         </div>

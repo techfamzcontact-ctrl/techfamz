@@ -7,8 +7,19 @@ export const metadata: Metadata = {
     "Discover the vision, mission, and legal foundation behind Techfamz Limited — building a unified technology network for Africa.",
   openGraph: {
     title: "About Techfamz — Vision, Mission & Legal Foundation",
-    description:
-      "Discover the vision, mission, and legal foundation behind Techfamz Limited.",
+    description: "Discover the vision, mission, and legal foundation behind Techfamz Limited.",
+    url: "https://techfamz.com/about",
+    type: "website",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Techfamz — Vision, Mission & Legal Foundation",
+    description: "Discover the vision, mission, and legal foundation behind Techfamz Limited.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://techfamz.com/about",
   },
 };
 
