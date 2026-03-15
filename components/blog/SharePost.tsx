@@ -5,17 +5,17 @@ import { useState, useEffect } from "react";
 
 interface SharePostProps {
   title: string;
-  slug: string;
+  path: string;
   className?: string;
 }
 
-export function SharePost({ title, slug, className }: SharePostProps) {
+export function SharePost({ title, path, className }: SharePostProps) {
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState("");
 
   useEffect(() => {
-    setUrl(`${window.location.origin}/blog/${slug}`);
-  }, [slug]);
+    setUrl(`${window.location.origin}${path}`);
+  }, [path]);
 
   const shareLinks = {
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,

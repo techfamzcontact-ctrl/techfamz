@@ -187,7 +187,7 @@ async function PostDetail({ slug }: { slug: string }) {
           )}
         </header>
 
-        <SharePost title={post.title} slug={post.slug} className="pb-4 mb-4 border-b border-border-glass" />
+        <SharePost title={post.title} path={`/blog/${post.slug}`} className="pb-4 mb-4 border-b border-border-glass" />
 
         {post.coverImage && (
           <div className="relative aspect-[16/9] w-full rounded-none overflow-hidden mb-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-border-glass">
@@ -227,7 +227,7 @@ async function PostDetail({ slug }: { slug: string }) {
           }}
         />
 
-        <SharePost title={post.title} slug={post.slug} />
+        <SharePost title={post.title} path={`/blog/${post.slug}`} />
 
       </article>
     </>

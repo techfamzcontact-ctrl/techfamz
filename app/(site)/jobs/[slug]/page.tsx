@@ -8,6 +8,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { ApplyButtons } from "@/components/jobs/ApplyButtons";
 import { Suspense } from "react";
 import { JobDetailSkeleton } from "@/components/jobs/JobCardSkeleton";
+import { SharePost } from "@/components/blog/SharePost";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -157,13 +158,18 @@ async function JobDetail({ slug }: { slug: string }) {
             </div>
           </div>
 
-          {/* Apply Button */}
-          <div className="mt-8 pt-6 border-t border-border-glass">
+          {/* Apply Button & Share */}
+          <div className="mt-8 pt-6 border-t border-border-glass flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <ApplyButtons 
               applyUrl={job.applyUrl} 
               isEmail={isEmail} 
               applyHref={applyHref} 
               size="large" 
+            />
+            <SharePost 
+              title={`${job.title} at ${job.company}`} 
+              path={`/jobs/${job.slug}`} 
+              className="border-none py-0 mt-0 shrink-0" 
             />
           </div>
         </div>
@@ -198,14 +204,16 @@ async function JobDetail({ slug }: { slug: string }) {
           />
 
           {/* Bottom Apply CTA */}
-          <div className="mt-10 pt-6 border-t border-border-glass flex items-center justify-between">
+          <div className="mt-10 pt-6 border-t border-border-glass flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <p className="text-text-secondary text-sm">Interested in this role?</p>
-            <ApplyButtons 
-              applyUrl={job.applyUrl} 
-              isEmail={isEmail} 
-              applyHref={applyHref} 
-              size="normal" 
-            />
+            <div className="shrink-0">
+              <ApplyButtons 
+                applyUrl={job.applyUrl} 
+                isEmail={isEmail} 
+                applyHref={applyHref} 
+                size="normal" 
+              />
+            </div>
           </div>
         </div>
       </div>
