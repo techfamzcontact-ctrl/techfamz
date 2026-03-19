@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ecosystem Insights & Updates — Techfamz Blog",
     description: "Deep dives, tutorials, and updates from the network building the infrastructure for African tech talent.",
-    url: "https://techfamz.com/blog",
+    url: "https://www.techfamz.com/blog",
     type: "website",
     images: ["/og-image.png"],
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://techfamz.com/blog",
+    canonical: "https://www.techfamz.com/blog",
   },
 };
 

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tech Jobs — Techfamz",
     description: "Discover the latest tech job openings curated by the Techfamz community. Find your next opportunity in engineering, design, product, and more.",
-    url: "https://techfamz.com/jobs",
+    url: "https://www.techfamz.com/jobs",
     type: "website",
     images: ["/og-image.png"],
   },
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://techfamz.com/jobs",
+    canonical: "https://www.techfamz.com/jobs",
   },
 };
 

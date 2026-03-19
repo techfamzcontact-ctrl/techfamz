@@ -102,7 +102,7 @@ export async function generateMetadata(
       images: post.coverImage ? [post.coverImage] : [],
     },
     alternates: {
-      canonical: `https://techfamz.com/blog/${resolvedParams.slug}`,
+      canonical: `https://www.techfamz.com/blog/${resolvedParams.slug}`,
     },
   };
 }
@@ -129,7 +129,7 @@ async function PostDetail({ slug }: { slug: string }) {
       {
         "@type": "Organization",
         name: "Techfamz",
-        url: "https://techfamz.com",
+        url: "https://www.techfamz.com",
       },
     ],
   };

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About Techfamz — Vision, Mission & Legal Foundation",
     description: "Discover the vision, mission, and legal foundation behind Techfamz Limited.",
-    url: "https://techfamz.com/about",
+    url: "https://www.techfamz.com/about",
     type: "website",
     images: ["/og-image.png"],
   },
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://techfamz.com/about",
+    canonical: "https://www.techfamz.com/about",
   },
 };
 

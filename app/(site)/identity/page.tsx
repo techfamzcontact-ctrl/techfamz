@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Techfamz Identity (TID) — Your Developer Passport",
     description: "Get verified and recognized in the African tech ecosystem with the Techfamz Identity (TID) system.",
-    url: "https://techfamz.com/identity",
+    url: "https://www.techfamz.com/identity",
     type: "website",
     images: ["/og-image.png"],
   },
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://techfamz.com/identity",
+    canonical: "https://www.techfamz.com/identity",
   },
 };
 

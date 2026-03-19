@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Partner with Techfamz — Access Top African Tech Talent",
     description: "Hire verified developers and collaborate with the fastest growing tech ecosystem in Africa.",
-    url: "https://techfamz.com/partners",
+    url: "https://www.techfamz.com/partners",
     type: "website",
     images: ["/og-image.png"],
   },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://techfamz.com/partners",
+    canonical: "https://www.techfamz.com/partners",
   },
 };
 

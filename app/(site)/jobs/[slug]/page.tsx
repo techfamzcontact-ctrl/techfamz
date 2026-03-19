@@ -42,7 +42,7 @@ export async function generateMetadata(
     openGraph: {
       title: `${job.title} at ${job.company} — Techfamz Jobs`,
       description: `${job.type} role at ${job.company}. ${job.location}.`,
-      url: `https://techfamz.com/jobs/${resolvedParams.slug}`,
+      url: `https://www.techfamz.com/jobs/${resolvedParams.slug}`,
       type: "article",
     },
     twitter: {
@@ -51,7 +51,7 @@ export async function generateMetadata(
       description: `${job.type} · ${job.location}${job.salary ? ` · ${job.salary}` : ""}. Apply now on Techfamz.`,
     },
     alternates: {
-      canonical: `https://techfamz.com/jobs/${resolvedParams.slug}`,
+      canonical: `https://www.techfamz.com/jobs/${resolvedParams.slug}`,
     },
   };
 }
