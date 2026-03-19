@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import ComingSoonDialog from "@/components/shared/ComingSoonDialog";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -48,25 +49,25 @@ export default function Navbar() {
         style={scrolled ? { backgroundColor: "var(--surface-glass)" } : undefined}
       >
         {/* Logo + Text — always links home */}
-        <a href="/" className="flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.02em] text-text-primary no-underline">
+        <Link href="/" className="flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.02em] text-text-primary no-underline">
           <div className="flex items-center justify-center w-[36px] h-[36px] rounded-full border-[1.5px] border-[rgba(255,255,255,0.9)] overflow-hidden bg-[rgba(255,255,255,0.05)] shrink-0">
             <Image src="/logo.png" alt="Techfamz logo" width={32} height={32} priority className="object-contain" />
           </div>
           <span className="text-[1.25rem]">
             Tech<span className="text-accent-blue-light">famz</span>
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-2">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="relative py-2 px-4 text-sm font-medium text-text-secondary no-underline rounded-lg transition-colors duration-300 ease-smooth hover:text-text-primary after:content-[''] after:absolute after:bottom-1 after:inset-x-4 after:h-0.5 after:bg-accent-blue after:rounded-[1px] after:scale-x-0 after:transition-transform after:duration-300 after:ease-premium hover:after:scale-x-100"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -102,14 +103,14 @@ export default function Navbar() {
         style={{ backgroundColor: "var(--surface-dialog)" }}
       >
         {navLinks.map((link) => (
-          <a
+          <Link
             key={link.href}
             href={link.href}
             className="block w-full text-left py-2.5 px-3.5 text-sm font-medium text-text-secondary no-underline rounded-lg transition-all duration-[250ms] ease-smooth hover:text-text-primary hover:bg-bg-card"
             onClick={handleLinkClick}
           >
             {link.label}
-          </a>
+          </Link>
         ))}
         
         <div className="flex items-center justify-between py-2.5 px-3.5 mt-2 mb-2 border-t border-border-glass">
