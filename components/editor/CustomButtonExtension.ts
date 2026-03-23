@@ -1,7 +1,7 @@
 import { mergeAttributes, Node } from '@tiptap/core'
 
 export interface CustomButtonOptions {
-  HTMLAttributes: Record<string, any>
+  HTMLAttributes: Record<string, unknown>
 }
 
 declare module '@tiptap/core' {

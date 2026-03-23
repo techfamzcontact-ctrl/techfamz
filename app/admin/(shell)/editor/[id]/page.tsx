@@ -169,7 +169,6 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     e.preventDefault();
     if (!editor || btnText === "") return;
     
-    // @ts-ignore - custom extension commands
     editor.chain().focus().setCustomButton({
       text: btnText,
       url: btnUrl,
@@ -210,8 +209,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       setExcerpt(data.summary);
       setIsDirty(true);
       
-    } catch (err: any) {
-      setSaveError(err.message || "An error occurred while generating the summary.");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while generating the summary.";
+      setSaveError(errorMessage);
     } finally {
       setGeneratingSummary(false);
     }

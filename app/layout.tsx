@@ -87,10 +87,6 @@ export const metadata: Metadata = {
     },
   },
 
-  alternates: {
-    canonical: baseUrl,
-  },
-
   category: "technology",
 
   verification: {

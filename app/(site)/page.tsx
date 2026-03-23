@@ -3,6 +3,13 @@ import TrustedBySection from "@/components/sections/TrustedBySection";
 import ShiftSection from "@/components/sections/ShiftSection";
 import MissionSection from "@/components/sections/MissionSection";
 import CTASection from "@/components/sections/CTASection";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
   return (

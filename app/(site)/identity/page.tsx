@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -189,7 +190,7 @@ export default function IdentityPage() {
               in African tech talent.
             </p>
             <Button variant="cta" asChild className="relative overflow-hidden group py-[14px] px-10 text-[1rem] h-auto rounded-lg after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
-              <a href="/">Back to Home</a>
+              <Link href="/">Back to Home</Link>
             </Button>
           </div>
         </div>

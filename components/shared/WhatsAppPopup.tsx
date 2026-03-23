@@ -16,8 +16,10 @@ export default function WhatsAppPopup() {
     // Check if user already dismissed recently (24h cooldown)
     const dismissedAt = localStorage.getItem("wa-popup-dismissed");
     if (dismissedAt && Date.now() - parseInt(dismissedAt) < 86400000) {
-      setDismissed(true);
-      setShowFab(true);
+      setTimeout(() => {
+        setDismissed(true);
+        setShowFab(true);
+      }, 0);
       return;
     }
 
