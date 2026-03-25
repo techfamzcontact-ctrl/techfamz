@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Plus, Menu, X, Briefcase } from "lucide-react";
+import { LayoutDashboard, FileText, Plus, Menu, X, Briefcase, MessageSquare } from "lucide-react";
 
 export function MobileAdminNav() {
   const [open, setOpen] = useState(false);
@@ -59,6 +59,16 @@ export function MobileAdminNav() {
             >
               <Plus size={20} />
               New Post
+            </Link>
+            <Link
+              href="/admin/comments"
+              onClick={closeMenu}
+              className={`flex items-center gap-3 px-3 py-4 rounded-lg text-base transition-colors ${
+                pathname === '/admin/comments' ? 'bg-bg-card text-accent-blue-light font-medium' : 'text-text-secondary hover:text-text-primary hover:bg-bg-card'
+              }`}
+            >
+              <MessageSquare size={20} />
+              Comments
             </Link>
 
             <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">

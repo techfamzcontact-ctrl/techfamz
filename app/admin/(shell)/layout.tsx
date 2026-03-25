@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, FileText, LogOut, Plus, Briefcase } from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, Plus, Briefcase, MessageSquare } from "lucide-react";
 import LogoutButton from "@/components/shared/LogoutButton";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { MobileAdminNav } from "@/components/layout/MobileAdminNav";
@@ -61,6 +61,13 @@ export default async function AdminShellLayout({
           >
             <Plus size={18} />
             New Post
+          </Link>
+          <Link
+            href="/admin/comments"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors"
+          >
+            <MessageSquare size={18} />
+            Comments
           </Link>
 
           <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">

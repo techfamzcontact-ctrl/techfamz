@@ -142,6 +142,16 @@ exports.Prisma.PostScalarFieldEnum = {
   authorId: 'authorId'
 };
 
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  name: 'name',
+  email: 'email',
+  isHidden: 'isHidden',
+  createdAt: 'createdAt',
+  postId: 'postId'
+};
+
 exports.Prisma.JobScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -178,6 +188,7 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   User: 'User',
   Post: 'Post',
+  Comment: 'Comment',
   Job: 'Job'
 };
 

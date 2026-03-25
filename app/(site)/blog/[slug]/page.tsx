@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { SharePost } from "@/components/blog/SharePost";
+import CommentSection from "@/components/blog/CommentSection";
 
 
 interface Props {
@@ -229,6 +230,7 @@ async function PostDetail({ slug }: { slug: string }) {
 
         <SharePost title={post.title} path={`/blog/${post.slug}`} />
 
+        <CommentSection postId={post.id} />
       </article>
     </>
   );

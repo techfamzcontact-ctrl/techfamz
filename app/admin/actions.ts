@@ -253,3 +253,48 @@ export async function toggleJobPublish(id: string, currentStatus: boolean) {
   revalidatePath("/admin/jobs");
   revalidatePath("/jobs");
 }
+
+// ───────────────────────────────────────────
+// Comments Moderation
+// ───────────────────────────────────────────
+
+export async function getComments() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  return await prisma.comment.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      post: {
+        select: { title: true, slug: true },
+      },
+    },
+  });
+}
+
+export async function toggleCommentVisibility(id: string, currentHidden: boolean) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const comment = await prisma.comment.update({
+    where: { id },
+    data: { isHidden: !currentHidden },
+    select: { post: { select: { slug: true } } },
+  });
+
+  revalidatePath("/admin/comments");
+  revalidatePath(`/blog/${comment.post.slug}`);
+}
+
+export async function deleteComment(id: string) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const comment = await prisma.comment.delete({
+    where: { id },
+    select: { post: { select: { slug: true } } },
+  });
+
+  revalidatePath("/admin/comments");
+  revalidatePath(`/blog/${comment.post.slug}`);
+}
