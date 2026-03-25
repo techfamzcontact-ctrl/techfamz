@@ -8,6 +8,7 @@ import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { SharePost } from "@/components/blog/SharePost";
 import CommentSection from "@/components/blog/CommentSection";
+import ViewTracker from "@/components/blog/ViewTracker";
 
 
 interface Props {
@@ -143,6 +144,7 @@ async function PostDetail({ slug }: { slug: string }) {
       />
       
       <article className="max-w-[800px] mx-auto px-5 md:px-8">
+        <ViewTracker slug={post.slug} />
         
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-sm text-text-muted mb-8 flex-wrap" aria-label="Breadcrumb">

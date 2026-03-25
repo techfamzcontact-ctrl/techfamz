@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, Fragment } from "react";
 import { getPosts, togglePublishStatus, deletePost, toggleCommentVisibility, deleteComment } from "../../actions";
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
@@ -13,6 +13,7 @@ type Post = {
   published: boolean;
   category: string | null;
   createdAt: Date;
+  views: number;
 };
 
 type PostComment = {
@@ -132,6 +133,7 @@ export default function AdminPostsPage() {
                 <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Title</th>
                 <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">Views</th>
                 <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -144,11 +146,10 @@ export default function AdminPostsPage() {
                 </tr>
               ) : (
                 posts.map((post) => (
-                  <>
-                    <tr key={post.id} className="hover:bg-bg-primary/50 transition-colors">
+                  <Fragment key={post.id}>
+                    <tr className="hover:bg-bg-primary/50 transition-colors">
                       <td className="px-6 py-4">
                         <p className="font-semibold text-text-primary mb-1">{post.title}</p>
-                        <p className="text-xs text-text-muted">/{post.slug}</p>
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -162,10 +163,13 @@ export default function AdminPostsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
-                        {format(new Date(post.createdAt), "MMM d, yyyy")}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      {format(new Date(post.createdAt), "MMM d, yyyy")}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-text-primary text-right whitespace-nowrap">
+                      {Intl.NumberFormat("en-US").format(post.views)}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openComments(post.id, post.title)}
                             className={`p-2 rounded-md transition-colors ${
@@ -299,7 +303,7 @@ export default function AdminPostsPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))
               )}
             </tbody>

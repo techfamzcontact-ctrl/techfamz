@@ -19,6 +19,7 @@ export async function getPosts() {
       published: true,
       category: true,
       createdAt: true,
+      views: true,
     },
   });
 }
