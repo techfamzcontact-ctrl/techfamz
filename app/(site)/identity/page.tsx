@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://www.techfamz.com/identity",
+    canonical: "/identity",
   },
 };
 

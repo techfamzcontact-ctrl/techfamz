@@ -104,7 +104,7 @@ export async function generateMetadata(
       images: post.coverImage ? [post.coverImage] : [],
     },
     alternates: {
-      canonical: `https://www.techfamz.com/blog/${resolvedParams.slug}`,
+      canonical: `/blog/${post.slug}`,
     },
   };
 }

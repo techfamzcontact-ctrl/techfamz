@@ -51,7 +51,7 @@ export async function generateMetadata(
       description: `${job.type} · ${job.location}${job.salary ? ` · ${job.salary}` : ""}. Apply now on Techfamz.`,
     },
     alternates: {
-      canonical: `https://www.techfamz.com/jobs/${resolvedParams.slug}`,
+      canonical: `/jobs/${job.slug}`,
     },
   };
 }
