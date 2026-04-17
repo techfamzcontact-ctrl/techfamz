@@ -8,12 +8,13 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import YoutubeExtension from "@tiptap/extension-youtube";
 import Image from "next/image";
 import {
   ImageIcon, Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, Quote, Code, Heading1, Heading2, Heading3,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Link as LinkIcon, Unlink,
-  Save, Send, Check, X, MousePointerClick, Sparkles
+  Save, Send, Check, X, MousePointerClick, Sparkles, Youtube as YoutubeIcon
 } from "lucide-react";
 import { CustomButtonExtension } from "@/components/editor/CustomButtonExtension";
 import { useState, useEffect, use, useCallback } from "react";
@@ -53,6 +54,9 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkInputUrl, setLinkInputUrl] = useState("");
 
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [youtubeInputUrl, setYoutubeInputUrl] = useState("");
+
   const [showBtnInput, setShowBtnInput] = useState(false);
   const [btnText, setBtnText] = useState("Click Me");
   const [btnUrl, setBtnUrl] = useState("https://");
@@ -81,6 +85,11 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
       TextStyle,
       Color,
       CustomButtonExtension,
+      YoutubeExtension.configure({
+        HTMLAttributes: {
+          class: "w-full aspect-video rounded-xl border border-border-glass my-6",
+        },
+      }),
       TiptapImage.configure({
         HTMLAttributes: {
           class: "rounded-none border border-border-glass max-w-full h-auto my-6",
@@ -163,6 +172,20 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     
     setShowLinkInput(false);
     setLinkInputUrl("");
+  };
+
+  const handleYoutubeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editor) return;
+
+    if (youtubeInputUrl.trim() !== "") {
+      editor.chain().focus().setYoutubeVideo({
+        src: youtubeInputUrl,
+      }).run();
+    }
+    
+    setShowYoutubeInput(false);
+    setYoutubeInputUrl("");
   };
 
   const handleBtnSubmit = (e: React.FormEvent) => {
@@ -480,6 +503,31 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
                         <button type="button" onClick={() => setShowBtnInput(false)} className="flex-1 h-8 text-xs rounded border border-border-glass text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">Cancel</button>
                         <button type="submit" className="flex-1 h-8 text-xs rounded bg-accent-blue text-white hover:bg-blue-600 transition-colors">Insert</button>
                       </div>
+                    </form>
+                  </div>
+                )}
+              </div>
+
+              <div className="relative inline-block">
+                <ToolbarButton onClick={() => setShowYoutubeInput(!showYoutubeInput)} isActive={showYoutubeInput} icon={YoutubeIcon} title="Insert YouTube Video" />
+                {showYoutubeInput && (
+                  <div className="absolute top-full mt-2 left-0 md:left-1/2 md:-translate-x-[75%] lg:md:-translate-x-1/2 bg-bg-primary border border-border-glass p-2 rounded-xl shadow-2xl z-50 w-[260px]">
+                    <form onSubmit={handleYoutubeSubmit} className="flex items-center gap-1.5 p-1">
+                      <Input
+                        type="url"
+                        value={youtubeInputUrl}
+                        onChange={(e) => setYoutubeInputUrl(e.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                        autoFocus
+                        className="flex-1 min-w-0 bg-bg-card border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50 h-8 text-xs"
+                        required
+                      />
+                      <button type="submit" className="bg-accent-blue text-white p-1 rounded hover:bg-blue-600 transition-colors flex-shrink-0" title="Insert Video">
+                        <Check size={14} />
+                      </button>
+                      <button type="button" onClick={() => setShowYoutubeInput(false)} className="bg-bg-card text-text-primary p-1 rounded border border-border-glass hover:bg-bg-card transition-colors flex-shrink-0" title="Cancel">
+                        <X size={14} />
+                      </button>
                     </form>
                   </div>
                 )}

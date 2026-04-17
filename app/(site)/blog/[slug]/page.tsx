@@ -212,13 +212,14 @@ async function PostDetail({ slug }: { slug: string }) {
                 "h1","h2","h3","h4","h5","h6",
                 "p","br","strong","em","u","s","del","mark","code","pre","blockquote","hr",
                 "ul","ol","li",
-                "a","img",
+                "a","img","iframe",
                 "table","thead","tbody","tr","th","td",
                 "div","span",
               ],
               allowedAttributes: {
                 a: ["href", "target", "rel", "class"],
                 img: ["src", "alt", "class", "width", "height"],
+                iframe: ["src", "width", "height", "allowfullscreen", "allow", "frameborder", "title", "class", "style", "data-youtube-video"],
                 "*": ["class", "style"],
               },
               allowedStyles: {
