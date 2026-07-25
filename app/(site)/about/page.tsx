@@ -44,8 +44,8 @@ export default function AboutPage() {
       {/* ═══ Hero ═══ */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-[140px]" />
-          <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-[120px]" />
+          <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-3xl" />
+          <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-3xl" />
         </div>
         <div className="relative z-10 text-center max-w-[800px] px-6 py-32">
           <span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-accent-blue-light mb-5 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
@@ -67,10 +67,10 @@ export default function AboutPage() {
 
       {/* ═══ Vision Section ═══ */}
       <section className="relative bg-bg-primary overflow-hidden">
-        <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.05] blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.05] blur-3xl pointer-events-none" />
         <div className="divider" />
         <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[900px] mx-auto text-center">
-          <div className="reveal">
+          <div className="animate-fade-in-up-delay-1">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
               The Vision
             </span>
@@ -79,7 +79,7 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="reveal reveal-delay-2 max-w-[680px] mx-auto">
+          <div className="animate-fade-in-up-delay-2 max-w-[680px] mx-auto">
             <p className="text-[1.1rem] mb-6">
               Africa holds extraordinary technical potential. Techfamz exists to help organize it.
             </p>
@@ -88,7 +88,7 @@ export default function AboutPage() {
               innovation, and opportunity intersect seamlessly — locally and globally.
             </p>
 
-            <div className="bg-bg-card border border-[rgba(59,130,246,0.15)] rounded-lg px-10 py-8 backdrop-blur-md text-center">
+            <div className="bg-bg-card border border-[rgba(59,130,246,0.15)] rounded-lg px-10 py-8  text-center">
               <p className="text-[1.1rem] text-text-primary font-medium m-0 leading-relaxed">
                 This is not just a platform.
                 <br />
@@ -105,7 +105,7 @@ export default function AboutPage() {
       <section className="relative" style={{ background: "var(--gradient-section-alt)" }}>
         <div className="divider" />
         <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[700px] mx-auto">
-          <div className="reveal text-center mb-14">
+          <div className="animate-fade-in-up-delay-1 text-center mb-14">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
               Our Journey
             </span>
@@ -116,7 +116,7 @@ export default function AboutPage() {
             {timeline.map((item, i) => (
               <div
                 key={i}
-                className="reveal mb-10 last:mb-0 relative"
+                className="animate-fade-in-up-delay-1 mb-10 last:mb-0 relative"
                 style={{ transitionDelay: `${i * 0.1}s` }}
               >
                 {/* Dot */}
@@ -135,7 +135,7 @@ export default function AboutPage() {
       <section className="relative bg-bg-primary">
         <div className="divider" />
         <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[1200px] mx-auto text-center">
-          <div className="reveal">
+          <div className="animate-fade-in-up-delay-1">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
               Legal & Structural Foundation
             </span>
@@ -150,7 +150,7 @@ export default function AboutPage() {
             {pillars.map((p, i) => (
               <Card
                 key={i}
-                className="bg-bg-card border-border-glass rounded-lg backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover text-left p-0"
+                className="bg-bg-card border-border-glass rounded-lg  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover text-left p-0"
                 style={{ transitionDelay: `${i * 0.1}s` }}
               >
                 <CardHeader className="p-8 pb-2">

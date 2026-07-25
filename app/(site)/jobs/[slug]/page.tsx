@@ -118,7 +118,7 @@ async function JobDetail({ slug }: { slug: string }) {
         </Link>
 
         {/* Job Header Card */}
-        <div className="bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md p-8 md:p-10 mb-8">
+        <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10 mb-8">
           <div className="flex flex-col sm:flex-row gap-6 items-start">
             {/* Company Badge */}
             <div className="shrink-0 w-16 h-16 rounded-xl bg-accent-blue-glow-soft border border-accent-blue-glow flex items-center justify-center">
@@ -175,7 +175,7 @@ async function JobDetail({ slug }: { slug: string }) {
         </div>
 
         {/* Job Description */}
-        <div className="bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md p-8 md:p-10">
+        <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10">
           <h2 className="text-xl font-bold text-text-primary mb-6">About This Role</h2>
           <div
             className="prose dark:prose-invert prose-base md:prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-blue-light hover:prose-a:text-accent-blue prose-hr:border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em]"

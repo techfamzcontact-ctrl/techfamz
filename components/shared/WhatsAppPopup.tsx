@@ -81,7 +81,7 @@ export default function WhatsAppPopup() {
     <>
       {/* ───── Backdrop ───── */}
       <div
-        className={`fixed inset-0 z-[199] bg-[rgba(0,0,0,0.6)] backdrop-blur-sm transition-opacity duration-500 ease-smooth ${
+        className={`fixed inset-0 z-[199] bg-[rgba(0,0,0,0.6)]  transition-opacity duration-300 ease-smooth ${
           showPopup
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -91,13 +91,13 @@ export default function WhatsAppPopup() {
 
       {/* ───── Popup Modal ───── */}
       <div
-        className={`fixed z-[200] bottom-24 right-5 md:right-8 w-[calc(100%-2.5rem)] max-w-[420px] transition-all duration-500 ease-premium ${
+        className={`fixed z-[200] bottom-24 right-5 md:right-8 w-[calc(100%-2.5rem)] max-w-[420px] transition-all duration-300 ease-premium ${
           showPopup
             ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
             : "opacity-0 translate-y-4 scale-95 pointer-events-none"
         }`}
       >
-        <div className="relative overflow-hidden rounded-2xl border border-[rgba(37,211,102,0.15)] bg-[rgba(8,14,30,0.95)] backdrop-blur-[24px] shadow-[0_24px_80px_rgba(0,0,0,0.5),0_0_60px_rgba(37,211,102,0.08)]">
+        <div className="relative overflow-hidden rounded-2xl border border-[rgba(37,211,102,0.15)] bg-[rgba(8,14,30,0.95)]  shadow-2xl">
           {/* Glow accent */}
           <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-[rgba(37,211,102,0.12)] blur-[60px] pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-[rgba(37,211,102,0.06)] blur-[40px] pointer-events-none" />
@@ -220,7 +220,7 @@ export default function WhatsAppPopup() {
       {/* ───── Floating Action Button ───── */}
       <button
         onClick={handleFabClick}
-        className={`fixed z-[198] bottom-6 right-5 md:right-8 w-11 h-11 rounded-full flex items-center justify-center bg-[#1a3a4a] border border-[rgba(37,211,102,0.25)] cursor-pointer shadow-[0_2px_12px_rgba(37,211,102,0.2)] transition-all duration-500 ease-premium hover:scale-110 hover:bg-[#1e4555] hover:shadow-[0_4px_20px_rgba(37,211,102,0.3)] active:scale-95 ${
+        className={`fixed z-[198] bottom-6 right-5 md:right-8 w-11 h-11 rounded-full flex items-center justify-center bg-[#1a3a4a] border border-[rgba(37,211,102,0.25)] cursor-pointer shadow-[0_2px_12px_rgba(37,211,102,0.2)] transition-all duration-300 ease-premium hover:scale-110 hover:bg-[#1e4555] hover:shadow-[0_4px_20px_rgba(37,211,102,0.3)] active:scale-95 ${
           showFab && fabVisible
             ? "opacity-100 translate-y-0 scale-100"
             : "opacity-0 translate-y-4 scale-75 pointer-events-none"

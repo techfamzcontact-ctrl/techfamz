@@ -53,9 +53,9 @@ export default function HeroSection() {
     >
       {/* ═══ LAYER 1: Deep space fog ═══ */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-15%] w-[700px] h-[700px] rounded-full bg-accent-blue blur-[160px] animate-pulse-glow" style={{ opacity: "var(--glow-opacity)" }} />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#1e3a8a] blur-[140px] animate-pulse-glow-navy" style={{ opacity: "var(--glow-opacity)" }} />
-        <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-[120px]" />
+        <div className="absolute top-[-20%] right-[-15%] w-[700px] h-[700px] rounded-full bg-accent-blue blur-3xl animate-pulse-glow" style={{ opacity: "var(--glow-opacity)" }} />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#1e3a8a] blur-3xl animate-pulse-glow-navy" style={{ opacity: "var(--glow-opacity)" }} />
+        <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-3xl" />
       </div>
 
       {/* ═══ LAYER 2: Subtle grid ═══ */}

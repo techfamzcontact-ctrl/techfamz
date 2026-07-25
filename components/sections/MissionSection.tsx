@@ -7,7 +7,7 @@ export default function MissionSection() {
       <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
           {/* Left */}
-          <div className="reveal">
+          <div className="animate-fade-in-up-delay-1">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">Our Mission</span>
             <h2 className="mb-5">
               Empower Talent.
@@ -19,7 +19,7 @@ export default function MissionSection() {
           </div>
 
           {/* Right */}
-          <div className="reveal reveal-delay-2">
+          <div className="animate-fade-in-up-delay-2">
             <p className="text-lg mb-6">
               Our mission is simple but ambitious: to design a platform that strengthens the identity,
               credibility, and global relevance of African tech talent.

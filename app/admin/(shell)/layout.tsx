@@ -26,7 +26,7 @@ export default async function AdminShellLayout({
   return (
     <div className="min-h-screen bg-bg-primary flex text-text-primary">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border-glass backdrop-blur-xl flex flex-col hidden md:flex h-screen sticky top-0" style={{ backgroundColor: "var(--surface-glass)" }}>
+      <aside className="w-64 border-r border-border-glass  flex flex-col hidden md:flex h-screen sticky top-0" style={{ backgroundColor: "var(--surface-glass)" }}>
         <div className="p-6 border-b border-border-glass">
           <Link href="/admin" className="text-lg font-bold text-text-primary flex items-center gap-2 group">
             <div className="flex items-center justify-center w-[32px] h-[32px] rounded-full border-[1.5px] border-[rgba(255,255,255,0.9)] overflow-hidden bg-[rgba(255,255,255,0.05)] shrink-0 transition-transform group-hover:scale-105">

@@ -19,7 +19,7 @@ export default function PartnersSection() {
           className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center"
         >
           {/* Left: Text Content */}
-          <div className="reveal">
+          <div className="animate-fade-in-up-delay-1">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">For Companies & Partners</span>
             <h2 className="mb-6">Access Structured Talent</h2>
             <p className="mb-8">
@@ -32,7 +32,7 @@ export default function PartnersSection() {
               {benefits.map((item, i) => (
                 <div
                   key={i}
-                  className={`stagger-item flex items-center gap-3.5`}
+                  className={`animate-slide-up-1 flex items-center gap-3.5`}
                   style={{
                     transitionDelay: `${0.2 + i * 0.1}s`,
                   }}
@@ -56,7 +56,7 @@ export default function PartnersSection() {
           </div>
 
           {/* Right: Network Animation */}
-          <div className="reveal reveal-delay-3 flex justify-center">
+          <div className="animate-slide-up-1 flex justify-center">
             <svg
               viewBox="0 0 400 400"
               className="w-full max-w-[400px] h-auto"

@@ -8,12 +8,12 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-bg-primary overflow-hidden border-t border-border-glass pt-16 pb-8">
+    <footer className="relative bg-bg-primary overflow-hidden rounded-t-[32px] md:rounded-t-[48px] border-t border-l border-r border-border-glass pt-16 pb-8">
       {/* Decorative top gradient */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-blue/50 to-transparent" />
       
       {/* Subtle background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[200px] bg-accent-blue-glow opacity-10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[200px] bg-accent-blue-glow opacity-10 blur-3xl pointer-events-none" />
 
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -98,11 +98,11 @@ export default function Footer() {
               <input 
                 type="email" 
                 placeholder="Enter your email" 
-                className="w-full bg-bg-card border border-border-glass rounded-xl py-3 pl-4 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue-glow focus:ring-1 focus:ring-accent-blue-glow transition-all"
+                className="w-full h-12 rounded-xl border border-border-glass bg-bg-primary/30 py-2 pl-4 pr-12 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
               />
               <button 
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-accent-blue text-white hover:bg-blue-600 transition-colors"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg bg-accent-blue text-white hover:bg-blue-600 transition-colors"
                 aria-label="Subscribe"
               >
                 <ArrowRight size={16} />

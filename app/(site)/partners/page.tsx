@@ -60,8 +60,8 @@ export default function PartnersPage() {
         {/* ═══ Hero ═══ */}
         <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-[140px]" />
-            <div className="absolute bottom-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-[120px]" />
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-3xl" />
+            <div className="absolute bottom-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-3xl" />
           </div>
 
           {/* Network SVG background */}
@@ -100,7 +100,7 @@ export default function PartnersPage() {
         <section className="relative bg-bg-primary">
           <div className="divider" />
           <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[1000px] mx-auto">
-            <div className="reveal text-center mb-14">
+            <div className="animate-fade-in-up-delay-1 text-center mb-14">
               <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
                 Partnership Benefits
               </span>
@@ -114,7 +114,7 @@ export default function PartnersPage() {
               {benefits.map((b, i) => (
                 <Card
                   key={i}
-                  className="bg-bg-card border-border-glass rounded-xl backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover p-0"
+                  className="bg-bg-card border-border-glass rounded-xl  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover p-0"
                   style={{ transitionDelay: `${i * 0.1}s` }}
                 >
                   <CardContent className="p-7">
@@ -134,7 +134,7 @@ export default function PartnersPage() {
         <section className="relative" style={{ background: "var(--gradient-section-alt)" }}>
           <div className="divider" />
           <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[900px] mx-auto">
-            <div className="reveal text-center mb-14">
+            <div className="animate-fade-in-up-delay-1 text-center mb-14">
               <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
                 Process
               </span>
@@ -145,7 +145,7 @@ export default function PartnersPage() {
               {steps.map((s, i) => (
                 <div
                   key={i}
-                  className="stagger-item text-center"
+                  className="animate-slide-up-1 text-center"
                   style={{ transitionDelay: `${i * 0.1}s` }}
                 >
                   <div className="text-[2.5rem] font-[800] text-accent-blue opacity-20 mb-2">
@@ -163,7 +163,7 @@ export default function PartnersPage() {
         <section className="relative bg-bg-primary">
           <div className="divider" />
           <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[700px] mx-auto text-center">
-            <div className="reveal">
+            <div className="animate-fade-in-up-delay-1">
               <h2 className="mb-4">Ready to Partner?</h2>
               <p className="text-text-secondary mb-8 max-w-[500px] mx-auto">
                 Join the growing network of organizations investing in structured African tech talent.

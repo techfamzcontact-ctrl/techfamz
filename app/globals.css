@@ -155,7 +155,7 @@
 .dark {
   --bg-primary: #060b18;
   --bg-secondary: #0c1a3a;
-  --bg-card-custom: rgba(255, 255, 255, 0.04);
+  --bg-card-custom: #0A1428;
   --border-glass: rgba(255, 255, 255, 0.08);
   --border-glass-hover: rgba(255, 255, 255, 0.15);
 
@@ -175,9 +175,9 @@
   --gradient-bottom-fade: linear-gradient(to top, #060B18, transparent);
 
   /* Surfaces */
-  --surface-glass: rgba(10, 16, 34, 0.85);
-  --surface-elevated: rgba(10, 16, 34, 0.6);
-  --surface-dialog: rgba(8, 14, 30, 0.97);
+  --surface-glass: #0A1428;
+  --surface-elevated: #0c1a3a;
+  --surface-dialog: #080e1e;
 
   /* Glow intensity */
   --glow-opacity: 0.06;
@@ -192,7 +192,7 @@
   }
 
   body {
-    @apply font-sans antialiased overflow-x-hidden bg-background text-foreground;
+    @apply font-sans antialiased overflow-x-hidden bg-bg-primary text-foreground;
   }
 
   /* ─── Typography ─── */
@@ -224,43 +224,6 @@
 }
 
 @layer utilities {
-  /* ─── Scroll Reveal Animations ─── */
-  .reveal {
-    @apply opacity-0 translate-y-10 transition-all duration-700 ease-premium motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none;
-  }
-
-  .reveal.in-view {
-    @apply opacity-100 translate-y-0;
-  }
-
-  .reveal-delay-1 {
-    transition-delay: 0.1s;
-  }
-  .reveal-delay-2 {
-    transition-delay: 0.2s;
-  }
-  .reveal-delay-3 {
-    transition-delay: 0.3s;
-  }
-  .reveal-delay-4 {
-    transition-delay: 0.4s;
-  }
-  .reveal-delay-5 {
-    transition-delay: 0.5s;
-  }
-  .reveal-delay-6 {
-    transition-delay: 0.6s;
-  }
-
-  /* Stagger for cards */
-  .stagger-item {
-    @apply opacity-0 translate-y-[30px] transition-all duration-[600ms] ease-premium motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none;
-  }
-
-  .stagger-item.in-view {
-    @apply opacity-100 translate-y-0;
-  }
-
   /* ─── Hero Animations ─── */
   .hero-headline {
     @apply animate-fade-in-up-delay-1;
@@ -277,7 +240,7 @@
 
   /* ─── Background Effects ─── */
   .bg-glow {
-    @apply absolute rounded-full blur-[120px] pointer-events-none z-0;
+    @apply absolute rounded-full pointer-events-none z-0;
   }
 
   .bg-glow-blue {

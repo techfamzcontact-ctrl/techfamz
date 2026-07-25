@@ -95,14 +95,13 @@ export default function CommentSection({ postId }: { postId: string }) {
 
       {/* Comment Form */}
       <form onSubmit={handleSubmit} className="mb-10">
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 md:p-6 backdrop-blur-md">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5 md:p-6 ">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Share your thoughts..."
+            className="w-full min-h-[120px] rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-3 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft mb-4 resize-none"
             required
-            rows={3}
-            className="w-full bg-bg-primary/50 border border-border-glass rounded-lg p-4 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-accent-blue resize-y min-h-[100px] text-sm transition-colors"
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
@@ -110,15 +109,17 @@ export default function CommentSection({ postId }: { postId: string }) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Name (optional)"
-              className="bg-bg-primary/50 border border-border-glass rounded-lg px-4 py-2.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-accent-blue text-sm transition-colors"
+              placeholder="Name"
+              className="w-full h-12 rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
+              required
             />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email (optional, private)"
-              className="bg-bg-primary/50 border border-border-glass rounded-lg px-4 py-2.5 text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-accent-blue text-sm transition-colors"
+              placeholder="Email (will not be published)"
+              className="w-full h-12 rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
+              required
             />
           </div>
 
@@ -185,7 +186,7 @@ export default function CommentSection({ postId }: { postId: string }) {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md transition-all duration-300 hover:border-border-glass-hover"
+              className="bg-bg-card border border-border-glass rounded-xl p-5  transition-all duration-300 hover:border-border-glass-hover"
             >
               <div className="flex items-center gap-3 mb-3">
                 {/* Avatar */}

@@ -26,7 +26,7 @@ export default function ComingSoonDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent 
-        className="w-full max-w-[440px] overflow-hidden rounded-2xl border border-border-glass backdrop-blur-[24px] shadow-[0_24px_80px_rgba(0,0,0,0.6)] p-0 sm:rounded-2xl gap-0"
+        className="w-full max-w-[440px] overflow-hidden rounded-2xl border border-border-glass  shadow-2xl p-0 sm:rounded-2xl gap-0"
         style={{ backgroundColor: "var(--surface-dialog)" }}
         showCloseButton={false}
       >

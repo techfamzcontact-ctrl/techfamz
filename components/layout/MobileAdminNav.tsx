@@ -22,7 +22,7 @@ export function MobileAdminNav() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-40 bg-bg-primary/95 backdrop-blur-xl border-t border-border-glass mt-[73px] flex flex-col p-4 h-[calc(100vh-73px)] overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-bg-primary/95  border-t border-border-glass mt-[73px] flex flex-col p-4 h-[calc(100vh-73px)] overflow-y-auto">
           <nav className="flex-1 flex flex-col gap-2 relative z-50">
             <Link
               href="/admin"

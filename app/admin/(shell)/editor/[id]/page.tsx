@@ -404,7 +404,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             {/* TipTap Rich Text Editor */}
             <div className="flex flex-col">
               {/* Toolbar */}
-              <div className="flex flex-wrap items-center gap-0.5 p-2 px-3 bg-bg-primary/50 border-b border-border-glass sticky top-0 z-10 backdrop-blur-xl">
+              <div className="flex flex-wrap items-center gap-0.5 p-2 px-3 bg-bg-primary/50 border-b border-border-glass sticky top-0 z-10 ">
               <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive("heading", { level: 1 })} icon={Heading1} title="Heading 1" />
               <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive("heading", { level: 2 })} icon={Heading2} title="Heading 2" />
               <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive("heading", { level: 3 })} icon={Heading3} title="Heading 3" />
@@ -553,7 +553,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         {/* Sidebar Settings */}
         <div className="space-y-6">
           {/* Cover Image */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md">
+          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
             <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest mb-3">Cover Image</Label>
             {coverImage ? (
               <div className="relative rounded-lg overflow-hidden aspect-video border border-border-glass group">
@@ -578,7 +578,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           </div>
 
           {/* Category */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md">
+          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
             <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest mb-3">Category</Label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
@@ -599,7 +599,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           </div>
 
           {/* SEO Details */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md">
+          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
             <div className="flex items-center justify-between mb-3">
               <Label className="text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">SEO & Excerpt</Label>
               <button 

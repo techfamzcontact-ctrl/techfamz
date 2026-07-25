@@ -69,7 +69,7 @@ export default function CommentsClient({ initialComments }: { initialComments: C
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className={`bg-bg-card border rounded-xl p-5 backdrop-blur-md transition-all duration-300 ${
+              className={`bg-bg-card border rounded-xl p-5  transition-all duration-300 ${
                 comment.isHidden
                   ? "border-red-500/20 opacity-60"
                   : "border-border-glass"

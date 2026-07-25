@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ArrowRight, Shield, Search, UserPlus, Star, Lock, Globe } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Techfamz Identity (TID) — Your Developer Passport",
@@ -27,56 +28,32 @@ export const metadata: Metadata = {
 
 const features = [
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    ),
+    icon: <Shield className="w-5 h-5" />,
     title: "Establish Credibility",
     desc: "Your TID serves as proof of membership in a structured, verified developer network.",
   },
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-      </svg>
-    ),
+    icon: <Search className="w-5 h-5" />,
     title: "Enable Talent Discovery",
     desc: "Companies can search, filter, and discover you through the Techfamz network using your TID.",
   },
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" x2="19" y1="8" y2="14" /><line x1="22" x2="16" y1="11" y2="11" />
-      </svg>
-    ),
+    icon: <UserPlus className="w-5 h-5" />,
     title: "Connect with Companies",
     desc: "Your identity bridges the gap between your skills and organizations looking for talent.",
   },
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
-    ),
+    icon: <Star className="w-5 h-5" />,
     title: "Unlock Ecosystem Privileges",
     desc: "Access exclusive opportunities, events, and resources reserved for verified TID holders.",
   },
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-      </svg>
-    ),
+    icon: <Lock className="w-5 h-5" />,
     title: "Permanent & Secure",
     desc: "Your TID is unique and permanent — a verifiable identity that grows with your career.",
   },
   {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-      </svg>
-    ),
+    icon: <Globe className="w-5 h-5" />,
     title: "Global Recognition",
     desc: "Be part of Africa's most structured developer network, recognized locally and globally.",
   },
@@ -86,9 +63,10 @@ export default function IdentityPage() {
   return (
     <main>
       {/* ═══ Hero ═══ */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
+        {/* Background effects */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.05] blur-[140px]" />
+          <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.05] blur-3xl" />
         </div>
 
         {/* Orbital ring */}
@@ -110,18 +88,26 @@ export default function IdentityPage() {
               Verified. Recognized.
             </span>
           </h1>
-          <p className="max-w-[600px] mx-auto text-text-secondary text-[1.05rem] leading-relaxed mb-10">
+          <p className="max-w-[600px] mx-auto text-text-secondary text-[1.05rem] leading-relaxed mb-8">
             Introducing <strong className="text-text-primary">TID</strong> — Techfamz Identity Number.
             A unique developer identity within the Techfamz ecosystem.
           </p>
 
-          {/* TID Card */}
-          <div className="max-w-[480px] mx-auto p-10 border border-accent-blue rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--bg-card-custom), var(--surface-elevated))" }}>
+          {/* CTA Button — prominent at the top */}
+          <Button variant="cta" asChild className="relative overflow-hidden group py-4 px-10 text-[1rem] font-bold h-auto rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.2)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
+            <Link href="/identity/claim" className="flex items-center gap-2">
+              Claim Your TID
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Button>
+
+          {/* TID Preview Card — below the CTA */}
+          <div className="max-w-[480px] mx-auto mt-14 p-10 border border-accent-blue/30 rounded-2xl relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--bg-card-custom), var(--surface-elevated))" }}>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.08),transparent_70%)] pointer-events-none" />
-            <p className="text-[0.75rem] uppercase tracking-[0.2em] text-text-muted mb-5 relative">
+            <p className="text-[0.75rem] uppercase tracking-[0.2em] text-text-muted mb-5 relative font-mono">
               Developer Identity
             </p>
-            <div className="tid-badge mx-auto mb-6 justify-center flex">
+            <div className="tid-badge mx-auto mb-6 justify-center flex font-mono">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <rect x="1" y="1" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="1.5" />
                 <circle cx="10" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
@@ -142,7 +128,7 @@ export default function IdentityPage() {
       <section className="relative bg-bg-primary">
         <div className="divider" />
         <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[1000px] mx-auto">
-          <div className="reveal text-center mb-14">
+          <div className="animate-fade-in-up-delay-1 text-center mb-14">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
               What TID Enables
             </span>
@@ -156,7 +142,7 @@ export default function IdentityPage() {
             {features.map((f, i) => (
               <Card
                 key={i}
-                className="bg-bg-card border-border-glass rounded-xl backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover p-0"
+                className="bg-bg-card border-border-glass rounded-xl transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover p-0"
                 style={{ transitionDelay: `${i * 0.08}s` }}
               >
                 <CardContent className="p-7">
@@ -169,29 +155,16 @@ export default function IdentityPage() {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ═══ Portal CTA ═══ */}
-      <section className="relative" style={{ background: "var(--gradient-section-alt)" }}>
-        <div className="divider" />
-        <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[700px] mx-auto text-center">
-          <div className="reveal">
-            <div className="inline-flex items-center gap-2 py-1.5 px-4 text-[0.7rem] font-semibold uppercase tracking-[0.15em] text-cta-yellow border border-cta-yellow-glow rounded-full bg-[rgba(212,168,75,0.08)] mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-cta-yellow opacity-75 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-cta-yellow" />
-              </span>
-              Coming Soon
-            </div>
-            <h2 className="mb-4">Developer Portal Launching Soon</h2>
-            <p className="text-text-secondary mb-8 max-w-[550px] mx-auto">
-              Claim your TID, build your profile, and get discovered by companies invested
-              in African tech talent.
-            </p>
-            <Button variant="cta" asChild className="relative overflow-hidden group py-[14px] px-10 text-[1rem] h-auto rounded-lg after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
-              <Link href="/">Back to Home</Link>
+          {/* Secondary CTA after features */}
+          <div className="text-center mt-16">
+            <Button variant="cta" asChild className="relative overflow-hidden group py-4 px-10 text-[1rem] font-bold h-auto rounded-xl shadow-[0_0_30px_rgba(234,179,8,0.2)] after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
+              <Link href="/identity/claim" className="flex items-center gap-2">
+                Get Started — Claim Your TID
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
+            <p className="text-sm text-text-muted mt-4">Free forever. Takes 30 seconds.</p>
           </div>
         </div>
       </section>

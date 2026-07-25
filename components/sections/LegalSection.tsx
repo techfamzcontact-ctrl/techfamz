@@ -14,7 +14,7 @@ export default function LegalSection() {
     >
       <div className="divider" />
       <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto text-center">
-        <div className="reveal">
+        <div className="animate-fade-in-up-delay-1">
           <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">Legal & Structural Foundation</span>
           <h2 className="mb-6">Built With Legitimacy. Built to Scale.</h2>
           <p className="max-w-[680px] text-lg text-text-secondary mx-auto mb-12">
@@ -27,7 +27,7 @@ export default function LegalSection() {
           {pillars.map((p, i) => (
             <div
               key={i}
-              className="bg-bg-card border border-border-glass rounded-lg p-8 backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover stagger-item text-left"
+              className="bg-bg-card border border-border-glass rounded-lg p-8  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover animate-slide-up-1 text-left"
               style={{ transitionDelay: `${i * 0.1}s` }}
             >
               <h3 className="text-[1.05rem] font-semibold mb-2 text-accent-blue-light">

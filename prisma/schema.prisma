@@ -62,3 +62,15 @@ model Job {
     postedById  String
     postedBy    User     @relation(fields: [postedById], references: [id])
 }
+
+model Developer {
+    id        String   @id @default(cuid())
+    tid       String   @unique
+    fullName  String
+    email     String   @unique
+    role      String
+    skills    String[]
+    githubUrl String?
+    country   String?
+    createdAt DateTime @default(now())
+}

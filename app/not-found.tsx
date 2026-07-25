@@ -16,8 +16,8 @@ export default function NotFound() {
     <main className="min-h-screen flex items-center justify-center pt-20 pb-20 relative overflow-hidden" style={{ background: "var(--bg-primary)" }}>
       {/* Decorative background elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[20%] left-[20%] w-[500px] h-[500px] rounded-full bg-accent-blue blur-[180px] opacity-[0.05]" />
-        <div className="absolute bottom-[20%] right-[20%] w-[400px] h-[400px] rounded-full bg-[#E8A427] blur-[160px] opacity-[0.03]" />
+        <div className="absolute top-[20%] left-[20%] w-[500px] h-[500px] rounded-full bg-accent-blue blur-3xl opacity-[0.05]" />
+        <div className="absolute bottom-[20%] right-[20%] w-[400px] h-[400px] rounded-full bg-[#E8A427] blur-3xl opacity-[0.03]" />
         
         {/* Subtle grid */}
         <div 

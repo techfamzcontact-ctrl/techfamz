@@ -73,7 +73,7 @@ export default function AdminJobsPage() {
         </Link>
       </div>
 
-      <div className="bg-bg-card border border-border-glass rounded-xl overflow-hidden backdrop-blur-md">
+      <div className="bg-bg-card border border-border-glass rounded-xl overflow-hidden ">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>

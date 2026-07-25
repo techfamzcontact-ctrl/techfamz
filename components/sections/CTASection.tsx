@@ -18,11 +18,11 @@ export default function CTASection() {
 
       {/* Background Glow */}
       <div
-        className="bg-glow bg-accent-blue opacity-12 blur-[120px] animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
+        className="bg-glow bg-accent-blue opacity-12 blur-3xl animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
       />
 
       <div className="relative z-10 max-w-[700px] mx-auto">
-        <div className="reveal">
+        <div className="animate-fade-in-up-delay-1">
           <h2 className="font-[800] leading-[1.1] mb-6 tracking-[-0.03em] text-[clamp(2.25rem,5vw,3.5rem)]">
             The Next Phase
             <br />
@@ -30,11 +30,11 @@ export default function CTASection() {
           </h2>
         </div>
 
-        <p className="reveal reveal-delay-1 text-[1.15rem] text-text-secondary mb-10 leading-[1.7]">
+        <p className="animate-fade-in-up-delay-1 text-[1.15rem] text-text-secondary mb-10 leading-[1.7]">
           Join a platform built for serious builders.
         </p>
 
-        <div className="reveal reveal-delay-2">
+        <div className="animate-fade-in-up-delay-2">
           <Button
             variant="cta"
             onClick={() => setShowComingSoon(true)}
@@ -44,7 +44,7 @@ export default function CTASection() {
           </Button>
         </div>
 
-        <div className="reveal reveal-delay-3 mt-14">
+        <div className="animate-slide-up-1 mt-14">
           <p className="text-[0.85rem] text-text-muted tracking-[0.05em]">
             <strong className="text-text-secondary">Techfamz Limited</strong>
           </p>

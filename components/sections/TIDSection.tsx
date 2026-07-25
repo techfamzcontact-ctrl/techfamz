@@ -15,11 +15,11 @@ export default function TIDSection() {
     >
       {/* Background Glow */}
       <div
-        className="bg-glow bg-accent-blue opacity-12 blur-[120px] animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-[20%] left-1/2 -translate-x-1/2 z-0"
+        className="bg-glow bg-accent-blue opacity-12 blur-3xl animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-[20%] left-1/2 -translate-x-1/2 z-0"
       />
 
       <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto text-center">
-        <div className="reveal">
+        <div className="animate-fade-in-up-delay-1">
           <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">The Techfamz Identity</span>
           <h2 className="mb-6">
             One Identity. Verified. Recognized.
@@ -32,7 +32,7 @@ export default function TIDSection() {
 
         {/* TID Card */}
         <div
-          className="reveal reveal-delay-2 max-w-[560px] mx-auto mb-12 p-12 bg-[linear-gradient(135deg,rgba(12,26,58,0.9),rgba(6,11,24,0.95))] border border-accent-blue rounded-2xl relative overflow-hidden"
+          className="animate-fade-in-up-delay-2 max-w-[560px] mx-auto mb-12 p-12 bg-[linear-gradient(135deg,rgba(12,26,58,0.9),rgba(6,11,24,0.95))] border border-accent-blue rounded-2xl relative overflow-hidden"
         >
           {/* Inner glow */}
           <div
@@ -66,7 +66,7 @@ export default function TIDSection() {
           {features.map((feat, i) => (
             <div
               key={i}
-              className="bg-bg-card border border-border-glass rounded-lg p-8 backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover stagger-item px-6 py-5 text-left flex flex-row items-center gap-3"
+              className="bg-bg-card border border-border-glass rounded-lg p-8  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover animate-slide-up-1 px-6 py-5 text-left flex flex-row items-center gap-3"
               style={{
                 transitionDelay: `${0.3 + i * 0.1}s`,
               }}
@@ -79,7 +79,7 @@ export default function TIDSection() {
           ))}
         </div>
 
-        <div className="reveal reveal-delay-4">
+        <div className="animate-slide-up-2">
           <p className="text-text-muted mb-2 text-[0.95rem]">
             TID is more than a number. It is a professional identity within a growing technology network.
           </p>

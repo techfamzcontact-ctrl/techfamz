@@ -59,7 +59,7 @@ async function JobsList() {
 
   if (jobs === null) {
     return (
-      <div className="text-center py-20 border border-red-500/20 rounded-2xl bg-[rgba(127,29,29,0.15)] backdrop-blur-md">
+      <div className="text-center py-20 border border-red-500/20 rounded-2xl bg-[rgba(127,29,29,0.15)] ">
         <h3 className="text-xl font-semibold text-text-primary mb-2">Something went wrong</h3>
         <p className="text-text-secondary mb-6">We couldn&apos;t load jobs right now. Please try again later.</p>
         <Link
@@ -74,7 +74,7 @@ async function JobsList() {
 
   if (jobs.length === 0) {
     return (
-      <div className="text-center py-20 border border-border-glass rounded-2xl bg-bg-card backdrop-blur-md">
+      <div className="text-center py-20 border border-border-glass rounded-2xl bg-bg-card ">
         <Briefcase size={40} className="mx-auto mb-4 text-text-muted opacity-30" />
         <h3 className="text-xl font-semibold text-text-primary mb-2">No openings yet</h3>
         <p className="text-text-secondary">We&apos;re sourcing new opportunities. Check back soon.</p>
@@ -88,7 +88,7 @@ async function JobsList() {
         <Link
           key={job.id}
           href={`/jobs/${job.slug}`}
-          className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-6 md:p-8 bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:border-border-glass-hover"
+          className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-6 md:p-8 bg-bg-card border border-border-glass rounded-2xl  transition-all duration-300 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:border-border-glass-hover"
         >
           {/* Left: Company Badge */}
           <div className="shrink-0 w-14 h-14 rounded-xl bg-accent-blue-glow-soft border border-accent-blue-glow flex items-center justify-center">

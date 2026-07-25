@@ -14,7 +14,7 @@ export default function TrustedBySection() {
     <section className="relative bg-bg-primary py-14 overflow-hidden border-t border-b border-border-glass">
       <div className="max-w-[1200px] mx-auto px-5 md:px-6">
         {/* Label */}
-        <p className="text-center text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-text-muted mb-10 reveal">
+        <p className="text-center text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-text-muted mb-10 animate-fade-in-up-delay-1">
           Trusted by forward-thinking organizations
         </p>
 

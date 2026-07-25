@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, FileText, Briefcase, ChevronRight, CheckCircle, Clock } from "lucide-react";
+import { Plus, FileText, Briefcase, ChevronRight, CheckCircle, Clock, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -7,12 +7,14 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   const [
     totalPosts, publishedPosts,
-    totalJobs, publishedJobs
+    totalJobs, publishedJobs,
+    totalDevelopers
   ] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { published: true } }),
     prisma.job.count(),
-    prisma.job.count({ where: { published: true } })
+    prisma.job.count({ where: { published: true } }),
+    prisma.developer.count()
   ]);
 
   const draftPosts = totalPosts - publishedPosts;
@@ -28,9 +30,19 @@ export default async function AdminDashboard() {
       </div>
 
       <h2 className="text-lg font-bold text-text-primary mb-4">Platform Overview</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
+        {/* Developers */}
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5  relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+          <div className="absolute -right-4 -top-4 text-accent-blue-light/5 group-hover:text-accent-blue-light/10 transition-colors">
+            <Users size={80} />
+          </div>
+          <div className="text-text-muted text-[0.65rem] font-bold uppercase tracking-wider mb-2 relative z-10">Registered Devs</div>
+          <div className="text-3xl font-bold text-text-primary mb-1 relative z-10">{totalDevelopers}</div>
+          <div className="text-xs text-accent-blue-light flex items-center gap-1 relative z-10"><CheckCircle size={12}/> Verified TIDs</div>
+        </div>
+
         {/* Published Posts */}
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5  relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
           <div className="absolute -right-4 -top-4 text-green-400/5 group-hover:text-green-400/10 transition-colors">
             <FileText size={80} />
           </div>
@@ -40,7 +52,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Draft Posts */}
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5  relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
           <div className="absolute -right-4 -top-4 text-amber-400/5 group-hover:text-amber-400/10 transition-colors">
             <FileText size={80} />
           </div>
@@ -50,7 +62,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Active Jobs */}
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5  relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
           <div className="absolute -right-4 -top-4 text-green-400/5 group-hover:text-green-400/10 transition-colors">
             <Briefcase size={80} />
           </div>
@@ -60,7 +72,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Draft Jobs */}
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 backdrop-blur-md relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-5  relative overflow-hidden group hover:border-accent-blue-glow transition-all duration-300">
           <div className="absolute -right-4 -top-4 text-amber-400/5 group-hover:text-amber-400/10 transition-colors">
             <Briefcase size={80} />
           </div>
@@ -71,7 +83,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <Link href="/admin/posts" className="bg-bg-card border border-border-glass rounded-xl p-6 backdrop-blur-md hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
+        <Link href="/admin/posts" className="bg-bg-card border border-border-glass rounded-xl p-6  hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
           <div className="w-12 h-12 rounded-xl bg-[rgba(59,130,246,0.1)] text-accent-blue-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]">
             <FileText size={24} />
           </div>
@@ -82,7 +94,7 @@ export default async function AdminDashboard() {
           <p className="text-sm text-text-secondary">View, edit, toggle publishing status, or delete existing articles from the blog.</p>
         </Link>
         
-        <Link href="/admin/jobs" className="bg-bg-card border border-border-glass rounded-xl p-6 backdrop-blur-md hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
+        <Link href="/admin/jobs" className="bg-bg-card border border-border-glass rounded-xl p-6  hover:border-accent-blue-glow transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] group">
           <div className="w-12 h-12 rounded-xl bg-[rgba(59,130,246,0.1)] text-accent-blue-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]">
             <Briefcase size={24} />
           </div>

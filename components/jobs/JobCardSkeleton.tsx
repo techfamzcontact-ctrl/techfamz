@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function JobCardSkeleton() {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-6 md:p-8 bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md transition-all duration-300">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-6 md:p-8 bg-bg-card border border-border-glass rounded-2xl  transition-all duration-300">
       {/* Left: Company Logo Badge */}
       <Skeleton className="shrink-0 w-14 h-14 rounded-xl bg-border-glass" />
 
@@ -29,7 +29,7 @@ export function JobDetailSkeleton() {
   return (
     <div className="w-full">
       {/* Job Header Card Skeleton */}
-      <div className="bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md p-8 md:p-10 mb-8">
+      <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10 mb-8">
         <div className="flex flex-col sm:flex-row gap-6 items-start">
           {/* Company Badge Skeleton */}
           <Skeleton className="shrink-0 w-16 h-16 rounded-xl bg-border-glass" />
@@ -54,7 +54,7 @@ export function JobDetailSkeleton() {
       </div>
 
       {/* Job Description Skeleton */}
-      <div className="bg-bg-card border border-border-glass rounded-2xl backdrop-blur-md p-8 md:p-10">
+      <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10">
         <Skeleton className="h-8 w-48 rounded-md mb-8 bg-border-glass" />
         
         <div className="space-y-4">

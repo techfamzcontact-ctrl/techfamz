@@ -21,10 +21,10 @@ export default function Home() {
 
       {/* ═══ TID Teaser ═══ */}
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-cta)" }}>
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-[120px] pointer-events-none" />
+        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-3xl pointer-events-none" />
         <div className="divider" />
         <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[700px] mx-auto text-center">
-          <div className="reveal">
+          <div className="animate-fade-in-up-delay-1">
             <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
               The Techfamz Identity
             </span>

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function PostCardSkeleton() {
   return (
-    <div className="flex flex-col bg-bg-card border border-border-glass rounded-2xl overflow-hidden backdrop-blur-md transition-all duration-400">
+    <div className="flex flex-col bg-bg-card border border-border-glass rounded-2xl overflow-hidden  transition-all duration-400">
       {/* Cover Image Skeleton */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[rgba(0,0,0,0.3)]">
         <Skeleton className="absolute inset-0 rounded-none bg-border-glass" />

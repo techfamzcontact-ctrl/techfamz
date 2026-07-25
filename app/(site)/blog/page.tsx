@@ -76,7 +76,7 @@ async function PostsList({ category }: { category?: string }) {
 
   if (posts === null) {
     return (
-      <div className="text-center py-20 border border-red-500/20 rounded-2xl bg-[rgba(127,29,29,0.15)] backdrop-blur-md">
+      <div className="text-center py-20 border border-red-500/20 rounded-2xl bg-[rgba(127,29,29,0.15)] ">
         <h3 className="text-xl font-semibold text-text-primary mb-2">Something went wrong</h3>
         <p className="text-text-secondary mb-6">We couldn&apos;t load the blog posts right now. Please try again later.</p>
         <Link 
@@ -118,7 +118,7 @@ async function PostsList({ category }: { category?: string }) {
         <Link 
           href={`/blog/${post.slug}`} 
           key={post.id}
-          className="group flex flex-col bg-bg-card border border-border-glass rounded-2xl overflow-hidden backdrop-blur-md transition-all duration-400 ease-premium hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:border-border-glass-hover"
+          className="group flex flex-col bg-bg-card border border-border-glass rounded-2xl overflow-hidden  transition-all duration-400 ease-premium hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:border-border-glass-hover"
         >
           <div className="relative aspect-[16/10] overflow-hidden bg-[rgba(0,0,0,0.3)]">
             {post.coverImage ? (
@@ -126,7 +126,7 @@ async function PostsList({ category }: { category?: string }) {
                 src={post.coverImage} 
                 alt={post.title} 
                 fill 
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/50">
@@ -136,7 +136,7 @@ async function PostsList({ category }: { category?: string }) {
           </div>
           
           <div className="flex flex-col flex-1 p-6 md:p-8 relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-blue opacity-0 group-hover:opacity-10 blur-[50px] transition-opacity duration-500 rounded-full" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-blue opacity-0 group-hover:opacity-10 blur-[50px] transition-opacity duration-300 rounded-full" />
             
             <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-accent-blue-light mb-4">
               {post.category && <span>{post.category}</span>}

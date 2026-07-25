@@ -33,6 +33,11 @@ export type Comment = $Result.DefaultSelection<Prisma.$CommentPayload>
  * 
  */
 export type Job = $Result.DefaultSelection<Prisma.$JobPayload>
+/**
+ * Model Developer
+ * 
+ */
+export type Developer = $Result.DefaultSelection<Prisma.$DeveloperPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -194,6 +199,16 @@ export class PrismaClient<
     * ```
     */
   get job(): Prisma.JobDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.developer`: Exposes CRUD operations for the **Developer** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Developers
+    * const developers = await prisma.developer.findMany()
+    * ```
+    */
+  get developer(): Prisma.DeveloperDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -631,7 +646,8 @@ export namespace Prisma {
     User: 'User',
     Post: 'Post',
     Comment: 'Comment',
-    Job: 'Job'
+    Job: 'Job',
+    Developer: 'Developer'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -647,7 +663,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "post" | "comment" | "job"
+      modelProps: "user" | "post" | "comment" | "job" | "developer"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -947,6 +963,80 @@ export namespace Prisma {
           }
         }
       }
+      Developer: {
+        payload: Prisma.$DeveloperPayload<ExtArgs>
+        fields: Prisma.DeveloperFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DeveloperFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DeveloperFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          findFirst: {
+            args: Prisma.DeveloperFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DeveloperFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          findMany: {
+            args: Prisma.DeveloperFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>[]
+          }
+          create: {
+            args: Prisma.DeveloperCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          createMany: {
+            args: Prisma.DeveloperCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DeveloperCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>[]
+          }
+          delete: {
+            args: Prisma.DeveloperDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          update: {
+            args: Prisma.DeveloperUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          deleteMany: {
+            args: Prisma.DeveloperDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DeveloperUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DeveloperUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>[]
+          }
+          upsert: {
+            args: Prisma.DeveloperUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeveloperPayload>
+          }
+          aggregate: {
+            args: Prisma.DeveloperAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDeveloper>
+          }
+          groupBy: {
+            args: Prisma.DeveloperGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DeveloperGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DeveloperCountArgs<ExtArgs>
+            result: $Utils.Optional<DeveloperCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1059,6 +1149,7 @@ export namespace Prisma {
     post?: PostOmit
     comment?: CommentOmit
     job?: JobOmit
+    developer?: DeveloperOmit
   }
 
   /* Types for Logging */
@@ -5780,6 +5871,1049 @@ export namespace Prisma {
 
 
   /**
+   * Model Developer
+   */
+
+  export type AggregateDeveloper = {
+    _count: DeveloperCountAggregateOutputType | null
+    _min: DeveloperMinAggregateOutputType | null
+    _max: DeveloperMaxAggregateOutputType | null
+  }
+
+  export type DeveloperMinAggregateOutputType = {
+    id: string | null
+    tid: string | null
+    fullName: string | null
+    email: string | null
+    role: string | null
+    githubUrl: string | null
+    country: string | null
+    createdAt: Date | null
+  }
+
+  export type DeveloperMaxAggregateOutputType = {
+    id: string | null
+    tid: string | null
+    fullName: string | null
+    email: string | null
+    role: string | null
+    githubUrl: string | null
+    country: string | null
+    createdAt: Date | null
+  }
+
+  export type DeveloperCountAggregateOutputType = {
+    id: number
+    tid: number
+    fullName: number
+    email: number
+    role: number
+    skills: number
+    githubUrl: number
+    country: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type DeveloperMinAggregateInputType = {
+    id?: true
+    tid?: true
+    fullName?: true
+    email?: true
+    role?: true
+    githubUrl?: true
+    country?: true
+    createdAt?: true
+  }
+
+  export type DeveloperMaxAggregateInputType = {
+    id?: true
+    tid?: true
+    fullName?: true
+    email?: true
+    role?: true
+    githubUrl?: true
+    country?: true
+    createdAt?: true
+  }
+
+  export type DeveloperCountAggregateInputType = {
+    id?: true
+    tid?: true
+    fullName?: true
+    email?: true
+    role?: true
+    skills?: true
+    githubUrl?: true
+    country?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type DeveloperAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Developer to aggregate.
+     */
+    where?: DeveloperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Developers to fetch.
+     */
+    orderBy?: DeveloperOrderByWithRelationInput | DeveloperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DeveloperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Developers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Developers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Developers
+    **/
+    _count?: true | DeveloperCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DeveloperMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DeveloperMaxAggregateInputType
+  }
+
+  export type GetDeveloperAggregateType<T extends DeveloperAggregateArgs> = {
+        [P in keyof T & keyof AggregateDeveloper]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDeveloper[P]>
+      : GetScalarType<T[P], AggregateDeveloper[P]>
+  }
+
+
+
+
+  export type DeveloperGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DeveloperWhereInput
+    orderBy?: DeveloperOrderByWithAggregationInput | DeveloperOrderByWithAggregationInput[]
+    by: DeveloperScalarFieldEnum[] | DeveloperScalarFieldEnum
+    having?: DeveloperScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DeveloperCountAggregateInputType | true
+    _min?: DeveloperMinAggregateInputType
+    _max?: DeveloperMaxAggregateInputType
+  }
+
+  export type DeveloperGroupByOutputType = {
+    id: string
+    tid: string
+    fullName: string
+    email: string
+    role: string
+    skills: string[]
+    githubUrl: string | null
+    country: string | null
+    createdAt: Date
+    _count: DeveloperCountAggregateOutputType | null
+    _min: DeveloperMinAggregateOutputType | null
+    _max: DeveloperMaxAggregateOutputType | null
+  }
+
+  type GetDeveloperGroupByPayload<T extends DeveloperGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DeveloperGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DeveloperGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DeveloperGroupByOutputType[P]>
+            : GetScalarType<T[P], DeveloperGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DeveloperSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tid?: boolean
+    fullName?: boolean
+    email?: boolean
+    role?: boolean
+    skills?: boolean
+    githubUrl?: boolean
+    country?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["developer"]>
+
+  export type DeveloperSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tid?: boolean
+    fullName?: boolean
+    email?: boolean
+    role?: boolean
+    skills?: boolean
+    githubUrl?: boolean
+    country?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["developer"]>
+
+  export type DeveloperSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tid?: boolean
+    fullName?: boolean
+    email?: boolean
+    role?: boolean
+    skills?: boolean
+    githubUrl?: boolean
+    country?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["developer"]>
+
+  export type DeveloperSelectScalar = {
+    id?: boolean
+    tid?: boolean
+    fullName?: boolean
+    email?: boolean
+    role?: boolean
+    skills?: boolean
+    githubUrl?: boolean
+    country?: boolean
+    createdAt?: boolean
+  }
+
+  export type DeveloperOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tid" | "fullName" | "email" | "role" | "skills" | "githubUrl" | "country" | "createdAt", ExtArgs["result"]["developer"]>
+
+  export type $DeveloperPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Developer"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tid: string
+      fullName: string
+      email: string
+      role: string
+      skills: string[]
+      githubUrl: string | null
+      country: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["developer"]>
+    composites: {}
+  }
+
+  type DeveloperGetPayload<S extends boolean | null | undefined | DeveloperDefaultArgs> = $Result.GetResult<Prisma.$DeveloperPayload, S>
+
+  type DeveloperCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DeveloperFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DeveloperCountAggregateInputType | true
+    }
+
+  export interface DeveloperDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Developer'], meta: { name: 'Developer' } }
+    /**
+     * Find zero or one Developer that matches the filter.
+     * @param {DeveloperFindUniqueArgs} args - Arguments to find a Developer
+     * @example
+     * // Get one Developer
+     * const developer = await prisma.developer.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DeveloperFindUniqueArgs>(args: SelectSubset<T, DeveloperFindUniqueArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Developer that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DeveloperFindUniqueOrThrowArgs} args - Arguments to find a Developer
+     * @example
+     * // Get one Developer
+     * const developer = await prisma.developer.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DeveloperFindUniqueOrThrowArgs>(args: SelectSubset<T, DeveloperFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Developer that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperFindFirstArgs} args - Arguments to find a Developer
+     * @example
+     * // Get one Developer
+     * const developer = await prisma.developer.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DeveloperFindFirstArgs>(args?: SelectSubset<T, DeveloperFindFirstArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Developer that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperFindFirstOrThrowArgs} args - Arguments to find a Developer
+     * @example
+     * // Get one Developer
+     * const developer = await prisma.developer.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DeveloperFindFirstOrThrowArgs>(args?: SelectSubset<T, DeveloperFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Developers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Developers
+     * const developers = await prisma.developer.findMany()
+     * 
+     * // Get first 10 Developers
+     * const developers = await prisma.developer.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const developerWithIdOnly = await prisma.developer.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DeveloperFindManyArgs>(args?: SelectSubset<T, DeveloperFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Developer.
+     * @param {DeveloperCreateArgs} args - Arguments to create a Developer.
+     * @example
+     * // Create one Developer
+     * const Developer = await prisma.developer.create({
+     *   data: {
+     *     // ... data to create a Developer
+     *   }
+     * })
+     * 
+     */
+    create<T extends DeveloperCreateArgs>(args: SelectSubset<T, DeveloperCreateArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Developers.
+     * @param {DeveloperCreateManyArgs} args - Arguments to create many Developers.
+     * @example
+     * // Create many Developers
+     * const developer = await prisma.developer.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DeveloperCreateManyArgs>(args?: SelectSubset<T, DeveloperCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Developers and returns the data saved in the database.
+     * @param {DeveloperCreateManyAndReturnArgs} args - Arguments to create many Developers.
+     * @example
+     * // Create many Developers
+     * const developer = await prisma.developer.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Developers and only return the `id`
+     * const developerWithIdOnly = await prisma.developer.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DeveloperCreateManyAndReturnArgs>(args?: SelectSubset<T, DeveloperCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Developer.
+     * @param {DeveloperDeleteArgs} args - Arguments to delete one Developer.
+     * @example
+     * // Delete one Developer
+     * const Developer = await prisma.developer.delete({
+     *   where: {
+     *     // ... filter to delete one Developer
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DeveloperDeleteArgs>(args: SelectSubset<T, DeveloperDeleteArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Developer.
+     * @param {DeveloperUpdateArgs} args - Arguments to update one Developer.
+     * @example
+     * // Update one Developer
+     * const developer = await prisma.developer.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DeveloperUpdateArgs>(args: SelectSubset<T, DeveloperUpdateArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Developers.
+     * @param {DeveloperDeleteManyArgs} args - Arguments to filter Developers to delete.
+     * @example
+     * // Delete a few Developers
+     * const { count } = await prisma.developer.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DeveloperDeleteManyArgs>(args?: SelectSubset<T, DeveloperDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Developers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Developers
+     * const developer = await prisma.developer.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DeveloperUpdateManyArgs>(args: SelectSubset<T, DeveloperUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Developers and returns the data updated in the database.
+     * @param {DeveloperUpdateManyAndReturnArgs} args - Arguments to update many Developers.
+     * @example
+     * // Update many Developers
+     * const developer = await prisma.developer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Developers and only return the `id`
+     * const developerWithIdOnly = await prisma.developer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DeveloperUpdateManyAndReturnArgs>(args: SelectSubset<T, DeveloperUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Developer.
+     * @param {DeveloperUpsertArgs} args - Arguments to update or create a Developer.
+     * @example
+     * // Update or create a Developer
+     * const developer = await prisma.developer.upsert({
+     *   create: {
+     *     // ... data to create a Developer
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Developer we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DeveloperUpsertArgs>(args: SelectSubset<T, DeveloperUpsertArgs<ExtArgs>>): Prisma__DeveloperClient<$Result.GetResult<Prisma.$DeveloperPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Developers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperCountArgs} args - Arguments to filter Developers to count.
+     * @example
+     * // Count the number of Developers
+     * const count = await prisma.developer.count({
+     *   where: {
+     *     // ... the filter for the Developers we want to count
+     *   }
+     * })
+    **/
+    count<T extends DeveloperCountArgs>(
+      args?: Subset<T, DeveloperCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DeveloperCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Developer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DeveloperAggregateArgs>(args: Subset<T, DeveloperAggregateArgs>): Prisma.PrismaPromise<GetDeveloperAggregateType<T>>
+
+    /**
+     * Group by Developer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeveloperGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DeveloperGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DeveloperGroupByArgs['orderBy'] }
+        : { orderBy?: DeveloperGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DeveloperGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDeveloperGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Developer model
+   */
+  readonly fields: DeveloperFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Developer.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DeveloperClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Developer model
+   */
+  interface DeveloperFieldRefs {
+    readonly id: FieldRef<"Developer", 'String'>
+    readonly tid: FieldRef<"Developer", 'String'>
+    readonly fullName: FieldRef<"Developer", 'String'>
+    readonly email: FieldRef<"Developer", 'String'>
+    readonly role: FieldRef<"Developer", 'String'>
+    readonly skills: FieldRef<"Developer", 'String[]'>
+    readonly githubUrl: FieldRef<"Developer", 'String'>
+    readonly country: FieldRef<"Developer", 'String'>
+    readonly createdAt: FieldRef<"Developer", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Developer findUnique
+   */
+  export type DeveloperFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter, which Developer to fetch.
+     */
+    where: DeveloperWhereUniqueInput
+  }
+
+  /**
+   * Developer findUniqueOrThrow
+   */
+  export type DeveloperFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter, which Developer to fetch.
+     */
+    where: DeveloperWhereUniqueInput
+  }
+
+  /**
+   * Developer findFirst
+   */
+  export type DeveloperFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter, which Developer to fetch.
+     */
+    where?: DeveloperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Developers to fetch.
+     */
+    orderBy?: DeveloperOrderByWithRelationInput | DeveloperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Developers.
+     */
+    cursor?: DeveloperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Developers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Developers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Developers.
+     */
+    distinct?: DeveloperScalarFieldEnum | DeveloperScalarFieldEnum[]
+  }
+
+  /**
+   * Developer findFirstOrThrow
+   */
+  export type DeveloperFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter, which Developer to fetch.
+     */
+    where?: DeveloperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Developers to fetch.
+     */
+    orderBy?: DeveloperOrderByWithRelationInput | DeveloperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Developers.
+     */
+    cursor?: DeveloperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Developers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Developers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Developers.
+     */
+    distinct?: DeveloperScalarFieldEnum | DeveloperScalarFieldEnum[]
+  }
+
+  /**
+   * Developer findMany
+   */
+  export type DeveloperFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter, which Developers to fetch.
+     */
+    where?: DeveloperWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Developers to fetch.
+     */
+    orderBy?: DeveloperOrderByWithRelationInput | DeveloperOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Developers.
+     */
+    cursor?: DeveloperWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Developers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Developers.
+     */
+    skip?: number
+    distinct?: DeveloperScalarFieldEnum | DeveloperScalarFieldEnum[]
+  }
+
+  /**
+   * Developer create
+   */
+  export type DeveloperCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Developer.
+     */
+    data: XOR<DeveloperCreateInput, DeveloperUncheckedCreateInput>
+  }
+
+  /**
+   * Developer createMany
+   */
+  export type DeveloperCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Developers.
+     */
+    data: DeveloperCreateManyInput | DeveloperCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Developer createManyAndReturn
+   */
+  export type DeveloperCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * The data used to create many Developers.
+     */
+    data: DeveloperCreateManyInput | DeveloperCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Developer update
+   */
+  export type DeveloperUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Developer.
+     */
+    data: XOR<DeveloperUpdateInput, DeveloperUncheckedUpdateInput>
+    /**
+     * Choose, which Developer to update.
+     */
+    where: DeveloperWhereUniqueInput
+  }
+
+  /**
+   * Developer updateMany
+   */
+  export type DeveloperUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Developers.
+     */
+    data: XOR<DeveloperUpdateManyMutationInput, DeveloperUncheckedUpdateManyInput>
+    /**
+     * Filter which Developers to update
+     */
+    where?: DeveloperWhereInput
+    /**
+     * Limit how many Developers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Developer updateManyAndReturn
+   */
+  export type DeveloperUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * The data used to update Developers.
+     */
+    data: XOR<DeveloperUpdateManyMutationInput, DeveloperUncheckedUpdateManyInput>
+    /**
+     * Filter which Developers to update
+     */
+    where?: DeveloperWhereInput
+    /**
+     * Limit how many Developers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Developer upsert
+   */
+  export type DeveloperUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Developer to update in case it exists.
+     */
+    where: DeveloperWhereUniqueInput
+    /**
+     * In case the Developer found by the `where` argument doesn't exist, create a new Developer with this data.
+     */
+    create: XOR<DeveloperCreateInput, DeveloperUncheckedCreateInput>
+    /**
+     * In case the Developer was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DeveloperUpdateInput, DeveloperUncheckedUpdateInput>
+  }
+
+  /**
+   * Developer delete
+   */
+  export type DeveloperDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+    /**
+     * Filter which Developer to delete.
+     */
+    where: DeveloperWhereUniqueInput
+  }
+
+  /**
+   * Developer deleteMany
+   */
+  export type DeveloperDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Developers to delete
+     */
+    where?: DeveloperWhereInput
+    /**
+     * Limit how many Developers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Developer without action
+   */
+  export type DeveloperDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Developer
+     */
+    select?: DeveloperSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Developer
+     */
+    omit?: DeveloperOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5853,6 +6987,21 @@ export namespace Prisma {
   };
 
   export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
+
+
+  export const DeveloperScalarFieldEnum: {
+    id: 'id',
+    tid: 'tid',
+    fullName: 'fullName',
+    email: 'email',
+    role: 'role',
+    skills: 'skills',
+    githubUrl: 'githubUrl',
+    country: 'country',
+    createdAt: 'createdAt'
+  };
+
+  export type DeveloperScalarFieldEnum = (typeof DeveloperScalarFieldEnum)[keyof typeof DeveloperScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -6268,6 +7417,78 @@ export namespace Prisma {
     postedById?: StringWithAggregatesFilter<"Job"> | string
   }
 
+  export type DeveloperWhereInput = {
+    AND?: DeveloperWhereInput | DeveloperWhereInput[]
+    OR?: DeveloperWhereInput[]
+    NOT?: DeveloperWhereInput | DeveloperWhereInput[]
+    id?: StringFilter<"Developer"> | string
+    tid?: StringFilter<"Developer"> | string
+    fullName?: StringFilter<"Developer"> | string
+    email?: StringFilter<"Developer"> | string
+    role?: StringFilter<"Developer"> | string
+    skills?: StringNullableListFilter<"Developer">
+    githubUrl?: StringNullableFilter<"Developer"> | string | null
+    country?: StringNullableFilter<"Developer"> | string | null
+    createdAt?: DateTimeFilter<"Developer"> | Date | string
+  }
+
+  export type DeveloperOrderByWithRelationInput = {
+    id?: SortOrder
+    tid?: SortOrder
+    fullName?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    skills?: SortOrder
+    githubUrl?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type DeveloperWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tid?: string
+    email?: string
+    AND?: DeveloperWhereInput | DeveloperWhereInput[]
+    OR?: DeveloperWhereInput[]
+    NOT?: DeveloperWhereInput | DeveloperWhereInput[]
+    fullName?: StringFilter<"Developer"> | string
+    role?: StringFilter<"Developer"> | string
+    skills?: StringNullableListFilter<"Developer">
+    githubUrl?: StringNullableFilter<"Developer"> | string | null
+    country?: StringNullableFilter<"Developer"> | string | null
+    createdAt?: DateTimeFilter<"Developer"> | Date | string
+  }, "id" | "tid" | "email">
+
+  export type DeveloperOrderByWithAggregationInput = {
+    id?: SortOrder
+    tid?: SortOrder
+    fullName?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    skills?: SortOrder
+    githubUrl?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: DeveloperCountOrderByAggregateInput
+    _max?: DeveloperMaxOrderByAggregateInput
+    _min?: DeveloperMinOrderByAggregateInput
+  }
+
+  export type DeveloperScalarWhereWithAggregatesInput = {
+    AND?: DeveloperScalarWhereWithAggregatesInput | DeveloperScalarWhereWithAggregatesInput[]
+    OR?: DeveloperScalarWhereWithAggregatesInput[]
+    NOT?: DeveloperScalarWhereWithAggregatesInput | DeveloperScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Developer"> | string
+    tid?: StringWithAggregatesFilter<"Developer"> | string
+    fullName?: StringWithAggregatesFilter<"Developer"> | string
+    email?: StringWithAggregatesFilter<"Developer"> | string
+    role?: StringWithAggregatesFilter<"Developer"> | string
+    skills?: StringNullableListFilter<"Developer">
+    githubUrl?: StringNullableWithAggregatesFilter<"Developer"> | string | null
+    country?: StringNullableWithAggregatesFilter<"Developer"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Developer"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -6627,6 +7848,90 @@ export namespace Prisma {
     postedById?: StringFieldUpdateOperationsInput | string
   }
 
+  export type DeveloperCreateInput = {
+    id?: string
+    tid: string
+    fullName: string
+    email: string
+    role: string
+    skills?: DeveloperCreateskillsInput | string[]
+    githubUrl?: string | null
+    country?: string | null
+    createdAt?: Date | string
+  }
+
+  export type DeveloperUncheckedCreateInput = {
+    id?: string
+    tid: string
+    fullName: string
+    email: string
+    role: string
+    skills?: DeveloperCreateskillsInput | string[]
+    githubUrl?: string | null
+    country?: string | null
+    createdAt?: Date | string
+  }
+
+  export type DeveloperUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tid?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    skills?: DeveloperUpdateskillsInput | string[]
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeveloperUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tid?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    skills?: DeveloperUpdateskillsInput | string[]
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeveloperCreateManyInput = {
+    id?: string
+    tid: string
+    fullName: string
+    email: string
+    role: string
+    skills?: DeveloperCreateskillsInput | string[]
+    githubUrl?: string | null
+    country?: string | null
+    createdAt?: Date | string
+  }
+
+  export type DeveloperUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tid?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    skills?: DeveloperUpdateskillsInput | string[]
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeveloperUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tid?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    skills?: DeveloperUpdateskillsInput | string[]
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -6961,6 +8266,48 @@ export namespace Prisma {
     postedById?: SortOrder
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type DeveloperCountOrderByAggregateInput = {
+    id?: SortOrder
+    tid?: SortOrder
+    fullName?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    skills?: SortOrder
+    githubUrl?: SortOrder
+    country?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type DeveloperMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tid?: SortOrder
+    fullName?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    githubUrl?: SortOrder
+    country?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type DeveloperMinOrderByAggregateInput = {
+    id?: SortOrder
+    tid?: SortOrder
+    fullName?: SortOrder
+    email?: SortOrder
+    role?: SortOrder
+    githubUrl?: SortOrder
+    country?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type PostCreateNestedManyWithoutAuthorInput = {
     create?: XOR<PostCreateWithoutAuthorInput, PostUncheckedCreateWithoutAuthorInput> | PostCreateWithoutAuthorInput[] | PostUncheckedCreateWithoutAuthorInput[]
     connectOrCreate?: PostCreateOrConnectWithoutAuthorInput | PostCreateOrConnectWithoutAuthorInput[]
@@ -7151,6 +8498,15 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutJobsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutJobsInput, UserUpdateWithoutJobsInput>, UserUncheckedUpdateWithoutJobsInput>
+  }
+
+  export type DeveloperCreateskillsInput = {
+    set: string[]
+  }
+
+  export type DeveloperUpdateskillsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {

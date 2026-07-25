@@ -46,10 +46,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
       {/* BG glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-blue opacity-[0.05] blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#1e3a8a] opacity-[0.05] blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-blue opacity-[0.05] blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#1e3a8a] opacity-[0.05] blur-3xl rounded-full pointer-events-none" />
 
-      <Card className="w-full max-w-[400px] border-border-glass backdrop-blur-xl relative z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]" style={{ backgroundColor: "var(--surface-dialog)" }}>
+      <Card className="w-full max-w-[400px] border-border-glass  relative z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]" style={{ backgroundColor: "var(--surface-dialog)" }}>
         <CardHeader className="pb-8">
           <div className="flex justify-center mb-6">
             <div className="w-12 h-12 rounded-full border border-border-glass bg-bg-card flex items-center justify-center">
