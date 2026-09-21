@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "404: Page Not Found | Techfamz",
+  title: "404: Page Not Found |Techfamz",
   description: "The page you are looking for does not exist or has been moved.",
   robots: {
     index: false,
