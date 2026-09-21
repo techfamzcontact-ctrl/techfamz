@@ -1,5 +1,6 @@
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { ShieldCheck, Cpu, Sparkles } from "lucide-react";
 
 interface TIDCardProps {
   developer: {
@@ -16,78 +17,94 @@ interface TIDCardProps {
 export function TIDCard({ developer, baseUrl }: TIDCardProps) {
   const verificationUrl = `${baseUrl}/tid/${developer.tid}`;
   const memberSince = new Date(developer.createdAt).toLocaleDateString("en-US", {
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 
   return (
     <div
       id="tid-card"
-      className="relative w-full max-w-lg mx-auto overflow-hidden rounded-2xl border border-accent-blue/40 bg-[#0A1428] shadow-[0_0_50px_var(--color-accent-blue-glow)]"
+      className="relative w-full max-w-lg mx-auto overflow-hidden rounded-3xl border border-accent-blue/40 bg-gradient-to-b from-[#0B1528] via-[#070D1B] to-[#040812] text-white shadow-[0_20px_60px_-15px_rgba(59,130,246,0.3)] transition-all duration-300"
     >
-      {/* Background accents */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(rgba(59,130,246,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }} 
+      {/* Metallic Circuit Grid Background */}
+      <div 
+        className="absolute inset-0 z-0 opacity-15 pointer-events-none" 
+        style={{ 
+          backgroundImage: 'radial-gradient(rgba(96, 165, 250, 0.4) 1px, transparent 1px)', 
+          backgroundSize: '18px 18px' 
+        }} 
       />
-      <div className="absolute -top-32 -right-32 w-64 h-64 bg-accent-blue opacity-15 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-indigo-500 opacity-10 rounded-full blur-[80px] pointer-events-none" />
       
-      {/* SVG Noise filter since background images might fail in HTML2Canvas */}
-      <div className="absolute inset-0 opacity-[0.015] pointer-events-none z-0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter>
-          <rect width="100%" height="100%" filter="url(#n)" fill="transparent"/>
-        </svg>
+      {/* Corner Ambient Glows */}
+      <div className="absolute -top-24 -right-24 w-56 h-56 bg-accent-blue/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      
+      {/* Top Header */}
+      <div className="relative z-10 px-7 pt-7 pb-5 flex items-center justify-between border-b border-white/10 bg-white/[0.02] backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          {/* Microchip Graphic */}
+          <div className="w-10 h-8 rounded-lg bg-gradient-to-br from-amber-400/30 via-amber-200/20 to-amber-600/30 border border-amber-400/40 flex items-center justify-center shadow-xs">
+            <Cpu size={18} className="text-amber-300" />
+          </div>
+          <div>
+            <span className="block text-[10px] font-mono uppercase tracking-[0.25em] text-accent-blue-light font-bold">
+              Techfamz Verified Passport
+            </span>
+            <span className="font-mono text-xs text-white/60 tracking-wider">
+              AFRICA TALENT REGISTRY
+            </span>
+          </div>
+        </div>
+
+        {/* Security / Verified Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-blue/15 border border-accent-blue/40 text-[11px] font-mono text-accent-blue-light font-bold tracking-wider">
+          <ShieldCheck size={14} className="text-accent-blue-light" />
+          <span>VERIFIED</span>
+        </div>
       </div>
 
-      {/* Header */}
-      <div className="relative z-10 p-6 md:p-8 flex items-start justify-between border-b border-accent-blue/10 bg-gradient-to-r from-black/20 to-transparent backdrop-blur-sm">
-        <div>
-          <h2 className="text-[10px] font-mono font-bold text-accent-blue uppercase tracking-[0.2em] mb-1">
-            Techfamz Developer Identity
-          </h2>
-          <div className="font-mono text-2xl md:text-3xl font-bold text-white drop-shadow-[0_0_15px_rgba(96,165,250,0.6)] tracking-wider">
+      {/* Main Card Body */}
+      <div className="relative z-10 px-7 py-7">
+        {/* TID Hash Identifier */}
+        <div className="mb-6">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 block mb-1">
+            Identity Hash
+          </span>
+          <div className="font-mono text-2xl md:text-3xl font-black text-white tracking-widest text-gradient-blue inline-block">
             {developer.tid}
           </div>
         </div>
-        <div className="w-12 h-12 flex items-center justify-center bg-black/40 border border-accent-blue/20 rounded-xl shadow-inner backdrop-blur-md">
-          <svg
-            className="w-6 h-6 text-accent-blue drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-      </div>
 
-      {/* Body */}
-      <div className="relative z-10 p-6 md:p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+        {/* Developer Name & Role */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight mb-1.5">
             {developer.fullName}
           </h1>
-          <p className="text-lg text-accent-blue-light flex items-center gap-2 font-medium">
-            <span className="inline-flex relative w-2 h-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-blue opacity-75"></span>
-              <span className="relative inline-flex rounded-full w-2 h-2 bg-accent-blue shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
-            </span>
-            {developer.role}
-          </p>
-          {developer.country && (
-            <p className="text-sm text-text-muted mt-1 font-mono uppercase tracking-wider">{developer.country}</p>
-          )}
+          <div className="flex items-center gap-2 text-sm text-accent-blue-light font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+            <span>{developer.role}</span>
+            {developer.country && (
+              <>
+                <span className="text-white/30">•</span>
+                <span className="text-xs text-white/70 font-mono uppercase tracking-wide">
+                  {developer.country}
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Skills */}
+        {/* Skills Stack Chips */}
         {developer.skills && developer.skills.length > 0 && (
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2">
+          <div className="mb-7">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 block mb-2">
+              Verified Stack
+            </span>
+            <div className="flex flex-wrap gap-1.5">
               {developer.skills.map((skill, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1 text-xs font-mono font-medium text-text-secondary bg-black/40 border border-border-glass rounded-md backdrop-blur-sm"
+                  className="px-2.5 py-1 text-xs font-mono font-semibold text-white/90 bg-white/[0.06] border border-white/10 rounded-lg backdrop-blur-sm"
                 >
                   {skill}
                 </span>
@@ -96,32 +113,36 @@ export function TIDCard({ developer, baseUrl }: TIDCardProps) {
           </div>
         )}
 
-        {/* Footer */}
-        <div className="flex items-end justify-between mt-auto">
+        {/* Card Footer: Metadata + QR */}
+        <div className="flex items-end justify-between pt-5 border-t border-white/10">
           <div>
-            <p className="text-[10px] font-mono text-text-muted uppercase tracking-[0.2em] mb-1">
-              Registry Date
-            </p>
-            <p className="text-sm font-semibold text-white tracking-wide">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 block mb-1">
+              Member Since
+            </span>
+            <span className="text-xs font-mono font-bold text-white tracking-wider">
               {memberSince}
-            </p>
+            </span>
+            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-amber-400/80 font-mono">
+              <Sparkles size={11} />
+              <span>Immutable Ledger Record</span>
+            </div>
           </div>
 
-          {/* QR Code */}
-          <div className="bg-white p-2 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-white/20">
+          {/* QR Code Container */}
+          <div className="bg-white p-2 rounded-2xl shadow-xl shadow-black/40 border border-white/20">
             <QRCodeSVG
               value={verificationUrl}
               size={64}
               level="M"
               bgColor="#ffffff"
-              fgColor="#000000"
+              fgColor="#0a1428"
             />
           </div>
         </div>
       </div>
 
-      {/* Bottom border glow */}
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-80 shadow-[0_0_15px_rgba(59,130,246,1)]" />
+      {/* Holographic Bottom Edge Accent */}
+      <div className="absolute bottom-0 inset-x-0 h-[3px] bg-gradient-to-r from-accent-blue via-amber-400 to-accent-blue-light opacity-90 shadow-[0_0_12px_rgba(59,130,246,0.8)]" />
     </div>
   );
 }

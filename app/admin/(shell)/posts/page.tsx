@@ -140,7 +140,7 @@ export default function AdminPostsPage() {
             <tbody className="divide-y divide-border-glass/50">
               {posts.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-text-muted">
+                  <td colSpan={5} className="px-6 py-12 text-center text-text-muted">
                     No posts yet. Start writing!
                   </td>
                 </tr>
@@ -220,7 +220,7 @@ export default function AdminPostsPage() {
                     {/* Expandable comments panel */}
                     {activePostId === post.id && (
                       <tr key={`${post.id}-comments`}>
-                        <td colSpan={4} className="p-0">
+                        <td colSpan={5} className="p-0">
                           <div className="bg-bg-primary/50 border-t border-border-glass px-6 py-5">
                             <div className="flex items-center justify-between mb-4">
                               <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">

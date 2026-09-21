@@ -42,23 +42,23 @@ export function ShareButtons({ url, tid }: ShareButtonsProps) {
       <Button
         variant="outline-glow"
         onClick={handleCopy}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 rounded-xl text-xs font-semibold"
       >
         {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-        {copied ? "Copied!" : "Copy Link"}
+        {copied ? "Copied Link!" : "Copy Link"}
       </Button>
-      <a href={twitterUrl} target="_blank" rel="noopener noreferrer">
-        <Button variant="outline-glow" className="flex items-center gap-2">
+      <Button asChild variant="outline-glow" className="flex items-center gap-2 rounded-xl text-xs font-semibold">
+        <a href={twitterUrl} target="_blank" rel="noopener noreferrer">
           <Twitter className="w-4 h-4" />
-          Twitter
-        </Button>
-      </a>
-      <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">
-        <Button variant="outline-glow" className="flex items-center gap-2">
+          Share on X
+        </a>
+      </Button>
+      <Button asChild variant="outline-glow" className="flex items-center gap-2 rounded-xl text-xs font-semibold">
+        <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">
           <Linkedin className="w-4 h-4" />
-          LinkedIn
-        </Button>
-      </a>
+          Share on LinkedIn
+        </a>
+      </Button>
     </div>
   );
 }

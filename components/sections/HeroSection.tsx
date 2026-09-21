@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -141,58 +142,58 @@ export default function HeroSection() {
       />
 
       {/* ═══ CONTENT ═══ */}
-      <div className="relative z-10 text-center max-w-[860px] px-6 py-20">
+      <div className="relative z-10 text-center max-w-[880px] px-6 py-24">
         {/* Status badge */}
         <div className="animate-fade-in-up-delay-1 mb-8 flex justify-center">
-          <Badge variant="glow">
+          <Badge variant="glow" className="shadow-md">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue-light opacity-75 animate-ping" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-blue-light" />
             </span>
-            Building the Future
+            <span>500+ Verified Engineers Across Africa</span>
           </Badge>
         </div>
 
         {/* Main headline */}
-        <h1 className="mb-6 animate-fade-in-up-delay-1 text-[clamp(2.2rem,5.5vw,4.2rem)] leading-[1.08] tracking-[-0.03em] font-[800]">
+        <h1 className="mb-6 animate-fade-in-up-delay-1 text-[clamp(2.4rem,6vw,4.5rem)] leading-[1.06] tracking-[-0.03em] font-black">
           Engineering the Future
           <br />
-          <span className="bg-[linear-gradient(135deg,#60a5fa,#3b82f6,#93c5fd)] bg-clip-text text-transparent">
+          <span className="text-gradient-blue">
             of African Technology
           </span>
         </h1>
 
         {/* Sub headline */}
-        <p className="max-w-[620px] mx-auto mb-4 text-text-secondary leading-[1.7] text-[clamp(1rem,2vw,1.15rem)] animate-fade-in-up-delay-2">
+        <p className="max-w-[660px] mx-auto mb-4 text-text-secondary leading-[1.7] text-[clamp(1.05rem,2.2vw,1.25rem)] font-normal animate-fade-in-up-delay-2">
           Techfamz is building a structured technology ecosystem designed to unify developers, engineers,
           and forward-thinking companies across Africa and beyond.
         </p>
 
         {/* Mystery line */}
-        <p className="max-w-[520px] mx-auto mb-10 text-text-muted leading-relaxed text-[0.95rem] opacity-0 animate-[fadeInUp_0.7s_cubic-bezier(0.16,1,0.3,1)_0.55s_both]">
-          What began as a community is evolving into infrastructure — built for talent, built for
+        <p className="max-w-[540px] mx-auto mb-10 text-text-muted leading-relaxed text-[0.95rem] opacity-0 animate-[fadeInUp_0.7s_cubic-bezier(0.16,1,0.3,1)_0.55s_both]">
+          What began as a community is evolving into digital infrastructure — built for talent, built for
           opportunity, built for scale.
         </p>
 
         {/* CTA buttons */}
-        <div className="flex justify-center gap-4 flex-wrap animate-slide-up-1">
-          <Button variant="cta" asChild className="relative overflow-hidden group py-[14px] px-8 text-[0.95rem] h-auto rounded-lg after:absolute after:inset-0 after:opacity-0 after:transition-opacity after:duration-400 after:ease-premium hover:after:opacity-100 after:bg-[radial-gradient(circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(255,255,255,0.3),transparent_60%)]">
-            <a href="/identity">
-              Claim Your Techfamz Identity
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 ease-premium group-hover:translate-x-0.5">
+        <div className="flex justify-center items-center gap-4 flex-wrap animate-slide-up-1">
+          <Button variant="cta" size="lg" asChild className="relative overflow-hidden group shadow-lg shadow-amber-500/20 rounded-xl px-8 h-13 font-bold text-sm">
+            <Link href="/identity/claim" className="flex items-center gap-2">
+              Claim Your Developer TID
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 ease-premium group-hover:translate-x-1">
                 <path d="M3.333 8h9.334M8.667 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </Link>
           </Button>
-          <Button variant="outline-glow" asChild className="py-[14px] px-8 text-[0.95rem] h-auto rounded-lg">
-            <a href="#shift">Explore the Vision</a>
+          <Button variant="outline-glow" size="lg" asChild className="rounded-xl px-8 h-13 font-semibold text-sm">
+            <Link href="#shift">Explore the Vision</Link>
           </Button>
         </div>
 
         {/* Scroll indicator */}
         <div className="mt-16 opacity-0 animate-[fadeInUp_0.7s_cubic-bezier(0.16,1,0.3,1)_1.2s_both]">
           <div className="flex flex-col items-center gap-2 text-text-muted">
-            <span className="text-[0.65rem] uppercase tracking-[0.2em] font-medium">Scroll</span>
+            <span className="text-[0.65rem] uppercase tracking-[0.2em] font-medium">Scroll to explore</span>
             <div className="w-[1px] h-8 bg-[linear-gradient(to_bottom,var(--color-text-muted),transparent)] animate-pulse" />
           </div>
         </div>

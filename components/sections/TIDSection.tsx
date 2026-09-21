@@ -1,93 +1,93 @@
-"use client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 const features = [
-  "Establish credibility",
+  "Establish technical credibility",
   "Enable structured talent discovery",
   "Connect developers directly with companies",
-  "Unlock ecosystem privileges",
+  "Unlock ecosystem privileges & job referrals",
 ];
 
 export default function TIDSection() {
   return (
     <section
       id="tid"
-      className="relative bg-[linear-gradient(180deg,#060B18_0%,#0A1428_50%,#060B18_100%)] overflow-hidden"
+      className="relative overflow-hidden py-24 px-5 md:px-6"
+      style={{ background: "var(--gradient-section-alt)" }}
     >
       {/* Background Glow */}
       <div
-        className="bg-glow bg-accent-blue opacity-12 blur-3xl animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-[20%] left-1/2 -translate-x-1/2 z-0"
+        className="bg-glow bg-accent-blue opacity-10 blur-3xl animate-pulse-glow absolute rounded-full w-[500px] h-[500px] top-[20%] left-1/2 -translate-x-1/2 z-0 pointer-events-none"
       />
 
-      <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto text-center">
+      <div className="relative py-12 max-w-[1200px] mx-auto text-center">
         <div className="animate-fade-in-up-delay-1">
-          <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">The Techfamz Identity</span>
-          <h2 className="mb-6">
-            One Identity. Verified. Recognized.
+          <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft shadow-xs">
+            The Techfamz Identity
+          </span>
+          <h2 className="mb-4 text-[clamp(2.2rem,4.5vw,3.2rem)] font-black tracking-tight">
+            One Identity. <span className="text-gradient-blue">Verified & Permanent.</span>
           </h2>
-          <p className="max-w-[680px] text-lg text-text-secondary mx-auto mb-12">
-            Introducing <strong className="text-text-primary">TID</strong> — Techfamz
-            Identity Number. A unique developer identity within the Techfamz ecosystem.
+          <p className="max-w-[680px] text-base md:text-lg text-text-secondary mx-auto mb-12 leading-relaxed">
+            Introducing <strong className="text-text-primary">TID</strong> — the Techfamz Identity Number. A cryptographically unique developer passport within Africa&apos;s fastest-growing technology network.
           </p>
         </div>
 
-        {/* TID Card */}
+        {/* Holographic TID Card Preview */}
         <div
-          className="animate-fade-in-up-delay-2 max-w-[560px] mx-auto mb-12 p-12 bg-[linear-gradient(135deg,rgba(12,26,58,0.9),rgba(6,11,24,0.95))] border border-accent-blue rounded-2xl relative overflow-hidden"
+          className="animate-fade-in-up-delay-2 max-w-[540px] mx-auto mb-12 p-8 md:p-10 bg-bg-card border border-accent-blue/30 rounded-3xl relative overflow-hidden shadow-xl backdrop-blur-md"
         >
           {/* Inner glow */}
           <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.08),transparent_70%)] pointer-events-none"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.1),transparent_70%)] pointer-events-none"
           />
 
-          <p
-            className="text-[0.8rem] uppercase tracking-[0.2em] text-text-muted mb-5 relative"
-          >
-            Developer Identity
+          <p className="text-xs font-mono uppercase tracking-[0.25em] text-text-muted mb-4 relative font-semibold">
+            Universal Developer Passport
           </p>
 
-          <div className="tid-badge mx-auto mb-7 justify-center flex">
+          <div className="tid-badge mx-auto mb-6 justify-center flex shadow-md">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="1" y="1" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="1.5" />
               <circle cx="10" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
               <path d="M5 16c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-            TID-DEV-0001
+            <span>TID-DEV-0001</span>
           </div>
 
-          <p className="text-[0.9rem] text-text-muted relative m-0">
-            Your verified, unique, and permanent identity in the Techfamz network.
+          <p className="text-sm text-text-secondary relative m-0 leading-relaxed">
+            Your verified, unique, and permanent identity recognized across top technology companies.
           </p>
         </div>
 
         {/* Features Grid */}
         <div
-          className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 max-w-[800px] mx-auto mb-12"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[800px] mx-auto mb-12"
         >
           {features.map((feat, i) => (
             <div
               key={i}
-              className="bg-bg-card border border-border-glass rounded-lg p-8  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover animate-slide-up-1 px-6 py-5 text-left flex flex-row items-center gap-3"
-              style={{
-                transitionDelay: `${0.3 + i * 0.1}s`,
-              }}
+              className="bg-bg-card/80 border border-border-glass rounded-2xl p-5 text-left flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent-blue/40 shadow-xs"
             >
               <div
-                className="w-2 h-2 rounded-full bg-accent-blue shrink-0 shadow-[0_0_8px_var(--color-accent-blue-glow)]"
+                className="w-2.5 h-2.5 rounded-full bg-accent-blue shrink-0 shadow-[0_0_8px_var(--color-accent-blue-glow)]"
               />
-              <span className="text-[0.95rem] text-text-secondary">{feat}</span>
+              <span className="text-sm font-medium text-text-primary">{feat}</span>
             </div>
           ))}
         </div>
 
-        <div className="animate-slide-up-2">
-          <p className="text-text-muted mb-2 text-[0.95rem]">
-            TID is more than a number. It is a professional identity within a growing technology network.
+        <div className="animate-slide-up-2 flex flex-col items-center gap-4">
+          <p className="text-text-muted text-sm max-w-md">
+            TID is more than a number. It is an immutable credential built to advance your career.
           </p>
-          <p
-            className="text-accent-blue-light font-semibold text-[1.05rem] tracking-[0.02em]"
-          >
-            Developer Portal Launching Soon.
-          </p>
+          <Button asChild variant="cta" size="lg" className="rounded-xl px-8 font-bold shadow-lg shadow-amber-500/20">
+            <Link href="/identity/claim" className="flex items-center gap-2">
+              <Sparkles size={16} />
+              Claim Your Developer TID Free
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
