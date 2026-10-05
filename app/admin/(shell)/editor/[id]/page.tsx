@@ -14,18 +14,26 @@ import {
   ImageIcon, Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, Quote, Code, Heading1, Heading2, Heading3,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Link as LinkIcon, Unlink,
-  Save, Send, Check, X, MousePointerClick, Sparkles, Youtube as YoutubeIcon
+  Save, Send, Check, X, MousePointerClick, Sparkles, Youtube as YoutubeIcon,
+  Eye, Trash2, Plus
 } from "lucide-react";
 import { CustomButtonExtension } from "@/components/editor/CustomButtonExtension";
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getPost, savePost } from "../../../actions";
+import { getPost, savePost, getPostCategories } from "../../../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   "Tutorial",
   "Tech News",
   "Tech Tips",
@@ -66,6 +74,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
   const [btnSize, setBtnSize] = useState("md");
   
   const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Dynamic Categories state
+  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -114,6 +128,15 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     const fetchData = async () => {
+      try {
+        const loadedCats = await getPostCategories();
+        if (loadedCats && loadedCats.length > 0) {
+          setAvailableCategories(loadedCats);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+
       if (resolvedParams.id !== "new") {
         const post = await getPost(resolvedParams.id);
         if (post) {
@@ -123,6 +146,12 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           setCoverImage(post.coverImage || "");
           setCategory(post.category || "");
           editor?.commands.setContent(post.content);
+
+          if (post.category) {
+            setAvailableCategories((prev) =>
+              prev.includes(post.category!) ? prev : [...prev, post.category!].sort()
+            );
+          }
           
           // Initial word count
           const text = editor?.getText() || "";
@@ -240,6 +269,23 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     }
   };
 
+  const handleAddNewCategory = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+
+    // Normalize category name (Capitalize first letter)
+    const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    setAvailableCategories((prev) => {
+      if (prev.includes(formatted)) return prev;
+      return [...prev, formatted].sort();
+    });
+    setCategory(formatted);
+    setIsDirty(true);
+    setNewCategoryName("");
+    setIsAddingCategory(false);
+  };
+
   const handleSave = async (publish: boolean) => {
     if (!title) {
       setSaveError("Title is required before saving.");
@@ -259,11 +305,16 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         published: publish,
       });
       setIsDirty(false);
-      router.push("/admin");
+      router.push("/admin/posts");
       router.refresh();
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
-      setSaveError("Failed to save post. Please try again.");
+      const message = e instanceof Error ? e.message : "Failed to save post. Please try again.";
+      if (message.includes("Unique constraint") || message.toLowerCase().includes("slug")) {
+        setSaveError("A post with this URL slug or title already exists. Please choose a different title or slug.");
+      } else {
+        setSaveError(message);
+      }
     } finally {
       setSaving(false);
     }
@@ -344,23 +395,32 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         <h1 className="text-2xl font-bold text-text-primary">
           {resolvedParams.id === "new" ? "Write a new post" : "Edit post"}
         </h1>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPreview(true)}
+            className="flex items-center gap-1.5 border-border-glass text-text-secondary hover:text-text-primary text-xs"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Preview</span>
+          </Button>
           <Button
             variant="outline-glow"
             onClick={() => handleSave(false)}
             disabled={saving}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 text-xs"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-3.5 h-3.5" />
             {saving ? "Saving..." : "Save Draft"}
           </Button>
           <Button
             variant="cta"
             onClick={() => handleSave(true)}
             disabled={saving}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 text-xs"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-3.5 h-3.5" />
             {saving ? "Publishing..." : "Publish Live"}
           </Button>
         </div>
@@ -554,16 +614,35 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
         <div className="space-y-6">
           {/* Cover Image */}
           <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
-            <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest mb-3">Cover Image</Label>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">Cover Image</Label>
+              {coverImage && (
+                <button
+                  type="button"
+                  onClick={() => { setCoverImage(""); setIsDirty(true); }}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                  title="Remove cover image"
+                >
+                  <Trash2 size={12} />
+                  <span>Remove</span>
+                </button>
+              )}
+            </div>
             {coverImage ? (
               <div className="relative rounded-lg overflow-hidden aspect-video border border-border-glass group">
-                {/* Fixed: use next/image instead of plain <img> */}
                 <Image src={coverImage} alt="Cover" fill className="object-cover" />
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <label className="cursor-pointer bg-[rgba(255,255,255,0.1)] hover:bg-accent-blue text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <label className="cursor-pointer bg-[rgba(255,255,255,0.15)] hover:bg-accent-blue text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                     Change Image
                     <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => { setCoverImage(""); setIsDirty(true); }}
+                    className="bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ) : (
@@ -579,9 +658,57 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
 
           {/* Category */}
           <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
-            <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest mb-3">Category</Label>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">
+                Category
+              </Label>
+              {!isAddingCategory && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingCategory(true)}
+                  className="text-[0.68rem] text-accent-blue-light hover:text-accent-blue font-semibold flex items-center gap-1 transition-colors"
+                >
+                  <Plus size={12} />
+                  <span>New Category</span>
+                </button>
+              )}
+            </div>
+
+            {isAddingCategory && (
+              <form onSubmit={handleAddNewCategory} className="mb-3.5 p-2.5 rounded-lg bg-bg-primary/70 border border-border-glass">
+                <div className="text-[0.65rem] text-text-muted mb-1.5 font-medium">Create New Category:</div>
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="e.g. AI & ML, Web3, Architecture..."
+                    autoFocus
+                    className="h-8 text-xs bg-bg-card border-border-glass focus-visible:ring-accent-blue flex-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newCategoryName.trim()}
+                    className="h-8 px-2.5 rounded bg-accent-blue hover:bg-blue-600 text-white text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    <Check size={13} />
+                    <span>Add</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingCategory(false);
+                      setNewCategoryName("");
+                    }}
+                    className="h-8 px-2 rounded text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </form>
+            )}
+
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
+              {availableCategories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -624,6 +751,41 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       </div>
+
+      {/* Article Live Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto bg-bg-card border-border-glass text-text-primary">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              {category && (
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 font-semibold uppercase tracking-wider">
+                  {category}
+                </span>
+              )}
+              <span className="text-xs text-text-muted">Article Preview</span>
+            </div>
+            <DialogTitle className="text-2xl font-bold text-text-primary mt-2">
+              {title || "Untitled Article"}
+            </DialogTitle>
+            {excerpt && (
+              <DialogDescription className="text-sm text-text-secondary italic border-l-2 border-accent-blue pl-3 py-1">
+                {excerpt}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          {coverImage && (
+            <div className="relative aspect-video rounded-xl overflow-hidden border border-border-glass my-3">
+              <Image src={coverImage} alt="Cover Preview" fill className="object-cover" />
+            </div>
+          )}
+
+          <div
+            className="prose dark:prose-invert max-w-none text-text-secondary mt-4 leading-relaxed [&_p]:my-2 [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5"
+            dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "<p>No content yet...</p>" }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

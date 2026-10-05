@@ -7,7 +7,7 @@ import Underline from "@tiptap/extension-underline";
 import {
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered,
   Quote, Heading2, Heading3, Link as LinkIcon, Unlink,
-  Save, Send, Check, X, ArrowLeft
+  Save, Send, Check, X, ArrowLeft, Eye
 } from "lucide-react";
 import { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,13 @@ import { getJob, saveJob } from "../../../../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
@@ -41,6 +48,7 @@ export default function JobEditorPage({ params }: { params: Promise<{ id: string
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkInputUrl, setLinkInputUrl] = useState("");
@@ -129,8 +137,13 @@ export default function JobEditorPage({ params }: { params: Promise<{ id: string
         } else if (resolvedParams.id === "new") {
           router.replace(`/admin/jobs/editor/${result.id}`);
         }
-      } catch (err) {
-        setSaveError(err instanceof Error ? err.message : "Save failed");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Save failed";
+        if (message.includes("Unique constraint") || message.toLowerCase().includes("slug")) {
+          setSaveError("A job listing with this URL slug or title already exists. Please choose a different title or slug.");
+        } else {
+          setSaveError(message);
+        }
       } finally {
         setSaving(false);
       }
@@ -319,25 +332,68 @@ export default function JobEditorPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          variant="outline"
+          className="flex items-center gap-2 border-border-glass text-text-secondary hover:text-text-primary text-xs"
+        >
+          <Eye size={15} />
+          <span>Preview Job</span>
+        </Button>
         <Button
           onClick={() => handleSave(false)}
           disabled={saving}
           variant="outline"
-          className="flex items-center gap-2 border-border-glass text-text-secondary hover:text-text-primary"
+          className="flex items-center gap-2 border-border-glass text-text-secondary hover:text-text-primary text-xs"
         >
-          <Save size={16} />
-          {saving ? "Saving..." : "Save Draft"}
+          <Save size={15} />
+          <span>{saving ? "Saving..." : "Save Draft"}</span>
         </Button>
         <Button
           onClick={() => handleSave(true)}
           disabled={saving}
-          className="flex items-center gap-2 bg-accent-blue hover:bg-blue-600 text-white shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]"
+          className="flex items-center gap-2 bg-accent-blue hover:bg-blue-600 text-white shadow-[0_0_15px_var(--color-accent-blue-glow-soft)] text-xs font-semibold"
         >
-          <Send size={16} />
-          {saving ? "Publishing..." : "Publish Job"}
+          <Send size={15} />
+          <span>{saving ? "Publishing..." : "Publish Job"}</span>
         </Button>
       </div>
+
+      {/* Job Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto bg-bg-card border-border-glass text-text-primary">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 font-semibold uppercase tracking-wider">
+                {type}
+              </span>
+              {category && (
+                <span className="text-xs text-text-muted">· {category}</span>
+              )}
+            </div>
+            <DialogTitle className="text-xl font-bold text-text-primary mt-2">
+              {title || "Untitled Job Listing"}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-text-secondary">
+              {company || "Company"} {location ? `· ${location}` : ""} {salary ? `· ${salary}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3 rounded-lg bg-bg-primary/50 border border-border-glass text-xs flex items-center justify-between">
+            <span className="text-text-muted">Application Target:</span>
+            <span className="font-mono text-accent-blue-light truncate max-w-sm">
+              {applyUrl || "Not specified"}
+            </span>
+          </div>
+
+          <div
+            className="prose dark:prose-invert max-w-none text-text-secondary mt-2 text-sm leading-relaxed [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_h2]:text-lg [&_h3]:text-base"
+            dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "<p>No description entered yet.</p>" }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
