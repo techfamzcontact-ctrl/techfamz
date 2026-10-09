@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function GET(req: NextRequest) {
   const postId = req.nextUrl.searchParams.get("postId");
@@ -10,6 +11,12 @@ export async function GET(req: NextRequest) {
   }
 
   if (isAdmin) {
+    // Admin view includes hidden comments and commenter emails, so it requires an admin session
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Admin: return ALL comments including hidden ones, with email
     const comments = await prisma.comment.findMany({
       where: { postId },

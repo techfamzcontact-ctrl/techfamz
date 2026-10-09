@@ -1,13 +1,21 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
 
 // Initialize the Google Generative AI client
 // We only do this if the key exists to prevent crashing the server on boot if unconfigured
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Only admins may use the Gemini quota (the post editor is the only caller)
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // 1. Check API Key
     if (!genAI) {
       return NextResponse.json(
