@@ -6,8 +6,11 @@ export async function proxy(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
 
-  // Protect /admin routes (except /admin/login)
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+  // Protect /admin routes, except the sign-in and password-reset pages
+  const isPublicAdminPage = ["/admin/login", "/admin/forgot-password", "/admin/reset-password"].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+  if (pathname.startsWith("/admin") && !isPublicAdminPage) {
     if (!token) {
       const url = new URL("/admin/login", req.url);
       url.searchParams.set("callbackUrl", encodeURI(req.url));

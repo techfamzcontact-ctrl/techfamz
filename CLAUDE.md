@@ -46,6 +46,12 @@ Environment variables (`.env`; `.env.example` lists most of them): `DATABASE_URL
 - Every server action in `app/admin/actions.ts` starts with its own `getServerSession(authOptions)` check. Keep that pattern for new actions.
 - API routes that need an admin use `getToken` from `next-auth/jwt` (see `app/api/upload`).
 - `POST /api/setup-admin` creates the first admin, and only works while the `User` table is empty.
+- **Password reset** (`/admin/forgot-password` → email → `/admin/reset-password?token=…`)
+  - Stateless: tokens come from `lib/password-reset.ts`, an HMAC over the user id, the expiry, and the current password hash, signed with `NEXTAUTH_SECRET`. That makes links single-use and 30-minute-limited with no database table.
+  - The public server actions in `app/admin/password-reset-actions.ts` are rate-limited and always return the same neutral message, so they don't reveal which emails are admins.
+  - The email is sent through Resend (`components/emails/PasswordResetEmail.tsx`). The link base is `NEXTAUTH_URL`, so it must be the public site URL in production.
+  - `proxy.ts` lets these pages through without a session.
+  - Existing JWT sessions are not revoked when the password changes.
 
 ### Data and server logic
 
@@ -93,7 +99,7 @@ When you change UI:
 
 ## UI design rules (SEO first)
 
-The owner's direction: **clean, normal, content-first design, where nothing may hurt SEO.** Do not use any animation or UI-effects library (Animata and React Bits Pro were evaluated and rejected). The site should look distinctive because of its typography, spacing, consistent Techfamz colours, and real content, not because of effects. Avoid generic template patterns and decoration that has no purpose.
+The owner's direction: **clean, normal, content-first design, where nothing may hurt SEO.** On the public site, do not use any animation or UI-effects library (Animata and React Bits Pro were evaluated and rejected there). Animata components are allowed in the admin only; see "Admin conventions". The site should look distinctive because of its typography, spacing, consistent Techfamz colours, and real content, not because of effects. Avoid generic template patterns and decoration that has no purpose.
 
 - **All text is server-rendered.** Headings, body copy, and links must be in the initial HTML. Never generate visible text with client-side JavaScript.
 - **Nothing above the fold animates in.** Content in the first screen is visible on first paint, with no fade-in or slide-in and no `opacity-0` start state. The old entrance animations (`fadeInUp`, `slideUp`, glow and pulse keyframes) have been removed from `globals.css`.
@@ -122,11 +128,34 @@ The owner's direction: **clean, normal, content-first design, where nothing may 
   - `className="prose article"`, defined in `globals.css`, is used by blog posts, job descriptions, the admin editors, and the editor preview. Never add `dark:prose-invert`, because the article colours already follow the theme tokens.
   - Blog articles sit in a 720px column. Their reading time is calculated from the content.
 - **Loading skeletons** (`components/blog/PostCardSkeleton.tsx`, `components/jobs/JobCardSkeleton.tsx`) mirror the real layouts so content doesn't jump when it streams in. Update them whenever a layout changes.
-- **Admin dashboard:** it has no SEO impact, so the owner allows any components or libraries there.
+- **Admin dashboard:** it has no SEO impact, so the owner allows any components or libraries there. It uses the same tokens, with a denser application layout. The shell (`app/admin/(shell)/layout.tsx`) provides the sidebar, a mobile `Sheet` menu, `ConfirmProvider`, and the sonner `Toaster`, and wraps pages in a padded `<main>` (`max-w-[1200px]`). Pages must not add their own outer padding or background.
+
+### Admin conventions
+
+- **Server actions return results, never throw.** Mutations in `app/admin/actions.ts` return `ActionResult<T>` (`{ ok: true, data } | { ok: false, error }`), because production builds hide the messages of errors thrown in server actions. In the client, call them through `runAction(promise, "Saved")` (`components/admin/run-action.ts`): it shows a toast and returns `{ data }`, or `null` on failure. Roll back optimistic updates when it returns `null`. Read actions (`getPosts`, `getJob`, …) still throw `Unauthorized`.
+- **Shared kit:**
+  - `components/admin/AdminUI.tsx` provides `PageHeader`, `StatCard`, `Panel`, `StatusBadge`, `EmptyState`, `Segmented`, `adminInputClass`, `adminLabelClass`, and `adminTable`.
+  - `useConfirm()` from `components/admin/ConfirmProvider.tsx` replaces `window.confirm`.
+  - Use `Button` sizes `xs` and `icon-xs` for dense UI.
+- **Navigation** is defined once, in `components/admin/AdminNav.tsx`, and used by both the desktop sidebar and the mobile menu.
+- **List pages** are server components that fetch their data and pass it to a `*Client.tsx` component, so no data loads in the browser after the page appears.
+- **Animata (admin only)**
+  - Adapted copies live in `components/animata/` under the MIT notice in `components/animata/LICENSE.md`:
+    - `graphs/bar-chart.tsx`: columns with tooltips and an sr-only table.
+    - `graphs/donut-chart.tsx`: a single-ratio meter.
+    - `text/counter.tsx`: animated stat values, which honour reduced motion.
+    - `tabs/fluid-tabs.tsx`: the period switcher.
+  - They need the `motion` package.
+  - Don't install Animata items with `shadcn add`: its registry pins an old `lucide-react` and writes `@/animata/*` imports. Copy the source from `https://animata.design/r/<category>/<name>.json` instead, then add `"use client"`, theme tokens, and reduced-motion handling.
+  - Never import these components into public pages.
+- **Analytics** (`/admin/analytics`, `lib/analytics.ts`, `components/admin/BarList.tsx`)
+  - Built from existing data only. One period filter scopes every number on the page, and month grouping is done in UTC so server and browser labels match.
+  - Charts use a single series in blue: `#2a78d6` in light mode and `#3987e5` in dark mode, validated against the card surfaces. Text uses text tokens, never the series colour.
+  - Post views are lifetime totals, because no daily history is stored. Real traffic-over-time needs either a page-view table (a database change, so ask first) or the GA4 Data API.
 
 ## Known gotchas
 
-- In production builds, Next.js replaces the message of an `Error` thrown inside a server action with a generic one. Client code that shows `err.message` or matches on it (for example, the slug-clash check in the post editor) only works in development. Return error values instead when the user needs to see the message.
+- In production builds, Next.js replaces the message of an `Error` thrown inside a server action with a generic one. That is why admin mutations return `ActionResult` (see "Admin conventions"). Never show `err.message` from a thrown server-action error to the user.
 - API routes that serve admin data or spend paid quota check the admin session with `getToken`: `GET /api/comments?admin=1`, `POST /api/generate-summary`, and `POST /api/upload`. Any new route of that kind needs the same check, because `proxy.ts` does not cover `/api/*`.- Public URLs in `/tid/[tid]` and in the welcome email are built from `NEXTAUTH_URL`.
 - `generated/` is listed in `.gitignore` but its files are already committed. `lint_output*.txt` files are stale output from an old lint run. The README describes an older folder layout.
 - Lists that are duplicated in several files and must be kept in sync: post categories (`app/admin/actions.ts` and the post editor) and TID roles (`app/api/tid/route.ts` and the claim page).
