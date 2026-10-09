@@ -1,537 +1,413 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { AlertCircle, ExternalLink, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { updateAdminPassword } from "@/app/admin/actions";
-import {
-  ShieldCheck,
-  KeyRound,
-  Server,
-  Database,
-  Mail,
-  Image as ImageIcon,
-  Sparkles,
-  Lock,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Eye,
-  EyeOff,
-  User,
-  Globe,
-  ExternalLink,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import type { getSystemHealth } from "@/app/admin/actions";
+import { PageHeader, Panel, adminInputClass, adminLabelClass } from "@/components/admin/AdminUI";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-interface SystemHealthData {
-  database: {
-    status: "connected" | "error";
-    latencyMs: number;
-    error: string | null;
-  };
-  services: {
-    resend: { configured: boolean };
-    cloudinary: { configured: boolean };
-    gemini: { configured: boolean };
-    nextAuth: { configured: boolean };
-  };
-  counts: {
-    users: number;
-    posts: number;
-    jobs: number;
-    developers: number;
-    comments: number;
-  };
-  environment: string;
-}
+type SystemHealthData = Awaited<ReturnType<typeof getSystemHealth>>;
+type ServiceKey = keyof SystemHealthData["services"];
+type Tone = "ok" | "warn" | "error";
 
 interface SettingsClientProps {
   userEmail: string;
   initialHealth: SystemHealthData;
 }
 
-export default function SettingsClient({
-  userEmail,
-  initialHealth,
-}: SettingsClientProps) {
-  const [activeTab, setActiveTab] = useState<"security" | "health" | "info">("security");
+const MIN_PASSWORD_LENGTH = 8;
+const NETWORK_ERROR = "Something went wrong. Check your connection and try again.";
 
-  // Password change state
+/** What each integration is used for; "configured" only means its environment variables are set. */
+const SERVICES: {
+  key: ServiceKey;
+  name: string;
+  purpose: string;
+  env: string[];
+  /** How serious a missing configuration is. */
+  missingTone: Tone;
+}[] = [
+  {
+    key: "nextAuth",
+    name: "NextAuth",
+    purpose: "Signs admin session tokens",
+    env: ["NEXTAUTH_SECRET"],
+    missingTone: "error",
+  },
+  {
+    key: "resend",
+    name: "Resend",
+    purpose: "Sends the TID welcome email",
+    env: ["RESEND_API_KEY"],
+    missingTone: "warn",
+  },
+  {
+    key: "cloudinary",
+    name: "Cloudinary",
+    purpose: "Image uploads in the post editor",
+    env: ["CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET", "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"],
+    missingTone: "warn",
+  },
+  {
+    key: "gemini",
+    name: "Google Gemini",
+    purpose: "AI excerpt suggestions in the post editor",
+    env: ["GEMINI_API_KEY"],
+    missingTone: "warn",
+  },
+];
+
+const PUBLIC_PAGES = [
+  { label: "Home", href: "/" },
+  { label: "Blog", href: "/blog" },
+  { label: "Jobs", href: "/jobs" },
+  { label: "TID overview", href: "/identity" },
+  { label: "Claim a TID", href: "/identity/claim" },
+];
+
+const toneStyles: Record<Tone, { dot: string; text: string }> = {
+  ok: { dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" },
+  warn: { dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400" },
+  error: { dot: "bg-red-500", text: "text-red-600 dark:text-red-400" },
+};
+
+/** Same look as StatusBadge in AdminUI, with an error tone for system checks. */
+function HealthStatus({ tone, label }: { tone: Tone; label: string }) {
+  const style = toneStyles[tone];
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap", style.text)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+export default function SettingsClient({ userEmail, initialHealth }: SettingsClientProps) {
+  const router = useRouter();
+  const [isRefreshing, startRefresh] = useTransition();
+  const health = initialHealth;
+  const dbOk = health.database.status === "connected";
+
+  const counts: { label: string; value: number }[] = [
+    { label: "Posts", value: health.counts.posts },
+    { label: "Jobs", value: health.counts.jobs },
+    { label: "TID holders", value: health.counts.developers },
+    { label: "Comments", value: health.counts.comments },
+    { label: "Admin users", value: health.counts.users },
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        title="Settings"
+        description="Your admin account, and the services this site depends on."
+        actions={
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() => startRefresh(() => router.refresh())}
+            disabled={isRefreshing}
+          >
+            <RefreshCw size={14} className={cn(isRefreshing && "animate-spin")} />
+            {isRefreshing ? "Checking…" : "Re-check health"}
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        {/* Left column */}
+        <div className="space-y-6">
+          <Panel title="Account" description="Change the password you use to sign in.">
+            <div className="flex items-center gap-3 border-b border-border-glass px-4 py-3">
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-blue-glow-soft text-sm font-semibold text-accent-blue-light"
+                aria-hidden="true"
+              >
+                {userEmail.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-text-primary" title={userEmail}>
+                  {userEmail}
+                </p>
+                <p className="text-xs text-text-muted">Administrator · signed in</p>
+              </div>
+            </div>
+            <PasswordForm userEmail={userEmail} />
+          </Panel>
+
+          <Panel title="Public pages" description="Open the live site in a new tab.">
+            <ul className="divide-y divide-border-glass">
+              {PUBLIC_PAGES.map((page) => (
+                <li key={page.href}>
+                  <a
+                    href={page.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-text-primary/2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-blue/40"
+                  >
+                    <span className="flex-1 text-text-primary">{page.label}</span>
+                    <span className="font-mono text-xs text-text-muted">{page.href}</span>
+                    <ExternalLink size={14} className="shrink-0 text-text-muted" aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          <Panel
+            title="System health"
+            description="Checked when this page loaded. “Configured” means the environment variables are set; the keys are not tested."
+          >
+            <ul className="divide-y divide-border-glass">
+              <li className="flex items-start gap-4 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-text-primary">Database</p>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Neon Postgres
+                    {dbOk && (
+                      <>
+                        {" · "}
+                        <span className="tabular-nums">{health.database.latencyMs} ms</span> query round trip
+                      </>
+                    )}
+                  </p>
+                  {!dbOk && health.database.error && (
+                    <p className="mt-1 wrap-break-word text-xs text-red-600 dark:text-red-400">{health.database.error}</p>
+                  )}
+                </div>
+                <HealthStatus tone={dbOk ? "ok" : "error"} label={dbOk ? "Connected" : "Unreachable"} />
+              </li>
+
+              {SERVICES.map((service) => {
+                const configured = health.services[service.key].configured;
+                return (
+                  <li key={service.key} className="flex items-start gap-4 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-primary">{service.name}</p>
+                      <p className="mt-0.5 text-xs text-text-muted">{service.purpose}</p>
+                      <p className="mt-1 break-all font-mono text-[11px] text-text-muted">
+                        {service.env.join(", ")}
+                      </p>
+                    </div>
+                    <HealthStatus
+                      tone={configured ? "ok" : service.missingTone}
+                      label={configured ? "Configured" : "Not configured"}
+                    />
+                  </li>
+                );
+              })}
+
+              <li className="flex items-center gap-4 px-4 py-3">
+                <p className="flex-1 text-sm font-medium text-text-primary">Environment</p>
+                <span className="font-mono text-xs text-text-secondary">{health.environment}</span>
+              </li>
+            </ul>
+          </Panel>
+
+          <Panel title="Records" description="Rows in the database.">
+            <dl className="divide-y divide-border-glass">
+              {counts.map((item) => (
+                <div key={item.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-sm text-text-secondary">{item.label}</dt>
+                  <dd className="text-sm font-medium tabular-nums text-text-primary">
+                    {item.value.toLocaleString("en-US")}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Panel>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Change password ───
+
+function PasswordForm({ userEmail }: { userEmail: string }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPass, setShowCurrentPass] = useState(false);
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [passError, setPassError] = useState("");
-  const [passSuccess, setPassSuccess] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const mismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPassError("");
-    setPassSuccess("");
+    if (saving) return;
+    setError("");
 
     if (!currentPassword) {
-      setPassError("Please enter your current password.");
+      setError("Enter your current password.");
       return;
     }
-    if (newPassword.length < 8) {
-      setPassError("New password must be at least 8 characters long.");
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setError(`The new password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPassError("New passwords do not match.");
+      setError("The new passwords don't match.");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setError("The new password must be different from the current one.");
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await updateAdminPassword({ currentPassword, newPassword });
-        setPassSuccess("Password updated successfully! Keep your new credentials secure.");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } catch (err) {
-        setPassError(err instanceof Error ? err.message : "Failed to update password.");
+    setSaving(true);
+    try {
+      const result = await updateAdminPassword({ currentPassword, newPassword });
+      if (!result.ok) {
+        setError(result.error);
+        return;
       }
-    });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowCurrent(false);
+      setShowNew(false);
+      toast.success("Password updated");
+    } catch (err) {
+      console.error(err);
+      setError(NETWORK_ERROR);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="max-w-[900px] mx-auto space-y-8">
-      {/* Header */}
+    <form onSubmit={handleSubmit} className="max-w-sm space-y-4 p-4">
+      {/* Lets password managers link the new password to this account. */}
+      <input type="email" name="username" autoComplete="username" value={userEmail} readOnly hidden />
+
       <div>
-        <h1 className="text-2xl font-bold text-text-primary mb-1">
-          Settings & Operations
-        </h1>
-        <p className="text-sm text-text-muted">
-          Manage admin credentials, security preferences, and inspect platform infrastructure.
+        <label htmlFor="current-password" className={adminLabelClass}>
+          Current password
+        </label>
+        <PasswordInput
+          id="current-password"
+          value={currentPassword}
+          onChange={setCurrentPassword}
+          autoComplete="current-password"
+          visible={showCurrent}
+          onToggleVisible={() => setShowCurrent((v) => !v)}
+          disabled={saving}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="new-password" className={adminLabelClass}>
+          New password
+        </label>
+        <PasswordInput
+          id="new-password"
+          value={newPassword}
+          onChange={setNewPassword}
+          autoComplete="new-password"
+          visible={showNew}
+          onToggleVisible={() => setShowNew((v) => !v)}
+          disabled={saving}
+          describedBy="new-password-hint"
+        />
+        <p id="new-password-hint" className="mt-1.5 text-xs text-text-muted">
+          At least {MIN_PASSWORD_LENGTH} characters.
         </p>
       </div>
 
-      {/* Tabs navigation */}
-      <div className="flex items-center gap-2 border-b border-border-glass pb-2">
-        <button
-          onClick={() => setActiveTab("security")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === "security"
-              ? "bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
-              : "text-text-muted hover:text-text-primary hover:bg-bg-card"
-          }`}
-        >
-          <KeyRound size={16} />
-          <span>Security & Account</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("health")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === "health"
-              ? "bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
-              : "text-text-muted hover:text-text-primary hover:bg-bg-card"
-          }`}
-        >
-          <Server size={16} />
-          <span>System & Integrations</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("info")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeTab === "info"
-              ? "bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
-              : "text-text-muted hover:text-text-primary hover:bg-bg-card"
-          }`}
-        >
-          <Globe size={16} />
-          <span>Ecosystem Info</span>
-        </button>
+      <div>
+        <label htmlFor="confirm-password" className={adminLabelClass}>
+          Confirm new password
+        </label>
+        <input
+          id="confirm-password"
+          type={showNew ? "text" : "password"}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          autoComplete="new-password"
+          disabled={saving}
+          aria-invalid={mismatch || undefined}
+          aria-describedby={mismatch ? "confirm-password-error" : undefined}
+          className={cn(adminInputClass, mismatch && "border-red-500/60")}
+        />
+        {mismatch && (
+          <p id="confirm-password-error" className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+            Doesn&apos;t match the new password.
+          </p>
+        )}
       </div>
 
-      {/* TAB 1: SECURITY & ACCOUNT */}
-      {activeTab === "security" && (
-        <div className="space-y-6">
-          {/* Current Profile Card */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 shadow-sm">
-            <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
-              <User size={16} className="text-accent-blue-light" />
-              <span>Active Administrator</span>
-            </h3>
-            <p className="text-xs text-text-muted mb-4">
-              Currently signed in session details.
-            </p>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-lg bg-bg-primary/50 border border-border-glass gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent-blue/10 border border-accent-blue-glow/30 flex items-center justify-center font-bold text-accent-blue-light text-sm">
-                  {userEmail.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-text-primary">
-                    {userEmail}
-                  </div>
-                  <div className="text-xs text-text-muted">
-                    Full Admin Privileges · JWT Session
-                  </div>
-                </div>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20 self-start sm:self-center">
-                <CheckCircle2 size={13} /> Active Session
-              </span>
-            </div>
-          </div>
-
-          {/* Change Password Form */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <Lock size={16} className="text-accent-blue-light" />
-              <h3 className="text-sm font-bold text-text-primary">
-                Update Admin Password
-              </h3>
-            </div>
-            <p className="text-xs text-text-muted mb-6">
-              Ensure your account is protected with a strong, unique password (minimum 8 characters).
-            </p>
-
-            {passError && (
-              <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-                <AlertCircle size={15} className="shrink-0" />
-                <span>{passError}</span>
-              </div>
-            )}
-
-            {passSuccess && (
-              <div className="mb-5 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs flex items-center gap-2">
-                <CheckCircle2 size={15} className="shrink-0" />
-                <span>{passSuccess}</span>
-              </div>
-            )}
-
-            <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5 block">
-                  Current Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    type={showCurrentPass ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                    placeholder="Enter current password"
-                    className="bg-bg-primary border-border-glass pr-10 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPass(!showCurrentPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
-                  >
-                    {showCurrentPass ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5 block">
-                  New Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    type={showNewPass ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    placeholder="At least 8 characters"
-                    className="bg-bg-primary border-border-glass pr-10 text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPass(!showNewPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
-                  >
-                    {showNewPass ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5 block">
-                  Confirm New Password
-                </Label>
-                <Input
-                  type={showNewPass ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="Re-enter new password"
-                  className="bg-bg-primary border-border-glass text-sm"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="mt-2 bg-accent-blue text-white hover:bg-blue-600 shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]"
-              >
-                {isPending ? "Updating Password..." : "Save New Password"}
-              </Button>
-            </form>
-          </div>
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400"
+        >
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      {/* TAB 2: SYSTEM HEALTH & INTEGRATIONS */}
-      {activeTab === "health" && (
-        <div className="space-y-6">
-          {/* Database Health Card */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between pb-3.5 border-b border-border-glass mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-accent-blue/10 text-accent-blue-light flex items-center justify-center">
-                  <Database size={18} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-text-primary">
-                    Neon Serverless PostgreSQL
-                  </h3>
-                  <p className="text-[0.7rem] text-text-muted">
-                    Primary transactional datastore & connection pool
-                  </p>
-                </div>
-              </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" size="xs" disabled={saving}>
+          {saving ? "Updating…" : "Update password"}
+        </Button>
+        <p className="text-xs text-text-muted">Other devices stay signed in.</p>
+      </div>
+    </form>
+  );
+}
 
-              {initialHealth.database.status === "connected" ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">
-                  <CheckCircle2 size={13} /> Connected
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
-                  <AlertCircle size={13} /> Unreachable
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-bg-primary/40 border border-border-glass/60">
-                <div className="text-text-muted text-[0.65rem] uppercase font-bold">Query Latency</div>
-                <div className="text-base font-semibold text-text-primary mt-0.5 flex items-center gap-1">
-                  <Clock size={13} className="text-cyan-400" />
-                  {initialHealth.database.latencyMs} ms
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-bg-primary/40 border border-border-glass/60">
-                <div className="text-text-muted text-[0.65rem] uppercase font-bold">Developers (TIDs)</div>
-                <div className="text-base font-semibold text-text-primary mt-0.5">
-                  {initialHealth.counts.developers}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-bg-primary/40 border border-border-glass/60">
-                <div className="text-text-muted text-[0.65rem] uppercase font-bold">Articles & Jobs</div>
-                <div className="text-base font-semibold text-text-primary mt-0.5">
-                  {initialHealth.counts.posts} posts · {initialHealth.counts.jobs} jobs
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-bg-primary/40 border border-border-glass/60">
-                <div className="text-text-muted text-[0.65rem] uppercase font-bold">Comments</div>
-                <div className="text-base font-semibold text-text-primary mt-0.5">
-                  {initialHealth.counts.comments}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Third-Party Integrations */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 shadow-sm">
-            <h3 className="text-sm font-bold text-text-primary mb-1">
-              External Cloud Services
-            </h3>
-            <p className="text-xs text-text-muted mb-4">
-              Real-time API key and credential detection for ecosystem dependencies.
-            </p>
-
-            <div className="divide-y divide-border-glass/50">
-              {/* Resend */}
-              <div className="py-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                    <Mail size={16} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">
-                      Resend Email Delivery
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      Automated TID Welcome emails & notifications
-                    </div>
-                  </div>
-                </div>
-                {initialHealth.services.resend.configured ? (
-                  <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <CheckCircle2 size={12} /> Configured
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <AlertCircle size={12} /> Missing Key
-                  </span>
-                )}
-              </div>
-
-              {/* Cloudinary */}
-              <div className="py-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                    <ImageIcon size={16} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">
-                      Cloudinary Media Storage
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      Post cover images & inline editor uploads
-                    </div>
-                  </div>
-                </div>
-                {initialHealth.services.cloudinary.configured ? (
-                  <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <CheckCircle2 size={12} /> Configured
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <AlertCircle size={12} /> Missing Key
-                  </span>
-                )}
-              </div>
-
-              {/* Google Gemini AI */}
-              <div className="py-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                    <Sparkles size={16} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">
-                      Google Gemini 2.5 Flash
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      AI-assisted SEO excerpts & meta copy generation
-                    </div>
-                  </div>
-                </div>
-                {initialHealth.services.gemini.configured ? (
-                  <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <CheckCircle2 size={12} /> Configured
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <AlertCircle size={12} /> Missing Key
-                  </span>
-                )}
-              </div>
-
-              {/* NextAuth Secret */}
-              <div className="py-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-text-primary">
-                      NextAuth Cryptographic Secret
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      JWT session token signing & encryption
-                    </div>
-                  </div>
-                </div>
-                {initialHealth.services.nextAuth.configured ? (
-                  <span className="text-xs font-semibold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <CheckCircle2 size={12} /> Configured
-                  </span>
-                ) : (
-                  <span className="text-xs font-semibold text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                    <AlertCircle size={12} /> Unset
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: ECOSYSTEM INFO */}
-      {activeTab === "info" && (
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-text-primary mb-1">
-            Platform Quick Links
-          </h3>
-          <p className="text-xs text-text-muted mb-4">
-            Direct navigation to public landing pages and entry portals.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Link
-              href="/"
-              target="_blank"
-              className="p-3.5 rounded-lg bg-bg-primary/50 border border-border-glass hover:border-accent-blue-glow transition-all flex items-center justify-between group"
-            >
-              <div>
-                <div className="text-xs font-semibold text-text-primary group-hover:text-accent-blue-light transition-colors">
-                  Main Landing Page
-                </div>
-                <div className="text-[0.7rem] text-text-muted">techfamz.com/</div>
-              </div>
-              <ExternalLink size={14} className="text-text-muted" />
-            </Link>
-
-            <Link
-              href="/identity/claim"
-              target="_blank"
-              className="p-3.5 rounded-lg bg-bg-primary/50 border border-border-glass hover:border-accent-blue-glow transition-all flex items-center justify-between group"
-            >
-              <div>
-                <div className="text-xs font-semibold text-text-primary group-hover:text-accent-blue-light transition-colors">
-                  TID Claim Portal
-                </div>
-                <div className="text-[0.7rem] text-text-muted">techfamz.com/identity/claim</div>
-              </div>
-              <ExternalLink size={14} className="text-text-muted" />
-            </Link>
-
-            <Link
-              href="/blog"
-              target="_blank"
-              className="p-3.5 rounded-lg bg-bg-primary/50 border border-border-glass hover:border-accent-blue-glow transition-all flex items-center justify-between group"
-            >
-              <div>
-                <div className="text-xs font-semibold text-text-primary group-hover:text-accent-blue-light transition-colors">
-                  Engineering Blog
-                </div>
-                <div className="text-[0.7rem] text-text-muted">techfamz.com/blog</div>
-              </div>
-              <ExternalLink size={14} className="text-text-muted" />
-            </Link>
-
-            <Link
-              href="/jobs"
-              target="_blank"
-              className="p-3.5 rounded-lg bg-bg-primary/50 border border-border-glass hover:border-accent-blue-glow transition-all flex items-center justify-between group"
-            >
-              <div>
-                <div className="text-xs font-semibold text-text-primary group-hover:text-accent-blue-light transition-colors">
-                  Tech Jobs Directory
-                </div>
-                <div className="text-[0.7rem] text-text-muted">techfamz.com/jobs</div>
-              </div>
-              <ExternalLink size={14} className="text-text-muted" />
-            </Link>
-          </div>
-        </div>
-      )}
+function PasswordInput({
+  id,
+  value,
+  onChange,
+  autoComplete,
+  visible,
+  onToggleVisible,
+  disabled,
+  describedBy,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: string;
+  visible: boolean;
+  onToggleVisible: () => void;
+  disabled: boolean;
+  describedBy?: string;
+}) {
+  const label = visible ? "Hide password" : "Show password";
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
+        disabled={disabled}
+        aria-describedby={describedBy}
+        className={cn(adminInputClass, "pr-10")}
+      />
+      <button
+        type="button"
+        onClick={onToggleVisible}
+        aria-label={label}
+        aria-pressed={visible}
+        title={label}
+        className="absolute right-1.5 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/40"
+      >
+        {visible ? <EyeOff size={15} /> : <Eye size={15} />}
+      </button>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import DevelopersClient from "./DevelopersClient";
 
 export const metadata = {
   title: "Developers & TIDs | Admin Dashboard",
-  description: "View and manage verified Techfamz Identity (TID) developers.",
+  description: "View and manage Techfamz Identity (TID) holders.",
 };
 
 export const dynamic = "force-dynamic";

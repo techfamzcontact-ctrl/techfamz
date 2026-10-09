@@ -1,40 +1,53 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
-import {
-  deleteDeveloper,
-  createDeveloperAdmin,
-  updateDeveloperAdmin,
-} from "@/app/admin/actions";
+import { useMemo, useRef, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
-import Link from "next/link";
+import { toast } from "sonner";
 import {
-  Search,
+  AlertCircle,
+  Check,
+  Code2,
+  Copy,
   Download,
   ExternalLink,
-  Trash2,
-  Copy,
-  Check,
-  Users,
-  Globe,
-  Briefcase,
-  X,
-  Code2,
-  Plus,
+  Mail,
+  MoreHorizontal,
   Pencil,
-  AlertCircle,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  X,
 } from "lucide-react";
+import { createDeveloperAdmin, deleteDeveloper, updateDeveloperAdmin } from "@/app/admin/actions";
+import {
+  EmptyState,
+  PageHeader,
+  Panel,
+  StatCard,
+  adminInputClass,
+  adminLabelClass,
+  adminTable,
+} from "@/components/admin/AdminUI";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { runAction } from "@/components/admin/run-action";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export interface Developer {
   id: string;
@@ -48,6 +61,7 @@ export interface Developer {
   createdAt: Date | string;
 }
 
+/** Same list as the public claim form (app/api/tid/route.ts). */
 const POPULAR_ROLES = [
   "Frontend Engineer",
   "Backend Engineer",
@@ -62,53 +76,174 @@ const POPULAR_ROLES = [
   "Other",
 ];
 
-export default function DevelopersClient({
-  initialDevelopers,
-}: {
-  initialDevelopers: Developer[];
-}) {
+const CUSTOM_ROLE = "__custom__";
+const VISIBLE_SKILLS = 3;
+const NETWORK_ERROR = "Something went wrong. Check your connection and try again.";
+
+type FormValues = {
+  fullName: string;
+  email: string;
+  role: string;
+  skills: string;
+  country: string;
+  githubUrl: string;
+};
+
+const EMPTY_FORM: FormValues = {
+  fullName: "",
+  email: "",
+  role: POPULAR_ROLES[0],
+  skills: "",
+  country: "",
+  githubUrl: "",
+};
+
+function valuesFromDeveloper(dev: Developer): FormValues {
+  return {
+    fullName: dev.fullName,
+    email: dev.email,
+    role: dev.role,
+    skills: dev.skills.join(", "),
+    country: dev.country ?? "",
+    githubUrl: dev.githubUrl ?? "",
+  };
+}
+
+function toDeveloperInput(values: FormValues) {
+  return {
+    fullName: values.fullName,
+    email: values.email,
+    role: values.role,
+    skills: values.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0),
+    country: values.country || undefined,
+    githubUrl: values.githubUrl || undefined,
+  };
+}
+
+function githubHref(url: string) {
+  return url.startsWith("http") ? url : `https://${url}`;
+}
+
+/** Fixed locale, so the server render and the browser agree (no hydration mismatch). */
+function formatCount(n: number) {
+  return n.toLocaleString("en-US");
+}
+
+function plural(n: number, word: string) {
+  return `${formatCount(n)} ${word}${n === 1 ? "" : "s"}`;
+}
+
+/** Count how often each value appears, most common first. */
+function countBy(values: string[]) {
+  const counts = new Map<string, number>();
+  for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
+  return counts;
+}
+
+function mostCommon(counts: Map<string, number>) {
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const [value, count] of counts) {
+    if (count > bestCount) {
+      best = value;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+async function copyToClipboard(text: string, label: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(`${label} copied`);
+    return true;
+  } catch {
+    toast.error("Couldn't copy to the clipboard.");
+    return false;
+  }
+}
+
+// ─── CSV export ───
+
+/**
+ * Spreadsheet apps run cells that start with these characters as formulas
+ * (CSV injection), so such values are prefixed with a single quote.
+ */
+const FORMULA_START = /^[=+\-@\t\r]/;
+
+function csvCell(value: string) {
+  const safe = FORMULA_START.test(value) ? `'${value}` : value;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+function buildDevelopersCsv(developers: Developer[]) {
+  const header = ["TID", "Full Name", "Email", "Role", "Skills", "Country", "GitHub URL", "Created At"];
+  const rows = developers.map((dev) => [
+    dev.tid,
+    dev.fullName,
+    dev.email,
+    dev.role,
+    dev.skills.join("; "),
+    dev.country ?? "",
+    dev.githubUrl ?? "",
+    new Date(dev.createdAt).toISOString(),
+  ]);
+  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+}
+
+function downloadCsv(csv: string, filename: string) {
+  // The BOM lets Excel detect UTF-8, so accented names display correctly.
+  const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  // Revoke after the browser has started the download.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ─── Page ───
+
+export default function DevelopersClient({ initialDevelopers }: { initialDevelopers: Developer[] }) {
+  const confirm = useConfirm();
   const [developers, setDevelopers] = useState<Developer[]>(initialDevelopers);
+
+  // Filters
   const [search, setSearch] = useState("");
-  const [selectedRole, setSelectedRole] = useState("ALL");
-  const [selectedCountry, setSelectedCountry] = useState("ALL");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+
+  // Row state
   const [copiedTid, setCopiedTid] = useState<string | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
 
-  // Create Modal State
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [createName, setCreateName] = useState("");
-  const [createEmail, setCreateEmail] = useState("");
-  const [createRole, setCreateRole] = useState(POPULAR_ROLES[0]);
-  const [createSkills, setCreateSkills] = useState("");
-  const [createCountry, setCreateCountry] = useState("");
-  const [createGithub, setCreateGithub] = useState("");
-  const [createSendEmail, setCreateSendEmail] = useState(true);
-  const [createError, setCreateError] = useState("");
+  // Create / edit dialog. `editing` is null in create mode and is kept while
+  // the dialog closes, so its content doesn't change during the exit animation.
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Developer | null>(null);
+  const [createValues, setCreateValues] = useState<FormValues>(EMPTY_FORM);
+  const [editValues, setEditValues] = useState<FormValues>(EMPTY_FORM);
+  const [sendWelcomeEmail, setSendWelcomeEmail] = useState(true);
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // Edit Modal State
-  const [editingDev, setEditingDev] = useState<Developer | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
-  const [editRole, setEditRole] = useState("");
-  const [editSkills, setEditSkills] = useState("");
-  const [editCountry, setEditCountry] = useState("");
-  const [editGithub, setEditGithub] = useState("");
-  const [editError, setEditError] = useState("");
+  const roleCounts = useMemo(() => countBy(developers.map((d) => d.role).filter(Boolean)), [developers]);
+  const countryCounts = useMemo(
+    () => countBy(developers.map((d) => d.country).filter((c): c is string => Boolean(c))),
+    [developers]
+  );
+  const availableRoles = useMemo(() => Array.from(roleCounts.keys()).sort(), [roleCounts]);
+  const availableCountries = useMemo(() => Array.from(countryCounts.keys()).sort(), [countryCounts]);
+  const topRole = mostCommon(roleCounts);
+  const topCountry = mostCommon(countryCounts);
 
-  // Extract unique roles and countries for filter dropdowns
-  const availableRoles = useMemo(() => {
-    const roles = Array.from(new Set(developers.map((d) => d.role).filter(Boolean)));
-    return roles.sort();
-  }, [developers]);
-
-  const availableCountries = useMemo(() => {
-    const countries = Array.from(new Set(developers.map((d) => d.country).filter(Boolean))) as string[];
-    return countries.sort();
-  }, [developers]);
-
-  // Filtered developers
   const filteredDevelopers = useMemo(() => {
     const q = search.trim().toLowerCase();
     return developers.filter((dev) => {
@@ -119,778 +254,660 @@ export default function DevelopersClient({
         dev.tid.toLowerCase().includes(q) ||
         dev.role.toLowerCase().includes(q) ||
         dev.skills.some((s) => s.toLowerCase().includes(q)) ||
-        (dev.country && dev.country.toLowerCase().includes(q));
-
-      const matchesRole = selectedRole === "ALL" || dev.role === selectedRole;
-      const matchesCountry = selectedCountry === "ALL" || dev.country === selectedCountry;
-
+        (dev.country?.toLowerCase().includes(q) ?? false);
+      const matchesRole = !selectedRole || dev.role === selectedRole;
+      const matchesCountry = !selectedCountry || dev.country === selectedCountry;
       return matchesSearch && matchesRole && matchesCountry;
     });
   }, [developers, search, selectedRole, selectedCountry]);
 
-  // Copy to clipboard
-  const handleCopyTid = (tid: string) => {
-    navigator.clipboard.writeText(tid);
+  const hasFilters = Boolean(search || selectedRole || selectedCountry);
+
+  const clearFilters = () => {
+    setSearch("");
+    setSelectedRole("");
+    setSelectedCountry("");
+  };
+
+  // ─── Actions ───
+
+  const handleCopyTid = async (tid: string) => {
+    if (!(await copyToClipboard(tid, "TID"))) return;
     setCopiedTid(tid);
-    setTimeout(() => setCopiedTid(null), 2000);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopiedTid(null), 2000);
   };
 
-  const handleCopyEmail = (email: string) => {
-    navigator.clipboard.writeText(email);
-    setCopiedEmail(email);
-    setTimeout(() => setCopiedEmail(null), 2000);
+  const openCreate = () => {
+    setEditing(null);
+    setFormError("");
+    setFormOpen(true);
   };
 
-  // Delete developer
-  const handleDelete = (id: string, name: string, tid: string) => {
-    if (!confirm(`Are you sure you want to delete ${name} (${tid})? This cannot be undone.`)) {
-      return;
-    }
-    setDeletingId(id);
-    startTransition(async () => {
-      try {
-        await deleteDeveloper(id);
-        setDevelopers((prev) => prev.filter((d) => d.id !== id));
-      } catch (err) {
-        console.error("Failed to delete developer:", err);
-        alert("Failed to delete developer. Please try again.");
-      } finally {
-        setDeletingId(null);
-      }
-    });
+  const openEdit = (dev: Developer) => {
+    setEditing(dev);
+    setEditValues(valuesFromDeveloper(dev));
+    setFormError("");
+    setFormOpen(true);
   };
 
-  // Open Edit Modal
-  const openEditModal = (dev: Developer) => {
-    setEditingDev(dev);
-    setEditName(dev.fullName);
-    setEditEmail(dev.email);
-    setEditRole(dev.role);
-    setEditSkills(dev.skills.join(", "));
-    setEditCountry(dev.country || "");
-    setEditGithub(dev.githubUrl || "");
-    setEditError("");
-  };
-
-  // Handle Edit Submit
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingDev) return;
+    if (saving) return;
+    setFormError("");
+    setSaving(true);
 
-    setEditError("");
-    const parsedSkills = editSkills
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-
-    startTransition(async () => {
-      try {
-        const updated = await updateDeveloperAdmin(editingDev.id, {
-          fullName: editName,
-          email: editEmail,
-          role: editRole,
-          skills: parsedSkills,
-          githubUrl: editGithub || undefined,
-          country: editCountry || undefined,
+    try {
+      if (editing) {
+        const result = await updateDeveloperAdmin(editing.id, toDeveloperInput(editValues));
+        if (!result.ok) {
+          setFormError(result.error);
+          return;
+        }
+        const updated = result.data;
+        setDevelopers((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+        setFormOpen(false);
+        toast.success(`Saved changes to ${updated.fullName}`);
+      } else {
+        const result = await createDeveloperAdmin({
+          ...toDeveloperInput(createValues),
+          sendEmail: sendWelcomeEmail,
         });
-
-        setDevelopers((prev) =>
-          prev.map((d) => (d.id === updated.id ? { ...d, ...updated } : d))
-        );
-        setEditingDev(null);
-      } catch (err) {
-        setEditError(err instanceof Error ? err.message : "Failed to update developer");
-      }
-    });
-  };
-
-  // Handle Create Submit
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreateError("");
-
-    const parsedSkills = createSkills
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-
-    startTransition(async () => {
-      try {
-        const created = await createDeveloperAdmin({
-          fullName: createName,
-          email: createEmail,
-          role: createRole,
-          skills: parsedSkills,
-          country: createCountry || undefined,
-          githubUrl: createGithub || undefined,
-          sendEmail: createSendEmail,
-        });
-
+        if (!result.ok) {
+          setFormError(result.error);
+          return;
+        }
+        const created = result.data;
         setDevelopers((prev) => [created, ...prev]);
-        setIsCreateOpen(false);
-
-        // Reset form
-        setCreateName("");
-        setCreateEmail("");
-        setCreateRole(POPULAR_ROLES[0]);
-        setCreateSkills("");
-        setCreateCountry("");
-        setCreateGithub("");
-      } catch (err) {
-        setCreateError(err instanceof Error ? err.message : "Failed to create developer");
+        setFormOpen(false);
+        setCreateValues(EMPTY_FORM);
+        toast.success(`Issued ${created.tid} to ${created.fullName}`, {
+          action: { label: "Copy TID", onClick: () => void copyToClipboard(created.tid, "TID") },
+        });
       }
+    } catch (err) {
+      console.error(err);
+      setFormError(NETWORK_ERROR);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (dev: Developer) => {
+    const ok = await confirm({
+      title: `Delete ${dev.fullName}?`,
+      description: `This permanently removes the developer and their TID ${dev.tid}. Their public TID page will stop working. This cannot be undone.`,
+      confirmLabel: "Delete developer",
+      destructive: true,
     });
+    if (!ok) return;
+
+    setDeletingId(dev.id);
+    const result = await runAction(deleteDeveloper(dev.id), `Deleted ${dev.fullName} (${dev.tid})`);
+    setDeletingId(null);
+    if (result) setDevelopers((prev) => prev.filter((d) => d.id !== dev.id));
   };
 
-  // CSV Export
-  const handleExportCSV = () => {
-    const headers = [
-      "TID",
-      "Full Name",
-      "Email",
-      "Role",
-      "Skills",
-      "Country",
-      "GitHub URL",
-      "Created At",
-    ];
-
-    const rows = filteredDevelopers.map((dev) => [
-      `"${dev.tid}"`,
-      `"${dev.fullName.replace(/"/g, '""')}"`,
-      `"${dev.email.replace(/"/g, '""')}"`,
-      `"${dev.role.replace(/"/g, '""')}"`,
-      `"${dev.skills.join("; ").replace(/"/g, '""')}"`,
-      `"${(dev.country || "").replace(/"/g, '""')}"`,
-      `"${(dev.githubUrl || "").replace(/"/g, '""')}"`,
-      `"${new Date(dev.createdAt).toISOString()}"`,
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    const dateStr = format(new Date(), "yyyy-MM-dd");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `techfamz-developers-${dateStr}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportCsv = () => {
+    if (filteredDevelopers.length === 0) return;
+    downloadCsv(
+      buildDevelopersCsv(filteredDevelopers),
+      `techfamz-developers-${format(new Date(), "yyyy-MM-dd")}.csv`
+    );
+    toast.success(`Exported ${plural(filteredDevelopers.length, "developer")}`);
   };
+
+  const formValues = editing ? editValues : createValues;
+  const setFormValues = editing ? setEditValues : setCreateValues;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-text-primary">
-              Developers & TIDs
-            </h1>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-accent-blue/10 text-accent-blue-light border border-accent-blue-glow/30">
-              {developers.length} Registered
-            </span>
-          </div>
-          <p className="text-sm text-text-muted mt-1">
-            Directory of verified Techfamz Identity (TID) holders across Africa and beyond.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5 self-start sm:self-center">
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="bg-accent-blue hover:bg-blue-600 text-white shadow-[0_0_15px_var(--color-accent-blue-glow-soft)] flex items-center gap-1.5 text-xs font-semibold"
-          >
-            <Plus size={15} />
-            <span>Issue TID</span>
-          </Button>
-
-          <button
-            onClick={handleExportCSV}
-            disabled={filteredDevelopers.length === 0}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-bg-card border border-border-glass text-text-primary hover:text-accent-blue-light hover:border-accent-blue-glow transition-all text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-          >
-            <Download size={14} />
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 relative overflow-hidden group hover:border-accent-blue-glow transition-all">
-          <div className="absolute -right-3 -top-3 text-accent-blue-light/5 group-hover:text-accent-blue-light/10 transition-colors">
-            <Users size={70} />
-          </div>
-          <div className="text-text-muted text-[0.68rem] font-bold uppercase tracking-wider mb-1 relative z-10">
-            Total Verified TIDs
-          </div>
-          <div className="text-3xl font-bold text-text-primary relative z-10">
-            {developers.length}
-          </div>
-          <div className="text-xs text-accent-blue-light mt-1 relative z-10">
-            Active identity holders
-          </div>
-        </div>
-
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 relative overflow-hidden group hover:border-accent-blue-glow transition-all">
-          <div className="absolute -right-3 -top-3 text-green-400/5 group-hover:text-green-400/10 transition-colors">
-            <Briefcase size={70} />
-          </div>
-          <div className="text-text-muted text-[0.68rem] font-bold uppercase tracking-wider mb-1 relative z-10">
-            Technical Roles
-          </div>
-          <div className="text-3xl font-bold text-text-primary relative z-10">
-            {availableRoles.length}
-          </div>
-          <div className="text-xs text-green-400 mt-1 relative z-10">
-            Specialized engineering domains
-          </div>
-        </div>
-
-        <div className="bg-bg-card border border-border-glass rounded-xl p-5 relative overflow-hidden group hover:border-accent-blue-glow transition-all">
-          <div className="absolute -right-3 -top-3 text-amber-400/5 group-hover:text-amber-400/10 transition-colors">
-            <Globe size={70} />
-          </div>
-          <div className="text-text-muted text-[0.68rem] font-bold uppercase tracking-wider mb-1 relative z-10">
-            Countries Represented
-          </div>
-          <div className="text-3xl font-bold text-text-primary relative z-10">
-            {availableCountries.length || 1}
-          </div>
-          <div className="text-xs text-amber-400 mt-1 relative z-10">
-            Geographic reach
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="bg-bg-card border border-border-glass rounded-xl p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-          />
-          <input
-            type="text"
-            placeholder="Search by name, email, TID (e.g. TF...), role, skill..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-9 py-2 bg-bg-primary border border-border-glass rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue transition-colors"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+    <div>
+      <PageHeader
+        title="Developers & TIDs"
+        description="Everyone who holds a Techfamz Identity (TID). Skills and other profile details are self-reported."
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={handleExportCsv}
+              disabled={filteredDevelopers.length === 0}
+              title={
+                hasFilters
+                  ? `Export the ${plural(filteredDevelopers.length, "developer")} that match your filters`
+                  : "Export all developers"
+              }
             >
-              <X size={16} />
-            </button>
-          )}
-        </div>
+              <Download size={14} />
+              Export CSV
+            </Button>
+            <Button size="xs" onClick={openCreate}>
+              <Plus size={14} />
+              Add developer
+            </Button>
+          </>
+        }
+      />
 
-        {/* Role Filter */}
-        <div className="w-full md:w-48">
+      {/* Key numbers */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <StatCard label="TID holders" value={formatCount(developers.length)} hint="Registered developers" />
+        <StatCard
+          label="Roles"
+          value={availableRoles.length}
+          hint={topRole ? `Most common: ${topRole}` : "None yet"}
+        />
+        <StatCard
+          label="Countries"
+          value={availableCountries.length}
+          hint={topCountry ? `Most common: ${topCountry}` : "None given yet"}
+        />
+      </div>
+
+      <Panel>
+        {/* Toolbar */}
+        <div className="flex flex-col gap-2 border-b border-border-glass p-3 md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, TID, role, skill or country"
+              aria-label="Search developers"
+              className={cn(adminInputClass, "pl-9 pr-9 [&::-webkit-search-cancel-button]:hidden")}
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Clear search"
+                title="Clear search"
+                className="absolute right-1.5 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/40"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
-            className="w-full py-2 px-3 bg-bg-primary border border-border-glass rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
+            aria-label="Filter by role"
+            className={cn(adminInputClass, "md:w-52")}
           >
-            <option value="ALL">All Roles ({developers.length})</option>
+            <option value="">All roles</option>
             {availableRoles.map((role) => (
+              <option key={role} value={role}>
+                {role} ({roleCounts.get(role)})
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            aria-label="Filter by country"
+            className={cn(adminInputClass, "md:w-44")}
+          >
+            <option value="">All countries</option>
+            {availableCountries.map((country) => (
+              <option key={country} value={country}>
+                {country} ({countryCounts.get(country)})
+              </option>
+            ))}
+          </select>
+
+          {hasFilters && (
+            <Button variant="ghost" size="xs" onClick={clearFilters} className="self-start md:self-auto">
+              Clear filters
+            </Button>
+          )}
+        </div>
+
+        {developers.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="No TID holders yet"
+            description="Developers appear here when they claim a TID on /identity/claim, or when you add one."
+            action={
+              <Button size="xs" onClick={openCreate}>
+                <Plus size={14} />
+                Add developer
+              </Button>
+            }
+          />
+        ) : filteredDevelopers.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="No developers match your filters"
+            description="Try a different search term, or clear the filters."
+            action={
+              <Button variant="outline" size="xs" onClick={clearFilters}>
+                Clear filters
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            <div className={adminTable.wrapper}>
+              <table className={adminTable.table}>
+                <thead>
+                  <tr>
+                    <th className={adminTable.th}>Developer</th>
+                    <th className={adminTable.th}>TID</th>
+                    <th className={adminTable.th}>Role</th>
+                    <th className={adminTable.th}>Skills</th>
+                    <th className={adminTable.th}>Country</th>
+                    <th className={adminTable.th}>Registered</th>
+                    <th className={cn(adminTable.th, "text-right")}>
+                      <span className="sr-only">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDevelopers.map((dev) => (
+                    <DeveloperRow
+                      key={dev.id}
+                      dev={dev}
+                      copied={copiedTid === dev.tid}
+                      deleting={deletingId === dev.id}
+                      onCopyTid={() => void handleCopyTid(dev.tid)}
+                      onEdit={() => openEdit(dev)}
+                      onDelete={() => void handleDelete(dev)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="border-t border-border-glass px-4 py-2.5 text-xs text-text-muted">
+              Showing {formatCount(filteredDevelopers.length)} of {plural(developers.length, "developer")}
+            </div>
+          </>
+        )}
+      </Panel>
+
+      {/* Create / edit dialog */}
+      <Dialog open={formOpen} onOpenChange={(open) => !saving && setFormOpen(open)}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-bg-card ring-border-glass sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex flex-wrap items-center gap-2 text-base font-semibold text-text-primary">
+              {editing ? "Edit developer" : "Add developer"}
+              {editing && <span className="font-mono text-xs font-medium text-accent-blue-light">{editing.tid}</span>}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-text-muted">
+              {editing
+                ? "Changes show on the public TID page straight away. The TID itself can't be changed."
+                : "Registers the developer and issues a new random TID with a public page at /tid/[tid]."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {formError && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400"
+              >
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <DeveloperFields
+              idPrefix={editing ? "edit" : "create"}
+              values={formValues}
+              onChange={(patch) => setFormValues((prev) => ({ ...prev, ...patch }))}
+              disabled={saving}
+            />
+
+            {!editing && (
+              <label className="flex cursor-pointer items-start gap-2 text-sm text-text-secondary">
+                <input
+                  type="checkbox"
+                  checked={sendWelcomeEmail}
+                  onChange={(e) => setSendWelcomeEmail(e.target.checked)}
+                  disabled={saving}
+                  className="mt-0.5 size-4 shrink-0 cursor-pointer accent-accent-blue"
+                />
+                <span>
+                  Send the welcome email with their TID and public page link
+                  <span className="block text-xs text-text-muted">Only sent when Resend is configured.</span>
+                </span>
+              </label>
+            )}
+
+            <DialogFooter className="border-border-glass bg-bg-secondary">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setFormOpen(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="xs" disabled={saving}>
+                {saving ? (editing ? "Saving…" : "Issuing TID…") : editing ? "Save changes" : "Add and issue TID"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Table row ───
+
+function DeveloperRow({
+  dev,
+  copied,
+  deleting,
+  onCopyTid,
+  onEdit,
+  onDelete,
+}: {
+  dev: Developer;
+  copied: boolean;
+  deleting: boolean;
+  onCopyTid: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const created = new Date(dev.createdAt);
+  const extraSkills = dev.skills.slice(VISIBLE_SKILLS);
+
+  return (
+    <tr className={cn(adminTable.tr, deleting && "opacity-50")} aria-busy={deleting || undefined}>
+      {/* Name and email */}
+      <td className={cn(adminTable.td, "min-w-50")}>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-medium text-text-primary">{dev.fullName}</span>
+          {dev.githubUrl && (
+            <a
+              href={githubHref(dev.githubUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`GitHub profile of ${dev.fullName}`}
+              title="GitHub profile"
+              className="shrink-0 rounded text-text-muted transition-colors hover:text-text-primary"
+            >
+              <Code2 size={14} />
+            </a>
+          )}
+        </div>
+        <div className="mt-0.5 truncate text-xs text-text-muted">{dev.email}</div>
+      </td>
+
+      {/* TID */}
+      <td className={cn(adminTable.td, "whitespace-nowrap")}>
+        <div className="inline-flex items-center gap-1">
+          <a
+            href={`/tid/${dev.tid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open public TID page"
+            className="font-mono text-xs font-medium text-accent-blue-light hover:underline underline-offset-2"
+          >
+            {dev.tid}
+          </a>
+          <button
+            type="button"
+            onClick={onCopyTid}
+            aria-label={`Copy TID ${dev.tid}`}
+            title="Copy TID"
+            className="inline-flex size-6 items-center justify-center rounded text-text-muted transition-colors hover:bg-text-primary/5 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue/40"
+          >
+            {copied ? (
+              <Check size={14} className="text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <Copy size={14} />
+            )}
+          </button>
+        </div>
+      </td>
+
+      {/* Role */}
+      <td className={cn(adminTable.td, "whitespace-nowrap text-text-secondary")}>{dev.role}</td>
+
+      {/* Skills */}
+      <td className={adminTable.td}>
+        {dev.skills.length === 0 ? (
+          <span className="text-text-muted">—</span>
+        ) : (
+          <div className="flex max-w-65 flex-wrap gap-1">
+            {dev.skills.slice(0, VISIBLE_SKILLS).map((skill, i) => (
+              <span
+                key={`${skill}-${i}`}
+                className="max-w-35 truncate rounded border border-border-glass px-1.5 py-0.5 text-xs text-text-secondary"
+                title={skill}
+              >
+                {skill}
+              </span>
+            ))}
+            {extraSkills.length > 0 && (
+              <span className="px-1 py-0.5 text-xs text-text-muted" title={extraSkills.join(", ")}>
+                +{extraSkills.length}
+              </span>
+            )}
+          </div>
+        )}
+      </td>
+
+      {/* Country */}
+      <td className={cn(adminTable.td, "whitespace-nowrap text-text-secondary")}>
+        {dev.country || <span className="text-text-muted">—</span>}
+      </td>
+
+      {/* Registered */}
+      <td className={cn(adminTable.td, "whitespace-nowrap")}>
+        <time
+          dateTime={created.toISOString()}
+          className="block text-text-secondary"
+          suppressHydrationWarning
+        >
+          {format(created, "MMM d, yyyy")}
+        </time>
+        <span className="block text-xs text-text-muted" suppressHydrationWarning>
+          {formatDistanceToNow(created, { addSuffix: true })}
+        </span>
+      </td>
+
+      {/* Actions */}
+      <td className={cn(adminTable.td, "w-12 text-right")}>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              disabled={deleting}
+              aria-label={`Actions for ${dev.fullName}`}
+              title="Actions"
+              className="text-text-muted hover:text-text-primary"
+            >
+              <MoreHorizontal size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onSelect={onEdit}>
+              <Pencil size={14} />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onCopyTid}>
+              <Copy size={14} />
+              Copy TID
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void copyToClipboard(dev.email, "Email")}>
+              <Mail size={14} />
+              Copy email
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href={`/tid/${dev.tid}`} target="_blank" rel="noopener noreferrer">
+                <ExternalLink size={14} />
+                Open public page
+              </a>
+            </DropdownMenuItem>
+            {dev.githubUrl && (
+              <DropdownMenuItem asChild>
+                <a href={githubHref(dev.githubUrl)} target="_blank" rel="noopener noreferrer">
+                  <Code2 size={14} />
+                  Open GitHub profile
+                </a>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+              <Trash2 size={14} />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </td>
+    </tr>
+  );
+}
+
+// ─── Form fields (shared by create and edit) ───
+
+function DeveloperFields({
+  idPrefix,
+  values,
+  onChange,
+  disabled,
+}: {
+  idPrefix: string;
+  values: FormValues;
+  onChange: (patch: Partial<FormValues>) => void;
+  disabled: boolean;
+}) {
+  const id = (name: string) => `${idPrefix}-${name}`;
+  // Roles outside the standard list (older records, or typed by an admin) are edited as free text.
+  const customRole = !POPULAR_ROLES.includes(values.role);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label htmlFor={id("name")} className={adminLabelClass}>
+          Full name
+        </label>
+        <input
+          id={id("name")}
+          value={values.fullName}
+          onChange={(e) => onChange({ fullName: e.target.value })}
+          required
+          minLength={2}
+          disabled={disabled}
+          placeholder="e.g. Samuel Adeyemi"
+          autoComplete="off"
+          className={adminInputClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor={id("email")} className={adminLabelClass}>
+          Email
+        </label>
+        <input
+          id={id("email")}
+          type="email"
+          value={values.email}
+          onChange={(e) => onChange({ email: e.target.value })}
+          required
+          disabled={disabled}
+          placeholder="samuel@example.com"
+          autoComplete="off"
+          className={adminInputClass}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor={id("role")} className={adminLabelClass}>
+            Role
+          </label>
+          <select
+            id={id("role")}
+            value={customRole ? CUSTOM_ROLE : values.role}
+            onChange={(e) => onChange({ role: e.target.value === CUSTOM_ROLE ? "" : e.target.value })}
+            disabled={disabled}
+            className={adminInputClass}
+          >
+            {POPULAR_ROLES.map((role) => (
               <option key={role} value={role}>
                 {role}
               </option>
             ))}
+            <option value={CUSTOM_ROLE}>Custom role…</option>
           </select>
         </div>
 
-        {/* Country Filter */}
-        <div className="w-full md:w-44">
-          <select
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-            className="w-full py-2 px-3 bg-bg-primary border border-border-glass rounded-lg text-sm text-text-primary focus:outline-none focus:border-accent-blue transition-colors"
-          >
-            <option value="ALL">All Countries</option>
-            {availableCountries.map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </select>
+        <div>
+          <label htmlFor={id("country")} className={adminLabelClass}>
+            Country <span className="font-normal text-text-muted">(optional)</span>
+          </label>
+          <input
+            id={id("country")}
+            value={values.country}
+            onChange={(e) => onChange({ country: e.target.value })}
+            disabled={disabled}
+            placeholder="e.g. Nigeria"
+            autoComplete="off"
+            className={adminInputClass}
+          />
         </div>
-
-        {/* Reset Filters button if any are applied */}
-        {(search || selectedRole !== "ALL" || selectedCountry !== "ALL") && (
-          <button
-            onClick={() => {
-              setSearch("");
-              setSelectedRole("ALL");
-              setSelectedCountry("ALL");
-            }}
-            className="text-xs text-text-muted hover:text-accent-blue-light transition-colors px-2 py-2 text-center whitespace-nowrap"
-          >
-            Clear Filters
-          </button>
-        )}
       </div>
 
-      {/* Developers Table */}
-      <div className="bg-bg-card border border-border-glass rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-text-secondary border-collapse">
-            <thead className="bg-bg-primary/60 border-b border-border-glass text-[0.7rem] uppercase tracking-wider text-text-muted font-bold">
-              <tr>
-                <th className="px-5 py-3.5">Developer</th>
-                <th className="px-5 py-3.5">TID Code</th>
-                <th className="px-5 py-3.5">Role & Skills</th>
-                <th className="px-5 py-3.5">Country</th>
-                <th className="px-5 py-3.5">Joined</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-glass">
-              {filteredDevelopers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-text-muted">
-                    <Users size={36} className="mx-auto mb-3 opacity-30" />
-                    <p className="text-base font-medium text-text-secondary">
-                      No developers found
-                    </p>
-                    <p className="text-xs text-text-muted mt-1">
-                      {search || selectedRole !== "ALL" || selectedCountry !== "ALL"
-                        ? "Try adjusting your search criteria or clearing filters."
-                        : "No developers have claimed a TID yet."}
-                    </p>
-                  </td>
-                </tr>
-              ) : (
-                filteredDevelopers.map((dev) => {
-                  const dateStr = dev.createdAt
-                    ? format(new Date(dev.createdAt), "MMM d, yyyy")
-                    : "—";
-
-                  return (
-                    <tr
-                      key={dev.id}
-                      className="hover:bg-bg-primary/40 transition-colors group"
-                    >
-                      {/* Name & Email */}
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-text-primary flex items-center gap-1.5">
-                          <span>{dev.fullName}</span>
-                          {dev.githubUrl && (
-                            <a
-                              href={
-                                dev.githubUrl.startsWith("http")
-                                  ? dev.githubUrl
-                                  : `https://${dev.githubUrl}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-text-muted hover:text-accent-blue-light transition-colors"
-                              title="GitHub Profile"
-                            >
-                              <Code2 size={13} />
-                            </a>
-                          )}
-                        </div>
-                        <div className="text-xs text-text-muted flex items-center gap-1.5 mt-0.5">
-                          <span>{dev.email}</span>
-                          <button
-                            onClick={() => handleCopyEmail(dev.email)}
-                            className="text-text-muted hover:text-text-primary transition-colors"
-                            title="Copy email"
-                          >
-                            {copiedEmail === dev.email ? (
-                              <Check size={12} className="text-green-400" />
-                            ) : (
-                              <Copy size={12} />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* TID Badge */}
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="inline-flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-md bg-accent-blue-glow-soft border border-accent-blue-glow text-accent-blue-light">
-                          <span>{dev.tid}</span>
-                          <button
-                            onClick={() => handleCopyTid(dev.tid)}
-                            className="hover:text-white transition-colors"
-                            title="Copy TID"
-                          >
-                            {copiedTid === dev.tid ? (
-                              <Check size={12} className="text-green-400" />
-                            ) : (
-                              <Copy size={12} />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Role & Skills */}
-                      <td className="px-5 py-4">
-                        <div className="text-xs font-medium text-text-primary mb-1">
-                          {dev.role}
-                        </div>
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {dev.skills && dev.skills.length > 0 ? (
-                            dev.skills.slice(0, 3).map((skill, i) => (
-                              <span
-                                key={i}
-                                className="text-[0.65rem] px-1.5 py-0.5 rounded bg-bg-primary border border-border-glass text-text-muted"
-                              >
-                                {skill}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-xs text-text-muted italic">
-                              No skills listed
-                            </span>
-                          )}
-                          {dev.skills && dev.skills.length > 3 && (
-                            <span className="text-[0.65rem] px-1.5 py-0.5 rounded bg-bg-primary text-text-muted">
-                              +{dev.skills.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Country */}
-                      <td className="px-5 py-4 whitespace-nowrap text-xs text-text-secondary">
-                        {dev.country || "—"}
-                      </td>
-
-                      {/* Joined Date */}
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="text-xs text-text-secondary">{dateStr}</div>
-                        {dev.createdAt && (
-                          <div className="text-[0.65rem] text-text-muted">
-                            {formatDistanceToNow(new Date(dev.createdAt), {
-                              addSuffix: true,
-                            })}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-5 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => openEditModal(dev)}
-                            className="p-1.5 rounded-lg text-text-muted hover:text-accent-blue-light hover:bg-bg-primary transition-colors"
-                            title="Edit Developer"
-                          >
-                            <Pencil size={15} />
-                          </button>
-
-                          <Link
-                            href={`/tid/${dev.tid}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg text-text-muted hover:text-cyan-400 hover:bg-bg-primary transition-colors"
-                            title="View Public TID Card"
-                          >
-                            <ExternalLink size={15} />
-                          </Link>
-
-                          <button
-                            onClick={() =>
-                              handleDelete(dev.id, dev.fullName, dev.tid)
-                            }
-                            disabled={deletingId === dev.id || isPending}
-                            className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                            title="Delete Developer"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {customRole && (
+        <div>
+          <label htmlFor={id("custom-role")} className={adminLabelClass}>
+            Custom role
+          </label>
+          <input
+            id={id("custom-role")}
+            value={values.role}
+            onChange={(e) => onChange({ role: e.target.value })}
+            required
+            disabled={disabled}
+            placeholder="e.g. Blockchain Developer"
+            autoComplete="off"
+            className={adminInputClass}
+          />
         </div>
+      )}
 
-        {/* Footer info */}
-        {filteredDevelopers.length > 0 && (
-          <div className="px-5 py-3 border-t border-border-glass bg-bg-primary/30 flex items-center justify-between text-xs text-text-muted">
-            <span>
-              Showing {filteredDevelopers.length} of {developers.length} developers
-            </span>
-            <span>Techfamz Identity Directory</span>
-          </div>
-        )}
+      <div>
+        <label htmlFor={id("skills")} className={adminLabelClass}>
+          Skills <span className="font-normal text-text-muted">(comma-separated)</span>
+        </label>
+        <input
+          id={id("skills")}
+          value={values.skills}
+          onChange={(e) => onChange({ skills: e.target.value })}
+          disabled={disabled}
+          placeholder="React, TypeScript, Node.js"
+          autoComplete="off"
+          className={adminInputClass}
+        />
       </div>
 
-      {/* CREATE DEVELOPER / ISSUE TID MODAL */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-lg bg-bg-card border-border-glass text-text-primary">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-text-primary">
-              Issue Techfamz Identity (TID)
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
-              Manually register a developer and issue an official verified TID.
-            </DialogDescription>
-          </DialogHeader>
-
-          {createError && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-              <AlertCircle size={15} className="shrink-0" />
-              <span>{createError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleCreateSubmit} className="space-y-4">
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Full Name *
-              </Label>
-              <Input
-                value={createName}
-                onChange={(e) => setCreateName(e.target.value)}
-                required
-                placeholder="e.g. Samuel Adeyemi"
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Email Address *
-              </Label>
-              <Input
-                type="email"
-                value={createEmail}
-                onChange={(e) => setCreateEmail(e.target.value)}
-                required
-                placeholder="samuel@example.com"
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                  Technical Role *
-                </Label>
-                <select
-                  value={createRole}
-                  onChange={(e) => setCreateRole(e.target.value)}
-                  className="w-full h-9 rounded-md border border-border-glass bg-bg-primary text-text-primary px-3 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue"
-                >
-                  {POPULAR_ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                  Country
-                </Label>
-                <Input
-                  value={createCountry}
-                  onChange={(e) => setCreateCountry(e.target.value)}
-                  placeholder="e.g. Nigeria, Ghana, Kenya"
-                  className="bg-bg-primary border-border-glass text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Key Skills (comma separated)
-              </Label>
-              <Input
-                value={createSkills}
-                onChange={(e) => setCreateSkills(e.target.value)}
-                placeholder="React, TypeScript, Node.js, GraphQL"
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                GitHub Profile URL
-              </Label>
-              <Input
-                value={createGithub}
-                onChange={(e) => setCreateGithub(e.target.value)}
-                placeholder="github.com/username"
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="sendEmailCheckbox"
-                checked={createSendEmail}
-                onChange={(e) => setCreateSendEmail(e.target.checked)}
-                className="rounded border-border-glass text-accent-blue focus:ring-accent-blue cursor-pointer"
-              />
-              <label
-                htmlFor="sendEmailCheckbox"
-                className="text-xs text-text-secondary cursor-pointer select-none"
-              >
-                Send welcome email with digital card & verification link via Resend
-              </label>
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsCreateOpen(false)}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="bg-accent-blue hover:bg-blue-600 text-white text-xs"
-              >
-                {isPending ? "Generating TID..." : "Generate & Issue TID"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* EDIT DEVELOPER MODAL */}
-      <Dialog
-        open={Boolean(editingDev)}
-        onOpenChange={(open) => !open && setEditingDev(null)}
-      >
-        <DialogContent className="sm:max-w-lg bg-bg-card border-border-glass text-text-primary">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <span>Edit Developer Profile</span>
-              {editingDev && (
-                <span className="font-mono text-xs px-2 py-0.5 rounded bg-accent-blue-glow-soft text-accent-blue-light border border-accent-blue-glow">
-                  {editingDev.tid}
-                </span>
-              )}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
-              Update developer metadata, verified skills, and external profiles.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editError && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-              <AlertCircle size={15} className="shrink-0" />
-              <span>{editError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleEditSubmit} className="space-y-4">
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Full Name *
-              </Label>
-              <Input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                required
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Email Address *
-              </Label>
-              <Input
-                type="email"
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                required
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                  Technical Role *
-                </Label>
-                <Input
-                  value={editRole}
-                  onChange={(e) => setEditRole(e.target.value)}
-                  required
-                  className="bg-bg-primary border-border-glass text-sm"
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                  Country
-                </Label>
-                <Input
-                  value={editCountry}
-                  onChange={(e) => setEditCountry(e.target.value)}
-                  placeholder="e.g. Nigeria"
-                  className="bg-bg-primary border-border-glass text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                Key Skills (comma separated)
-              </Label>
-              <Input
-                value={editSkills}
-                onChange={(e) => setEditSkills(e.target.value)}
-                placeholder="React, TypeScript, Python"
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 block">
-                GitHub Profile URL
-              </Label>
-              <Input
-                value={editGithub}
-                onChange={(e) => setEditGithub(e.target.value)}
-                placeholder="https://github.com/..."
-                className="bg-bg-primary border-border-glass text-sm"
-              />
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditingDev(null)}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="bg-accent-blue hover:bg-blue-600 text-white text-xs"
-              >
-                {isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <div>
+        <label htmlFor={id("github")} className={adminLabelClass}>
+          GitHub profile <span className="font-normal text-text-muted">(optional)</span>
+        </label>
+        <input
+          id={id("github")}
+          value={values.githubUrl}
+          onChange={(e) => onChange({ githubUrl: e.target.value })}
+          disabled={disabled}
+          placeholder="github.com/username"
+          autoComplete="off"
+          className={adminInputClass}
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { use, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEditor, useEditorState, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TiptapImage from "@tiptap/extension-image";
 import TiptapLink from "@tiptap/extension-link";
@@ -9,30 +12,32 @@ import TextAlign from "@tiptap/extension-text-align";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import YoutubeExtension from "@tiptap/extension-youtube";
-import Image from "next/image";
-import {
-  ImageIcon, Bold, Italic, Underline as UnderlineIcon, Strikethrough,
-  List, ListOrdered, Quote, Code, Heading1, Heading2, Heading3,
-  AlignLeft, AlignCenter, AlignRight, AlignJustify, Link as LinkIcon, Unlink,
-  Save, Send, Check, X, MousePointerClick, Sparkles, Youtube as YoutubeIcon,
-  Eye, Trash2, Plus
-} from "lucide-react";
+import slugify from "slugify";
+import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { ArrowLeft, Check, ExternalLink, Eye, LoaderCircle, Plus, Save, Send, Sparkles, X } from "lucide-react";
 import { CustomButtonExtension } from "@/components/editor/CustomButtonExtension";
-import { useState, useEffect, use, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { getPost, savePost, getPostCategories } from "../../../actions";
+import { getPost, getPostCategories, savePost } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  EmptyState,
+  PageHeader,
+  Panel,
+  StatusBadge,
+  adminInputClass,
+  adminLabelClass,
+  adminTextareaClass,
+} from "@/components/admin/AdminUI";
+import { useConfirm } from "@/components/admin/ConfirmProvider";
+import { runAction } from "@/components/admin/run-action";
+import { cn } from "@/lib/utils";
+import { EditorToolbar } from "./EditorToolbar";
+import { CoverImagePanel } from "./CoverImagePanel";
+import { PreviewDialog } from "./PreviewDialog";
+import { useLeaveGuard } from "./use-leave-guard";
+import { EXCERPT_MAX, EXCERPT_MIN, countWords, readingMinutes } from "./editor-utils";
 
+// Keep in sync with DEFAULT_POST_CATEGORIES in app/admin/actions.ts
 const DEFAULT_CATEGORIES = [
   "Tutorial",
   "Tech News",
@@ -43,47 +48,42 @@ const DEFAULT_CATEGORIES = [
   "Daily Courses",
 ];
 
+type LoadState = "loading" | "ready" | "not-found" | "error";
+type SavedPost = { published: boolean; slug: string; updatedAt: Date };
+
+const toSlug = (value: string) => slugify(value, { lower: true, strict: true });
+
 export default function EditorPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+  const { id } = use(params);
+  const isNew = id === "new";
   const router = useRouter();
+  const confirm = useConfirm();
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+
+  const [loadState, setLoadState] = useState<LoadState>(isNew ? "ready" : "loading");
+  const [saved, setSaved] = useState<SavedPost | null>(null);
 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [category, setCategory] = useState("");
-  const [saveError, setSaveError] = useState("");
-  
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
+
   const [isDirty, setIsDirty] = useState(false);
   const [wordCount, setWordCount] = useState(0);
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [linkInputUrl, setLinkInputUrl] = useState("");
-
-  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
-  const [youtubeInputUrl, setYoutubeInputUrl] = useState("");
-
-  const [showBtnInput, setShowBtnInput] = useState(false);
-  const [btnText, setBtnText] = useState("Click Me");
-  const [btnUrl, setBtnUrl] = useState("https://");
-  const [btnBg, setBtnBg] = useState("#3b82f6");
-  const [btnTextCol, setBtnTextCol] = useState("#ffffff");
-  const [btnRad, setBtnRad] = useState("8");
-  const [btnSize, setBtnSize] = useState("md");
-  
+  const [saving, setSaving] = useState<"draft" | "publish" | null>(null);
+  const [saveError, setSaveError] = useState("");
   const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-
-  // Dynamic Categories state
-  const [availableCategories, setAvailableCategories] = useState<string[]>(DEFAULT_CATEGORIES);
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [preview, setPreview] = useState<{ open: boolean; html: string }>({ open: false, html: "" });
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // Link and Underline are registered below with their own options, so StarterKit
+      // must not register second copies (duplicates made links open on click).
+      StarterKit.configure({ link: false, underline: false }),
       Underline,
       TiptapLink.extend({
         inclusive: false,
@@ -114,678 +114,571 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class:
-          "prose article focus:outline-none min-h-[400px] max-h-[600px] overflow-y-auto p-6 md:p-8 bg-bg-primary border border-border-glass w-full",
+        class: "prose article min-h-[420px] px-5 py-6 focus:outline-none md:px-8 md:py-8",
+        "aria-label": "Post content",
       },
     },
-    onUpdate: ({ editor }) => {
+    onUpdate: ({ editor: e }) => {
       setIsDirty(true);
-      const text = editor.getText();
-      const words = text.trim().split(/\s+/).filter((w) => w.length > 0);
-      setWordCount(words.length);
+      setWordCount(countWords(e.getText()));
     },
   });
 
+  const editorIsEmpty = useEditorState({ editor, selector: ({ editor: e }) => e?.isEmpty ?? true });
+
+  useLeaveGuard(isDirty);
+
+  // Categories: defaults plus every category already used by a post.
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const loadedCats = await getPostCategories();
-        if (loadedCats && loadedCats.length > 0) {
-          setAvailableCategories(loadedCats);
+    let cancelled = false;
+    getPostCategories()
+      .then((loaded) => {
+        if (!cancelled && loaded.length > 0) {
+          setCategories((prev) => Array.from(new Set([...loaded, ...prev])).sort());
         }
-      } catch (err) {
-        console.error("Failed to load categories:", err);
-      }
-
-      if (resolvedParams.id !== "new") {
-        const post = await getPost(resolvedParams.id);
-        if (post) {
-          setTitle(post.title);
-          setSlug(post.slug);
-          setExcerpt(post.excerpt || "");
-          setCoverImage(post.coverImage || "");
-          setCategory(post.category || "");
-          editor?.commands.setContent(post.content);
-
-          if (post.category) {
-            setAvailableCategories((prev) =>
-              prev.includes(post.category!) ? prev : [...prev, post.category!].sort()
-            );
-          }
-          
-          // Initial word count
-          const text = editor?.getText() || "";
-          setWordCount(text.trim().split(/\s+/).filter(w => w.length > 0).length);
-        }
-      }
-      setLoading(false);
-      // Wait a tick for editor to initialize before resetting dirtiness
-      setTimeout(() => setIsDirty(false), 10);
+      })
+      .catch((err) => console.error("Failed to load categories:", err));
+    return () => {
+      cancelled = true;
     };
-    if (editor) fetchData();
-  }, [resolvedParams.id, editor]);
+  }, []);
 
-  // Unsaved changes warning
+  // Existing post: load it into the form and the editor.
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
-
-  const openLinkInput = useCallback(() => {
-    if (!editor) return;
-    const previousUrl = editor.getAttributes("link").href;
-    setLinkInputUrl(previousUrl || "");
-    setShowLinkInput(true);
-  }, [editor]);
-
-  const handleLinkSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editor) return;
-
-    if (linkInputUrl === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      setShowLinkInput(false);
-      return;
-    }
-    
-    const fixedUrl = /^https?:\/\//.test(linkInputUrl) || /^(mailto|tel):/.test(linkInputUrl) ? linkInputUrl : `https://${linkInputUrl}`;
-    
-    editor.chain().focus().extendMarkRange("link").setLink({ href: fixedUrl }).run();
-    editor.commands.setTextSelection(editor.state.selection.to);
-    
-    setShowLinkInput(false);
-    setLinkInputUrl("");
-  };
-
-  const handleYoutubeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editor) return;
-
-    if (youtubeInputUrl.trim() !== "") {
-      editor.chain().focus().setYoutubeVideo({
-        src: youtubeInputUrl,
-      }).run();
-    }
-    
-    setShowYoutubeInput(false);
-    setYoutubeInputUrl("");
-  };
-
-  const handleBtnSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editor || btnText === "") return;
-    
-    editor.chain().focus().setCustomButton({
-      text: btnText,
-      url: btnUrl,
-      bgColor: btnBg,
-      textColor: btnTextCol,
-      borderRadius: btnRad,
-      size: btnSize
-    }).run();
-    
-    setShowBtnInput(false);
-  };
-
-  const generateAiSummary = async () => {
-    if (!editor || generatingSummary) return;
-    
-    const textContent = editor.getText();
-    if (!textContent || textContent.trim().length < 50) {
-      setSaveError("Please write some content first before generating a summary.");
-      return;
-    }
-
-    try {
-      setGeneratingSummary(true);
-      setSaveError("");
-      
-      const response = await fetch("/api/generate-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: textContent }),
+    if (isNew || !editor) return;
+    let cancelled = false;
+    getPost(id)
+      .then((post) => {
+        if (cancelled) return;
+        if (!post) {
+          setLoadState("not-found");
+          return;
+        }
+        const postCategory = post.category ?? "";
+        setTitle(post.title);
+        setSlug(post.slug);
+        setExcerpt(post.excerpt ?? "");
+        setCoverImage(post.coverImage ?? "");
+        setCategory(postCategory);
+        if (postCategory) {
+          setCategories((prev) => (prev.includes(postCategory) ? prev : [...prev, postCategory].sort()));
+        }
+        setSaved({ published: post.published, slug: post.slug, updatedAt: new Date(post.updatedAt) });
+        // emitUpdate: false so loading the post doesn't count as an unsaved change
+        editor.commands.setContent(post.content, { emitUpdate: false });
+        setWordCount(countWords(editor.getText()));
+        setIsDirty(false);
+        setLoadState("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to load post:", err);
+        if (!cancelled) setLoadState("error");
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [editor, id, isNew]);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to generate summary");
-      }
+  // The title is a textarea so long titles wrap; grow it to fit its content.
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [title, loadState, editor]);
 
-      const data = await response.json();
-      setExcerpt(data.summary);
-      setIsDirty(true);
-      
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred while generating the summary.";
-      setSaveError(errorMessage);
-    } finally {
-      setGeneratingSummary(false);
-    }
-  };
+  const isPublished = saved?.published ?? false;
+  const autoSlug = toSlug(title);
+  const finalSlug = slug ? toSlug(slug) : autoSlug;
+  const slugChangesLiveUrl = Boolean(saved?.published && finalSlug && finalSlug !== saved.slug);
+  const excerptLength = excerpt.trim().length;
+  const minutes = readingMinutes(wordCount);
 
-  const handleAddNewCategory = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const trimmed = newCategoryName.trim();
-    if (!trimmed) return;
+  async function handleSave(publish: boolean) {
+    if (!editor || saving) return;
 
-    // Normalize category name (Capitalize first letter)
-    const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-    setAvailableCategories((prev) => {
-      if (prev.includes(formatted)) return prev;
-      return [...prev, formatted].sort();
-    });
-    setCategory(formatted);
-    setIsDirty(true);
-    setNewCategoryName("");
-    setIsAddingCategory(false);
-  };
-
-  const handleSave = async (publish: boolean) => {
-    if (!title) {
-      setSaveError("Title is required before saving.");
+    if (!title.trim()) {
+      setSaveError("Add a title before saving.");
+      titleRef.current?.focus();
       return;
     }
+
+    if (!publish && isPublished) {
+      const ok = await confirm({
+        title: "Unpublish this post?",
+        description: "Your changes will be saved and the post will be taken off the blog until you publish it again.",
+        confirmLabel: "Unpublish",
+      });
+      if (!ok) return;
+    }
+
     setSaveError("");
-    setSaving(true);
-    try {
-      await savePost({
-        id: resolvedParams.id,
+    setSaving(publish ? "publish" : "draft");
+
+    const successMessage = publish
+      ? isPublished
+        ? "Post updated"
+        : "Post published"
+      : isPublished
+        ? "Post unpublished and saved as a draft"
+        : "Draft saved";
+
+    const result = await runAction(
+      savePost({
+        id,
         title,
         slug,
-        content: editor?.getHTML() || "",
+        content: editor.getHTML(),
         excerpt,
         coverImage,
         category,
         published: publish,
-      });
-      setIsDirty(false);
-      router.push("/admin/posts");
-      router.refresh();
-    } catch (e: unknown) {
-      console.error(e);
-      const message = e instanceof Error ? e.message : "Failed to save post. Please try again.";
-      if (message.includes("Unique constraint") || message.toLowerCase().includes("slug")) {
-        setSaveError("A post with this URL slug or title already exists. Please choose a different title or slug.");
-      } else {
-        setSaveError(message);
-      }
-    } finally {
-      setSaving(false);
+      }).then((res) => {
+        // Keep the reason on the page as well as in the toast, so it can be fixed (e.g. a slug clash).
+        if (!res.ok) setSaveError(res.error);
+        return res;
+      }),
+      successMessage
+    );
+
+    if (!result) {
+      setSaving(null);
+      return;
     }
-  };
 
-  const uploadImage = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    if (!res.ok) throw new Error("Upload failed");
-    const data = await res.json();
-    return data.url;
-  };
+    setIsDirty(false);
+    router.push("/admin/posts");
+    router.refresh();
+  }
 
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function generateSummary() {
+    if (!editor || generatingSummary) return;
+
+    const text = editor.getText().trim();
+    if (text.length < 50) {
+      toast.error("Write a few sentences first. The summary is generated from the post content.");
+      return;
+    }
+
+    setGeneratingSummary(true);
     try {
-      const url = await uploadImage(file);
-      setCoverImage(url);
-    } catch {
-      setSaveError("Failed to upload cover image.");
-    }
-  };
-
-  const insertImage = async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file || !editor) return;
-      try {
-        const url = await uploadImage(file);
-        editor.chain().focus().setImage({ src: url }).run();
-      } catch {
-        setSaveError("Failed to upload image into post.");
+      const res = await fetch("/api/generate-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text }),
+      });
+      const data: { summary?: unknown; error?: unknown } = await res.json().catch(() => ({}));
+      if (!res.ok || typeof data.summary !== "string") {
+        throw new Error(typeof data.error === "string" ? data.error : "Couldn't generate a summary. Please try again.");
       }
-    };
-    input.click();
-  };
 
-  if (loading || !editor) {
+      const previous = excerpt;
+      setExcerpt(data.summary);
+      setIsDirty(true);
+      toast.success(
+        "Summary generated",
+        previous.trim() ? { action: { label: "Undo", onClick: () => setExcerpt(previous) } } : undefined
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't generate a summary. Please try again.");
+    } finally {
+      setGeneratingSummary(false);
+    }
+  }
+
+  function addCategory(event: FormEvent) {
+    event.preventDefault();
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    setCategories((prev) => (prev.includes(formatted) ? prev : [...prev, formatted].sort()));
+    setCategory(formatted);
+    setIsDirty(true);
+    setNewCategory("");
+    setAddingCategory(false);
+  }
+
+  function cancelAddCategory() {
+    setNewCategory("");
+    setAddingCategory(false);
+  }
+
+  function openPreview() {
+    if (!editor) return;
+    setPreview({ open: true, html: editor.isEmpty ? "" : editor.getHTML() });
+  }
+
+  const backLink = (
+    <Link
+      href="/admin/posts"
+      className="mb-3 inline-flex items-center gap-1 rounded text-xs font-medium text-text-muted transition-colors hover:text-text-primary"
+    >
+      <ArrowLeft size={14} aria-hidden="true" />
+      All posts
+    </Link>
+  );
+
+  if (loadState === "not-found" || loadState === "error") {
     return (
-      <div className="flex justify-center items-center h-full min-h-[50vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-accent-blue border-t-transparent animate-spin" />
+      <div>
+        {backLink}
+        <PageHeader title="Edit post" />
+        <Panel>
+          <EmptyState
+            title={loadState === "not-found" ? "Post not found" : "Couldn't load this post"}
+            description={
+              loadState === "not-found"
+                ? "It may have been deleted. Go back to the list to pick another post."
+                : "Check your connection and reload the page. If your session expired, sign in again."
+            }
+            action={
+              loadState === "error" ? (
+                <Button variant="outline" size="xs" onClick={() => window.location.reload()}>
+                  Reload
+                </Button>
+              ) : (
+                <Button asChild variant="outline" size="xs">
+                  <Link href="/admin/posts">Back to posts</Link>
+                </Button>
+              )
+            }
+          />
+        </Panel>
       </div>
     );
   }
 
-  const ToolbarButton = ({ onClick, isActive, icon: Icon, title, disabled = false }: {
-    onClick: () => void;
-    isActive?: boolean;
-    icon: React.ElementType;
-    title: string;
-    disabled?: boolean;
-  }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`p-2 rounded transition-colors ${
-        isActive 
-          ? "bg-accent-blue-glow-soft text-accent-blue-light" 
-          : "text-text-muted hover:bg-bg-card hover:text-text-primary"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      title={title}
-      type="button"
-    >
-      <Icon size={16} />
-    </button>
-  );
-
-  const Divider = () => <div className="w-px h-5 bg-border-glass mx-1" />;
+  if (loadState === "loading" || !editor) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center gap-2 text-sm text-text-muted" role="status">
+        <LoaderCircle size={16} className="animate-spin" aria-hidden="true" />
+        Loading editor…
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-[1000px] mx-auto pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">
-          {resolvedParams.id === "new" ? "Write a new post" : "Edit post"}
-        </h1>
-        <div className="flex flex-wrap gap-2.5">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowPreview(true)}
-            className="flex items-center gap-1.5 border-border-glass text-text-secondary hover:text-text-primary text-xs"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Preview</span>
-          </Button>
-          <Button
-            variant="outline-glow"
-            onClick={() => handleSave(false)}
-            disabled={saving}
-            className="flex items-center gap-1.5 text-xs"
-          >
-            <Save className="w-3.5 h-3.5" />
-            {saving ? "Saving..." : "Save Draft"}
-          </Button>
-          <Button
-            variant="cta"
-            onClick={() => handleSave(true)}
-            disabled={saving}
-            className="flex items-center gap-1.5 text-xs"
-          >
-            <Send className="w-3.5 h-3.5" />
-            {saving ? "Publishing..." : "Publish Live"}
-          </Button>
-        </div>
-      </div>
+    <div>
+      {backLink}
+      <PageHeader
+        title={isNew ? "New post" : "Edit post"}
+        description={
+          saved ? (
+            <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+              <StatusBadge status={isPublished ? "published" : "draft"} />
+              {isPublished && (
+                <a
+                  href={`/blog/${saved.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-text-muted transition-colors hover:text-text-primary"
+                >
+                  View on blog
+                  <ExternalLink size={12} aria-hidden="true" />
+                </a>
+              )}
+            </span>
+          ) : (
+            "Drafts stay private until you publish them."
+          )
+        }
+        actions={
+          <>
+            <Button type="button" variant="ghost" size="xs" onClick={openPreview}>
+              <Eye size={14} />
+              Preview
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              disabled={saving !== null}
+              onClick={() => handleSave(false)}
+              title={isPublished ? "Save your changes and take the post off the blog" : undefined}
+            >
+              {saving === "draft" ? <LoaderCircle size={14} className="animate-spin" /> : <Save size={14} />}
+              {isPublished ? "Unpublish" : "Save draft"}
+            </Button>
+            <Button type="button" size="xs" disabled={saving !== null} onClick={() => handleSave(true)}>
+              {saving === "publish" ? <LoaderCircle size={14} className="animate-spin" /> : <Send size={14} />}
+              {isPublished ? "Update" : "Publish"}
+            </Button>
+          </>
+        }
+      />
 
-      {/* Inline error banner */}
       {saveError && (
-        <div className="mb-6 px-4 py-3 rounded-lg border border-red-500/30 bg-red-900/20 text-sm text-red-300 flex items-center justify-between gap-3">
-          <span>{saveError}</span>
-          <button onClick={() => setSaveError("")} className="text-red-400 hover:text-red-200 transition-colors shrink-0">
-            <X size={14} />
+        <div
+          role="alert"
+          className="-mt-4 mb-6 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/6 px-3 py-2.5 text-sm text-red-700 dark:text-red-300"
+        >
+          <span className="min-w-0 flex-1">{saveError}</span>
+          <button
+            type="button"
+            onClick={() => setSaveError("")}
+            aria-label="Dismiss message"
+            title="Dismiss"
+            className="shrink-0 rounded p-0.5 opacity-70 transition-opacity hover:opacity-100"
+          >
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Editor Column */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-bg-card border border-border-glass rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
-            <div className="p-4 md:p-6 border-b border-border-glass">
-              <Input
-                type="text"
-                value={title}
-                onChange={(e) => { setTitle(e.target.value); setIsDirty(true); }}
-                placeholder="Post title..."
-                className="w-full h-auto p-0 bg-transparent border-none text-text-primary text-[clamp(1.5rem,3vw,2.5rem)] font-bold focus-visible:ring-0 shadow-none placeholder:text-text-muted/40 transition-all font-sans mb-3 rounded-none"
-              />
-              <div className="flex items-center gap-1 text-sm text-text-muted px-1">
-                <span className="opacity-60 hidden sm:inline">techfamz.com/blog/</span>
-                <span className="opacity-60 sm:hidden">/blog/</span>
-                <Input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => { setSlug(e.target.value); setIsDirty(true); }}
-                  placeholder={title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-') : "your-post-slug"}
-                  className="flex-1 min-w-[100px] h-6 p-0 bg-transparent border-none text-accent-blue-light focus-visible:ring-0 shadow-none font-mono"
-                />
-              </div>
-            </div>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* ─── Main column: title + content ─── */}
+        <div className="min-w-0 rounded-xl border border-border-glass bg-bg-primary">
+          <div className="px-5 pt-6 pb-3 md:px-8 md:pt-8">
+            <label htmlFor="post-title" className="sr-only">
+              Title
+            </label>
+            <textarea
+              id="post-title"
+              ref={titleRef}
+              rows={1}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value.replace(/\s*\n+\s*/g, " "));
+                setIsDirty(true);
+              }}
+              onKeyDown={(e) => {
+                // Enter moves on to the content instead of adding a line break
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  editor.commands.focus("start");
+                }
+              }}
+              placeholder="Post title"
+              className="-mx-2 block w-[calc(100%+1rem)] resize-none overflow-hidden rounded-md bg-transparent px-2 text-[1.75rem] font-bold leading-tight tracking-tight text-text-primary outline-none placeholder:text-text-muted/60 focus-visible:ring-2 focus-visible:ring-accent-blue/20 md:text-[2rem]"
+            />
+          </div>
 
-            {/* TipTap Rich Text Editor */}
-            <div className="flex flex-col">
-              {/* Toolbar */}
-              <div className="flex flex-wrap items-center gap-0.5 p-2 px-3 bg-bg-primary/50 border-b border-border-glass sticky top-0 z-10 ">
-              <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive("heading", { level: 1 })} icon={Heading1} title="Heading 1" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive("heading", { level: 2 })} icon={Heading2} title="Heading 2" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive("heading", { level: 3 })} icon={Heading3} title="Heading 3" />
-              <Divider />
-              
-              <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive("bold")} icon={Bold} title="Bold (Ctrl+B)" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive("italic")} icon={Italic} title="Italic (Ctrl+I)" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive("underline")} icon={UnderlineIcon} title="Underline (Ctrl+U)" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} isActive={editor.isActive("strike")} icon={Strikethrough} title="Strikethrough" />
-              <div className="relative flex items-center justify-center p-1 rounded hover:bg-bg-card transition-colors" title="Text Color">
-                <input
-                  type="color"
-                  onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
-                  value={editor.getAttributes("textStyle").color || "#ffffff"}
-                  className="w-5 h-5 p-0 border-0 rounded cursor-pointer bg-transparent"
-                />
-              </div>
-              <Divider />
-              
-              <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} icon={AlignLeft} title="Align Left" />
-              <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} isActive={editor.isActive({ textAlign: 'center' })} icon={AlignCenter} title="Align Center" />
-              <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} icon={AlignRight} title="Align Right" />
-              <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} isActive={editor.isActive({ textAlign: 'justify' })} icon={AlignJustify} title="Justify" />
-              <Divider />
-              
-              <div className="relative inline-block">
-                <ToolbarButton onClick={openLinkInput} isActive={editor.isActive("link") || showLinkInput} icon={LinkIcon} title="Add Link" />
-                {showLinkInput && (
-                  <div className="absolute top-full mt-2 left-0 md:left-1/2 md:-translate-x-1/2 bg-bg-primary border border-border-glass p-1.5 rounded-lg shadow-xl z-50 w-[260px]">
-                    <form onSubmit={handleLinkSubmit} className="flex items-center gap-1.5">
-                      <Input
-                        type="url"
-                        value={linkInputUrl}
-                        onChange={(e) => setLinkInputUrl(e.target.value)}
-                        placeholder="https://..."
-                        autoFocus
-                        className="flex-1 min-w-0 bg-bg-primary/50 border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50 h-8"
-                      />
-                      <button type="submit" className="bg-accent-blue text-white p-1 rounded hover:bg-blue-600 transition-colors flex-shrink-0" title="Save Link">
-                        <Check size={14} />
-                      </button>
-                      <button type="button" onClick={() => setShowLinkInput(false)} className="bg-bg-card text-text-primary p-1 rounded border border-border-glass hover:bg-bg-card transition-colors flex-shrink-0" title="Cancel">
-                        <X size={14} />
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </div>
-              <ToolbarButton onClick={() => editor.chain().focus().unsetLink().run()} disabled={!editor.isActive("link")} icon={Unlink} title="Remove Link" />
-              <Divider />
+          <EditorToolbar
+            editor={editor}
+            className="sticky top-14 z-20 overflow-x-auto border-y border-border-glass bg-bg-secondary px-2 py-1 [scrollbar-width:none] md:top-0 md:flex-wrap md:overflow-visible"
+          />
 
-              <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive("bulletList")} icon={List} title="Bullet List" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive("orderedList")} icon={ListOrdered} title="Numbered List" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive("blockquote")} icon={Quote} title="Quote" />
-              <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} isActive={editor.isActive("codeBlock")} icon={Code} title="Code Block" />
-              
-              <div className="relative inline-block">
-                <ToolbarButton onClick={() => setShowBtnInput(!showBtnInput)} isActive={showBtnInput} icon={MousePointerClick} title="Insert Button" />
-                {showBtnInput && (
-                  <div className="absolute top-full mt-2 left-0 md:left-1/2 md:-translate-x-[75%] lg:md:-translate-x-1/2 bg-bg-primary border border-border-glass p-4 rounded-xl shadow-2xl z-50 w-[260px] flex flex-col gap-3">
-                    <div className="text-[0.65rem] font-bold text-text-muted uppercase tracking-wider">Button Settings</div>
-                    <form onSubmit={handleBtnSubmit} className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-1.5">
-                        <Label className="text-[0.65rem] text-text-secondary">Text</Label>
-                        <Input value={btnText} onChange={e => setBtnText(e.target.value)} className="h-8 text-xs bg-bg-card border-border-glass" required />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <Label className="text-[0.65rem] text-text-secondary">Link (URL)</Label>
-                        <Input value={btnUrl} onChange={e => setBtnUrl(e.target.value)} className="h-8 text-xs bg-bg-card border-border-glass" type="url" required />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-[0.65rem] text-text-secondary">Bg Color</Label>
-                          <input type="color" value={btnBg} onChange={e => setBtnBg(e.target.value)} className="w-full h-8 p-0 rounded bg-transparent border-none cursor-pointer" />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-[0.65rem] text-text-secondary">Text Color</Label>
-                          <input type="color" value={btnTextCol} onChange={e => setBtnTextCol(e.target.value)} className="w-full h-8 p-0 rounded bg-transparent border-none cursor-pointer" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-[0.65rem] text-text-secondary">Size</Label>
-                          <select value={btnSize} onChange={e => setBtnSize(e.target.value)} className="h-8 text-xs bg-bg-card border border-border-glass rounded text-text-primary px-2 focus:outline-none focus:ring-1 focus:ring-accent-blue">
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                          </select>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <Label className="text-[0.65rem] text-text-secondary">Radius</Label>
-                          <Input value={btnRad} onChange={e => setBtnRad(e.target.value)} className="h-8 text-xs bg-bg-card border-border-glass" type="number" />
-                        </div>
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <button type="button" onClick={() => setShowBtnInput(false)} className="flex-1 h-8 text-xs rounded border border-border-glass text-text-secondary hover:text-text-primary hover:bg-bg-card transition-colors">Cancel</button>
-                        <button type="submit" className="flex-1 h-8 text-xs rounded bg-accent-blue text-white hover:bg-blue-600 transition-colors">Insert</button>
-                      </div>
-                    </form>
-                  </div>
-                )}
+          <div className="relative">
+            {editorIsEmpty && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-5 top-6 text-[1.0625rem] leading-[1.75] text-text-muted md:left-8 md:top-8 md:text-[1.125rem]"
+              >
+                Start writing your post…
               </div>
+            )}
+            <EditorContent editor={editor} />
+          </div>
 
-              <div className="relative inline-block">
-                <ToolbarButton onClick={() => setShowYoutubeInput(!showYoutubeInput)} isActive={showYoutubeInput} icon={YoutubeIcon} title="Insert YouTube Video" />
-                {showYoutubeInput && (
-                  <div className="absolute top-full mt-2 left-0 md:left-1/2 md:-translate-x-[75%] lg:md:-translate-x-1/2 bg-bg-primary border border-border-glass p-2 rounded-xl shadow-2xl z-50 w-[260px]">
-                    <form onSubmit={handleYoutubeSubmit} className="flex items-center gap-1.5 p-1">
-                      <Input
-                        type="url"
-                        value={youtubeInputUrl}
-                        onChange={(e) => setYoutubeInputUrl(e.target.value)}
-                        placeholder="https://youtube.com/watch?v=..."
-                        autoFocus
-                        className="flex-1 min-w-0 bg-bg-card border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50 h-8 text-xs"
-                        required
-                      />
-                      <button type="submit" className="bg-accent-blue text-white p-1 rounded hover:bg-blue-600 transition-colors flex-shrink-0" title="Insert Video">
-                        <Check size={14} />
-                      </button>
-                      <button type="button" onClick={() => setShowYoutubeInput(false)} className="bg-bg-card text-text-primary p-1 rounded border border-border-glass hover:bg-bg-card transition-colors flex-shrink-0" title="Cancel">
-                        <X size={14} />
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </div>
-              
-              <ToolbarButton onClick={insertImage} icon={ImageIcon} title="Insert Image" />
-            </div>
-
-              <EditorContent editor={editor} />
-              
-              {/* Editor Footer / Meta */}
-              <div className="flex items-center justify-between p-3 border-t border-border-glass bg-[rgba(255,255,255,0.02)] text-xs text-text-muted">
-                <div className="flex items-center gap-4">
-                  <span>{wordCount} words</span>
-                  <span>{Math.max(1, Math.ceil(wordCount / 200))} min read</span>
-                </div>
-                {isDirty && <span className="text-cta-yellow italic">Unsaved changes</span>}
-              </div>
-            </div>
+          <div className="flex items-center justify-between gap-3 border-t border-border-glass px-5 py-2.5 text-xs text-text-muted md:px-8">
+            <span className="tabular-nums">
+              {wordCount.toLocaleString()} {wordCount === 1 ? "word" : "words"} · {minutes} min read
+            </span>
+            {isDirty && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-cta-yellow" aria-hidden="true" />
+                Unsaved changes
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Sidebar Settings */}
+        {/* ─── Side column: settings ─── */}
         <div className="space-y-6">
-          {/* Cover Image */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
-            <div className="flex items-center justify-between mb-3">
-              <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">Cover Image</Label>
-              {coverImage && (
-                <button
-                  type="button"
-                  onClick={() => { setCoverImage(""); setIsDirty(true); }}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
-                  title="Remove cover image"
-                >
-                  <Trash2 size={12} />
-                  <span>Remove</span>
-                </button>
-              )}
-            </div>
-            {coverImage ? (
-              <div className="relative rounded-lg overflow-hidden aspect-video border border-border-glass group">
-                <Image src={coverImage} alt="Cover" fill className="object-cover" />
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <label className="cursor-pointer bg-[rgba(255,255,255,0.15)] hover:bg-accent-blue text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-                    Change Image
-                    <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => { setCoverImage(""); setIsDirty(true); }}
-                    className="bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
+          <Panel title="Post settings" bodyClassName="space-y-5 p-4">
+            <div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-text-secondary">Status</span>
+                <StatusBadge
+                  status={isPublished ? "published" : "draft"}
+                  label={saved ? undefined : "Draft, not saved yet"}
+                />
               </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-border-glass rounded-lg cursor-pointer hover:bg-bg-primary/50 hover:border-accent-blue transition-colors group">
-                <div className="w-10 h-10 rounded-full bg-bg-card text-text-muted flex items-center justify-center mb-3 group-hover:text-accent-blue group-hover:bg-accent-blue-glow-soft transition-colors">
-                  <ImageIcon size={20} />
-                </div>
-                <span className="text-sm text-text-secondary font-medium">Upload Cover</span>
-                <input type="file" className="hidden" accept="image/*" onChange={handleCoverUpload} />
-              </label>
-            )}
-          </div>
+              <p className="mt-1 text-xs text-text-muted">
+                {isPublished ? "Visible on the blog." : "Only admins can see drafts."}
+                {saved && ` Updated ${formatDistanceToNow(saved.updatedAt, { addSuffix: true })}.`}
+              </p>
+            </div>
 
-          {/* Category */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
-            <div className="flex items-center justify-between mb-3">
-              <Label className="block text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">
-                Category
-              </Label>
-              {!isAddingCategory && (
-                <button
-                  type="button"
-                  onClick={() => setIsAddingCategory(true)}
-                  className="text-[0.68rem] text-accent-blue-light hover:text-accent-blue font-semibold flex items-center gap-1 transition-colors"
-                >
-                  <Plus size={12} />
-                  <span>New Category</span>
-                </button>
+            <div>
+              <label htmlFor="post-slug" className={adminLabelClass}>
+                URL slug
+              </label>
+              <div className="flex h-9 items-center rounded-md border border-border-glass bg-bg-primary transition-colors hover:border-border-glass-hover focus-within:border-accent-blue focus-within:ring-2 focus-within:ring-accent-blue/20">
+                <span className="select-none pl-3 text-sm text-text-muted">/blog/</span>
+                <input
+                  id="post-slug"
+                  value={slug}
+                  onChange={(e) => {
+                    setSlug(e.target.value);
+                    setIsDirty(true);
+                  }}
+                  placeholder={autoSlug || "post-url"}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  aria-describedby="post-slug-hint"
+                  className="h-full min-w-0 flex-1 bg-transparent pr-3 font-mono text-[13px] text-text-primary outline-none placeholder:text-text-muted"
+                />
+              </div>
+              <p id="post-slug-hint" className="mt-1.5 text-xs text-text-muted">
+                {slug ? (
+                  <>
+                    Saved as <span className="font-mono text-text-secondary">/blog/{finalSlug || "…"}</span>
+                  </>
+                ) : (
+                  "Leave empty to build it from the title."
+                )}
+              </p>
+              {slugChangesLiveUrl && (
+                <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                  This post is live. Changing the slug changes its URL, and existing links to it will stop working.
+                </p>
               )}
             </div>
 
-            {isAddingCategory && (
-              <form onSubmit={handleAddNewCategory} className="mb-3.5 p-2.5 rounded-lg bg-bg-primary/70 border border-border-glass">
-                <div className="text-[0.65rem] text-text-muted mb-1.5 font-medium">Create New Category:</div>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    placeholder="e.g. AI & ML, Web3, Architecture..."
-                    autoFocus
-                    className="h-8 text-xs bg-bg-card border-border-glass focus-visible:ring-accent-blue flex-1"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newCategoryName.trim()}
-                    className="h-8 px-2.5 rounded bg-accent-blue hover:bg-blue-600 text-white text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
-                  >
-                    <Check size={13} />
-                    <span>Add</span>
-                  </button>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <label htmlFor={addingCategory ? "post-new-category" : "post-category"} className="text-xs font-medium text-text-secondary">
+                  {addingCategory ? "New category" : "Category"}
+                </label>
+                {!addingCategory && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsAddingCategory(false);
-                      setNewCategoryName("");
+                    onClick={() => setAddingCategory(true)}
+                    className="inline-flex items-center gap-1 rounded text-xs font-medium text-accent-blue-light hover:underline"
+                  >
+                    <Plus size={12} aria-hidden="true" />
+                    New category
+                  </button>
+                )}
+              </div>
+              {addingCategory ? (
+                <form onSubmit={addCategory} className="flex items-center gap-1.5">
+                  <input
+                    id="post-new-category"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") cancelAddCategory();
                     }}
-                    className="h-8 px-2 rounded text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors"
+                    placeholder="e.g. AI & ML"
+                    autoFocus
+                    autoComplete="off"
+                    className={adminInputClass}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon-xs"
+                    disabled={!newCategory.trim()}
+                    aria-label="Add category"
+                    title="Add category"
+                  >
+                    <Check size={14} />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={cancelAddCategory}
+                    aria-label="Cancel"
+                    title="Cancel"
                   >
                     <X size={14} />
-                  </button>
-                </div>
-              </form>
-            )}
-
-            <div className="flex flex-wrap gap-2">
-              {availableCategories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => { setCategory(category === cat ? "" : cat); setIsDirty(true); }}
-                  className={`py-1.5 px-3 rounded-full text-[0.7rem] font-semibold border transition-all ${
-                    category === cat
-                      ? "bg-accent-blue text-white border-accent-blue shadow-[0_0_12px_var(--color-accent-blue-glow-soft)]"
-                      : "bg-transparent text-text-secondary border-border-glass hover:border-accent-blue-light hover:text-text-primary"
-                  }`}
+                  </Button>
+                </form>
+              ) : (
+                <select
+                  id="post-category"
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setIsDirty(true);
+                  }}
+                  className={adminInputClass}
                 >
-                  {cat}
-                </button>
-              ))}
+                  <option value="">No category</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-          </div>
+          </Panel>
 
-          {/* SEO Details */}
-          <div className="bg-bg-card border border-border-glass rounded-xl p-5 ">
-            <div className="flex items-center justify-between mb-3">
-              <Label className="text-[0.65rem] font-bold text-text-muted uppercase tracking-widest">SEO & Excerpt</Label>
-              <button 
-                type="button" 
-                onClick={generateAiSummary}
+          <Panel
+            title="Summary"
+            description="Shown under the title, in search results and when the post is shared."
+            bodyClassName="p-4"
+          >
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <label htmlFor="post-excerpt" className="text-xs font-medium text-text-secondary">
+                Excerpt
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                onClick={generateSummary}
                 disabled={generatingSummary}
-                className="flex items-center gap-1.5 text-[0.65rem] font-semibold text-accent-blue hover:text-accent-blue-light transition-colors disabled:opacity-50"
+                className="-mr-2 h-7 px-2 text-text-secondary"
               >
-                <Sparkles size={12} className={generatingSummary ? "animate-pulse" : ""} />
-                {generatingSummary ? "Generating..." : "Auto-generate"}
-              </button>
+                {generatingSummary ? <LoaderCircle size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                {generatingSummary ? "Generating…" : "Generate with AI"}
+              </Button>
             </div>
-            <Textarea
+            <textarea
+              id="post-excerpt"
               value={excerpt}
-              onChange={(e) => { setExcerpt(e.target.value); setIsDirty(true); }}
-              placeholder="Brief summary for search engines and post previews..."
-              className="bg-bg-primary/50 border-border-glass focus-visible:ring-accent-blue placeholder:text-text-muted/50 min-h-[120px] resize-y"
+              onChange={(e) => {
+                setExcerpt(e.target.value);
+                setIsDirty(true);
+              }}
+              rows={4}
+              placeholder="One or two sentences that tell readers what they will learn."
+              aria-describedby="post-excerpt-hint"
+              className={cn(adminTextareaClass, "min-h-28 resize-y")}
             />
-            <p className="text-[0.65rem] text-text-muted mt-2">
-              Recommended: 150-160 characters. This appears on Google and when sharing on social media.
+            <p id="post-excerpt-hint" className="mt-1.5 text-xs tabular-nums text-text-muted">
+              {excerptLength === 0 ? (
+                `Aim for ${EXCERPT_MIN}–${EXCERPT_MAX} characters.`
+              ) : excerptLength < EXCERPT_MIN ? (
+                `${excerptLength} characters. A little short; aim for ${EXCERPT_MIN}–${EXCERPT_MAX}.`
+              ) : excerptLength <= EXCERPT_MAX ? (
+                <span className="inline-flex items-center gap-1 text-text-secondary">
+                  <Check size={12} aria-hidden="true" />
+                  {excerptLength} characters. Good length.
+                </span>
+              ) : (
+                <span className="text-amber-600 dark:text-amber-400">
+                  {excerptLength} characters. Search results may cut it off after {EXCERPT_MAX}.
+                </span>
+              )}
             </p>
-          </div>
+          </Panel>
+
+          <CoverImagePanel
+            value={coverImage}
+            onChange={(url) => {
+              setCoverImage(url);
+              setIsDirty(true);
+            }}
+          />
         </div>
       </div>
 
-      {/* Article Live Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto bg-bg-card border-border-glass text-text-primary">
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              {category && (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue-light border border-accent-blue-glow/30 font-semibold uppercase tracking-wider">
-                  {category}
-                </span>
-              )}
-              <span className="text-xs text-text-muted">Article Preview</span>
-            </div>
-            <DialogTitle className="text-2xl font-bold text-text-primary mt-2">
-              {title || "Untitled Article"}
-            </DialogTitle>
-            {excerpt && (
-              <DialogDescription className="text-sm text-text-secondary italic border-l-2 border-accent-blue pl-3 py-1">
-                {excerpt}
-              </DialogDescription>
-            )}
-          </DialogHeader>
-
-          {coverImage && (
-            <div className="relative aspect-video rounded-xl overflow-hidden border border-border-glass my-3">
-              <Image src={coverImage} alt="Cover Preview" fill className="object-cover" />
-            </div>
-          )}
-
-          <div
-            className="prose article mt-4"
-            dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "<p>No content yet...</p>" }}
-          />
-        </DialogContent>
-      </Dialog>
+      <PreviewDialog
+        open={preview.open}
+        onOpenChange={(open) => setPreview((prev) => ({ ...prev, open }))}
+        html={preview.html}
+        title={title}
+        excerpt={excerpt}
+        category={category}
+        coverImage={coverImage}
+        minutes={minutes}
+      />
     </div>
   );
 }

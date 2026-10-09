@@ -17,17 +17,19 @@ const buttonVariants = cva(
         ghost:
           "rounded-lg text-text-primary hover:bg-text-primary/5",
         destructive:
-          "bg-red-900/50 text-red-200 border border-red-900/50 hover:bg-red-800/80 hover:border-red-500/50",
+          "bg-red-600 text-white hover:bg-red-700",
         link: "text-accent-blue underline-offset-4 hover:underline",
         cta: "bg-cta-yellow text-on-cta hover:bg-cta-yellow-hover",
         "outline-glow": "border border-border-glass bg-transparent text-text-primary hover:border-accent-blue/60 hover:bg-accent-blue-glow-soft",
       },
       size: {
         default: "h-11 px-6",
+        xs: "h-8 px-3 text-xs gap-1.5 rounded-md",
         sm: "h-10 px-4 text-[13px]",
         lg: "h-13 px-8 text-[15px]",
         icon: "size-11 rounded-full",
         "icon-sm": "size-10 rounded-full",
+        "icon-xs": "size-8 rounded-md",
       },
     },
     defaultVariants: {

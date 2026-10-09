@@ -5,8 +5,8 @@ import { getSystemHealth } from "@/app/admin/actions";
 import SettingsClient from "./SettingsClient";
 
 export const metadata = {
-  title: "Admin Settings & Operations | Techfamz",
-  description: "Manage admin password, account security, and inspect platform integrations.",
+  title: "Settings | Admin Dashboard",
+  description: "Change the admin password and check the health of the site's services.",
 };
 
 export const dynamic = "force-dynamic";

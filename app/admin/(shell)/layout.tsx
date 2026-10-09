@@ -1,15 +1,16 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import type { Metadata } from "next";
 import LogoutButton from "@/components/shared/LogoutButton";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { MobileAdminNav } from "@/components/layout/MobileAdminNav";
-import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
+import { AdminMetricsProvider, AdminMobileNav, AdminSidebar } from "@/components/admin/AdminNav";
+import { ConfirmProvider } from "@/components/admin/ConfirmProvider";
+import { Toaster } from "@/components/ui/sonner";
 
-export const metadata = {
-  title: "Admin Dashboard | Techfamz",
+export const metadata: Metadata = {
+  title: "Admin",
+  robots: { index: false, follow: false },
 };
 
 export default async function AdminShellLayout({
@@ -23,57 +24,50 @@ export default async function AdminShellLayout({
     redirect("/admin/login");
   }
 
+  const email = session.user?.email ?? "";
+
+  const accountFooter = (
+    <>
+      <div className="mt-2 flex items-center gap-2.5 px-3 py-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-blue-glow-soft text-xs font-semibold text-accent-blue-light">
+          {email.charAt(0).toUpperCase()}
+        </div>
+        <p className="min-w-0 flex-1 truncate text-xs text-text-secondary" title={email}>
+          {email}
+        </p>
+        <ThemeToggle />
+      </div>
+      <LogoutButton />
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-bg-primary flex text-text-primary">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-border-glass flex flex-col hidden md:flex h-screen sticky top-0" style={{ backgroundColor: "var(--surface-glass)" }}>
-        <div className="p-6 border-b border-border-glass">
-          <Link href="/admin" className="text-lg font-bold text-text-primary flex items-center gap-2 group">
-            <div className="flex items-center justify-center w-[32px] h-[32px] rounded-full border-[1.5px] border-[rgba(255,255,255,0.9)] overflow-hidden bg-[rgba(255,255,255,0.05)] shrink-0 transition-transform group-hover:scale-105">
-              <Image src="/logo.png" alt="Techfamz logo" width={28} height={28} className="object-contain" />
-            </div>
-            <span>Techfamz <span className="text-accent-blue-light">Admin</span></span>
-          </Link>
-        </div>
+    <AdminMetricsProvider>
+      <ConfirmProvider>
+        <div className="flex min-h-screen bg-bg-primary text-text-primary">
+          {/* Sidebar */}
+          <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-border-glass bg-bg-secondary md:block">
+            <AdminSidebar footer={accountFooter} />
+          </aside>
 
-        <AdminSidebarNav />
+          {/* Main Content */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            {/* Mobile Header */}
+            <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border-glass bg-bg-primary/95 px-3 backdrop-blur md:hidden">
+              <div className="flex items-center gap-1">
+                <AdminMobileNav footer={accountFooter} />
+                <span className="text-sm font-semibold">Techfamz Admin</span>
+              </div>
+              <ThemeToggle />
+            </header>
 
-        <div className="p-4 border-t border-border-glass">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-bg-card border border-border-glass flex items-center justify-center text-xs font-bold text-text-muted">
-              {session?.user?.email?.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">
-                {session?.user?.email}
-              </p>
-            </div>
-            <ThemeToggle />
+            <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 md:px-8 md:py-8">
+              {children}
+            </main>
           </div>
-          <LogoutButton />
         </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-border-glass bg-bg-primary relative z-50">
-          <div className="flex items-center gap-2">
-            <MobileAdminNav />
-            <Link href="/admin" className="text-lg font-bold text-text-primary">
-              Admin
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <LogoutButton />
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-auto p-4 md:p-8">
-          {children}
-        </div>
-      </main>
-    </div>
+        <Toaster position="bottom-right" richColors closeButton />
+      </ConfirmProvider>
+    </AdminMetricsProvider>
   );
 }
