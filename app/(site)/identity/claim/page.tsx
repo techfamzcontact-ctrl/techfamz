@@ -1,359 +1,537 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowRight, Shield, Fingerprint, Lock, Cpu, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Fingerprint, Loader2, Lock, Pencil, Plus, Shield, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { COMMON_SKILLS, COUNTRY_SUGGESTIONS, MAX_SKILLS, ROLES, STEPS } from "./claim-data";
+import { PassportPreview } from "./PassportPreview";
+import { Stepper } from "./Stepper";
 
-const ROLES = [
-  "Frontend Engineer",
-  "Backend Engineer",
-  "Full-Stack Developer",
-  "Mobile Developer",
-  "DevOps Engineer",
-  "Data Scientist",
-  "UI/UX Designer",
-  "Cloud Engineer",
-  "Cybersecurity Specialist",
-  "AI/ML Engineer",
-  "Other",
-];
+type FormData = { fullName: string; email: string; country: string; role: string; githubUrl: string };
+type Errors = Partial<Record<keyof FormData | "skill", string>>;
 
-const COMMON_SKILLS = [
-  "JavaScript", "TypeScript", "React", "Next.js", "Vue", "Angular",
-  "Node.js", "Python", "Go", "Rust", "Java", "Swift", "Flutter",
-  "Docker", "AWS", "PostgreSQL", "MongoDB", "GraphQL", "TailwindCSS"
-];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateStep(step: number, data: FormData): Errors {
+  const errors: Errors = {};
+  if (step === 0) {
+    if (data.fullName.trim().length < 2) errors.fullName = "Enter your full name (at least 2 characters).";
+    if (!EMAIL_RE.test(data.email.trim())) errors.email = "Enter a valid email address, like name@example.com.";
+  }
+  if (step === 1) {
+    if (!data.role) errors.role = "Choose the role that fits you best.";
+    const link = data.githubUrl.trim();
+    if (link && (/\s/.test(link) || !link.includes("."))) {
+      errors.githubUrl = "Enter a link like github.com/yourname, or leave it empty.";
+    }
+  }
+  return errors;
+}
+
+const labelClass = "mb-1.5 block text-sm font-medium text-text-primary";
+const fieldErrorClass = "mt-1.5 text-xs text-red-600 dark:text-red-400";
 
 export default function ClaimTIDPage() {
   const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [maxReached, setMaxReached] = useState(0);
+  const [formData, setFormData] = useState<FormData>({ fullName: "", email: "", country: "", role: "", githubUrl: "" });
+  const [skills, setSkills] = useState<string[]>([]);
+  const [customSkill, setCustomSkill] = useState("");
+  const [errors, setErrors] = useState<Errors>({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    role: "",
-    githubUrl: "",
-    country: "",
-  });
-  
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const hasNavigated = useRef(false);
+
+  // Move focus to the new step's heading (not on first load, so the page doesn't jump)
+  useEffect(() => {
+    if (hasNavigated.current) headingRef.current?.focus();
+  }, [step]);
+
+  const update = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const goTo = (target: number) => {
+    hasNavigated.current = true;
+    setErrors({});
+    setSubmitError("");
+    setStep(target);
+    setMaxReached((m) => Math.max(m, target));
+  };
+
+  const handleContinue = () => {
+    const found = validateStep(step, formData);
+    if (Object.keys(found).length > 0) {
+      setErrors(found);
+      const firstField = Object.keys(found)[0];
+      document.getElementById(firstField === "role" ? "role-0" : firstField)?.focus();
+      return;
+    }
+    goTo(step + 1);
+  };
 
   const toggleSkill = (skill: string) => {
-    if (selectedSkills.includes(skill)) {
-      setSelectedSkills(selectedSkills.filter((s) => s !== skill));
-    } else if (selectedSkills.length < 5) {
-      setSelectedSkills([...selectedSkills, skill]);
+    setErrors((prev) => ({ ...prev, skill: undefined }));
+    setSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : prev.length < MAX_SKILLS ? [...prev, skill] : prev
+    );
+  };
+
+  const addCustomSkill = () => {
+    const value = customSkill.trim().replace(/\s+/g, " ");
+    if (!value) return;
+    if (value.length > 30) {
+      setErrors((prev) => ({ ...prev, skill: "Keep each skill under 30 characters." }));
+      return;
     }
+    if (skills.some((s) => s.toLowerCase() === value.toLowerCase())) {
+      setErrors((prev) => ({ ...prev, skill: `${value} is already selected.` }));
+      return;
+    }
+    if (skills.length >= MAX_SKILLS) {
+      setErrors((prev) => ({ ...prev, skill: `You can choose up to ${MAX_SKILLS} skills. Remove one to add another.` }));
+      return;
+    }
+    setSkills((prev) => [...prev, value]);
+    setCustomSkill("");
+    setErrors((prev) => ({ ...prev, skill: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    // Enter on an earlier step means "Continue", not "submit"
+    if (step < STEPS.length - 1) {
+      handleContinue();
+      return;
+    }
 
+    // Re-check everything before sending
+    for (let i = 0; i < STEPS.length - 1; i++) {
+      const found = validateStep(i, formData);
+      if (Object.keys(found).length > 0) {
+        goTo(i);
+        setErrors(found);
+        return;
+      }
+    }
+
+    setLoading(true);
+    setSubmitError("");
     try {
       const res = await fetch("/api/tid", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, skills: selectedSkills }),
+        body: JSON.stringify({ ...formData, skills }),
       });
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "We couldn't create your TID. Please try again.");
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to generate TID");
-      }
-
-      if (data.existing) {
-        router.push(`/tid/${data.developer.tid}?existing=true`);
-      } else {
-        router.push(`/tid/${data.developer.tid}?new=true`);
-      }
+      router.push(`/tid/${data.developer.tid}?${data.existing ? "existing" : "new"}=true`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setSubmitError(err instanceof Error ? err.message : "We couldn't create your TID. Please try again.");
       setLoading(false);
     }
   };
 
-  return (
-    <main className="min-h-screen bg-bg-primary flex flex-col lg:flex-row relative">
-      {/* LEFT PANEL - Live Holographic Passport Card Preview */}
-      <div className="lg:w-[48%] lg:sticky lg:top-0 lg:h-screen bg-bg-secondary border-r border-border-glass relative overflow-y-auto overflow-x-hidden px-6 pb-10 pt-24 md:px-10 lg:px-14 lg:pt-28 flex flex-col justify-between z-10">
+  const isLast = step === STEPS.length - 1;
+  const current = STEPS[step];
 
-        <div className="relative z-10">
-          <div className="eyebrow flex items-center gap-2 mb-4">
-            <Fingerprint className="w-3.5 h-3.5" />
+  return (
+    <main className="min-h-screen bg-bg-primary pb-20 pt-28">
+      <div className="mx-auto grid max-w-[1140px] grid-cols-1 gap-10 px-5 md:px-8 lg:grid-cols-[1fr_1.15fr] lg:gap-14">
+        {/* Intro: first on every screen size */}
+        <header className="lg:col-start-1 lg:row-start-1">
+          <div className="eyebrow mb-4 flex items-center gap-2">
+            <Fingerprint className="h-3.5 w-3.5" />
             Developer Registry
           </div>
-
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-text-primary leading-[1.08] tracking-[-0.03em] mb-4">
+          <h1 className="mb-4 text-3xl font-extrabold leading-[1.08] tracking-[-0.03em] text-text-primary md:text-4xl lg:text-5xl">
             Mint Your <span className="text-accent-blue-light">Developer Passport</span>
           </h1>
-          <p className="text-sm md:text-base text-text-secondary max-w-md leading-relaxed mb-8">
+          <p className="max-w-md text-sm leading-relaxed text-text-secondary md:text-base">
             Your permanent developer identity in the African tech ecosystem, with a public page anyone can check. Preview your card in real time as you complete your profile.
           </p>
+        </header>
 
-          {/* LIVE VIRTUAL PASSPORT CARD */}
-          <div className="w-full max-w-md mx-auto my-4">
-            <div className="relative rounded-xl border border-white/10 bg-brand-navy text-white p-6 shadow-lg overflow-hidden">
+        {/* Wizard */}
+        <section
+          aria-label="Claim your TID"
+          className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start"
+        >
+          <form onSubmit={handleSubmit} noValidate className="rounded-xl border border-border-glass bg-bg-card">
+            <div className="border-b border-border-glass px-5 py-4 md:px-7">
+              <Stepper steps={STEPS} current={step} maxReached={maxReached} onSelect={goTo} />
+            </div>
 
-              {/* Card Header */}
-              <div className="relative z-10 flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-7 rounded-md bg-cta-yellow/20 border border-cta-yellow/40 flex items-center justify-center">
-                    <Cpu size={15} className="text-cta-yellow" />
+            <div className="px-5 py-6 md:px-7 md:py-8">
+              <p className="mb-1 hidden text-xs font-medium text-text-muted sm:block">
+                Step {step + 1} of {STEPS.length}
+              </p>
+              <h2 ref={headingRef} tabIndex={-1} className="text-xl font-bold tracking-tight text-text-primary outline-none md:text-2xl">
+                {current.title}
+              </h2>
+              <p className="mb-6 mt-1 text-sm text-text-secondary">{current.description}</p>
+
+              {/* Step 1: About you */}
+              {step === 0 && (
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <label htmlFor="fullName" className={labelClass}>Full name</label>
+                    <Input
+                      id="fullName"
+                      autoComplete="name"
+                      placeholder="e.g. Chinua Achebe"
+                      value={formData.fullName}
+                      onChange={(e) => update("fullName", e.target.value)}
+                      aria-invalid={Boolean(errors.fullName)}
+                      aria-describedby={errors.fullName ? "fullName-error" : undefined}
+                      className="h-11"
+                    />
+                    {errors.fullName && <p id="fullName-error" className={fieldErrorClass}>{errors.fullName}</p>}
                   </div>
                   <div>
-                    <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-[#60a5fa] font-bold">
-                      Techfamz Developer ID
-                    </span>
-                    <span className="text-[10px] font-mono text-white/50">LIVE PREVIEW</span>
+                    <label htmlFor="email" className={labelClass}>Email address</label>
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="name@example.com"
+                      value={formData.email}
+                      onChange={(e) => update("email", e.target.value)}
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={errors.email ? "email-error" : "email-hint"}
+                      className="h-11"
+                    />
+                    {errors.email ? (
+                      <p id="email-error" className={fieldErrorClass}>{errors.email}</p>
+                    ) : (
+                      <p id="email-hint" className="mt-1.5 text-xs text-text-muted">
+                        Already have a TID? Use the same email to open your existing passport.
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="country" className={labelClass}>
+                      Country <span className="font-normal text-text-muted">(optional)</span>
+                    </label>
+                    <Input
+                      id="country"
+                      autoComplete="country-name"
+                      list="country-suggestions"
+                      placeholder="e.g. Ghana, Kenya, Nigeria"
+                      value={formData.country}
+                      onChange={(e) => update("country", e.target.value)}
+                      className="h-11"
+                    />
+                    <datalist id="country-suggestions">
+                      {COUNTRY_SUGGESTIONS.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 text-[10px] font-mono text-[#93c5fd] font-bold">
-                  <span>DRAFT</span>
+              )}
+
+              {/* Step 2: Role */}
+              {step === 1 && (
+                <div className="flex flex-col gap-6">
+                  <fieldset aria-describedby={errors.role ? "role-error" : undefined}>
+                    <legend className={labelClass}>Primary role</legend>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {ROLES.map((role, i) => {
+                        const selected = formData.role === role;
+                        return (
+                          <label
+                            key={role}
+                            className={cn(
+                              "flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3.5 py-3 text-sm transition-colors",
+                              "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent-blue/50",
+                              selected
+                                ? "border-accent-blue bg-accent-blue-glow-soft font-medium text-text-primary"
+                                : "border-border-glass text-text-secondary hover:border-border-glass-hover hover:text-text-primary"
+                            )}
+                          >
+                            <input
+                              id={`role-${i}`}
+                              type="radio"
+                              name="role"
+                              value={role}
+                              checked={selected}
+                              onChange={() => update("role", role)}
+                              className="sr-only"
+                            />
+                            {role}
+                            <span
+                              className={cn(
+                                "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                                selected ? "border-accent-blue bg-accent-blue text-white" : "border-border-glass-hover"
+                              )}
+                              aria-hidden="true"
+                            >
+                              {selected && <Check size={10} strokeWidth={3} />}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {errors.role && <p id="role-error" className={fieldErrorClass}>{errors.role}</p>}
+                  </fieldset>
+
+                  <div>
+                    <label htmlFor="githubUrl" className={labelClass}>
+                      GitHub or portfolio <span className="font-normal text-text-muted">(optional)</span>
+                    </label>
+                    <Input
+                      id="githubUrl"
+                      autoComplete="url"
+                      placeholder="github.com/yourhandle"
+                      value={formData.githubUrl}
+                      onChange={(e) => update("githubUrl", e.target.value)}
+                      aria-invalid={Boolean(errors.githubUrl)}
+                      aria-describedby={errors.githubUrl ? "githubUrl-error" : undefined}
+                      className="h-11"
+                    />
+                    {errors.githubUrl && <p id="githubUrl-error" className={fieldErrorClass}>{errors.githubUrl}</p>}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* ID Number */}
-              <div className="relative z-10 mb-5">
-                <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">TID Number · assigned when you submit</span>
-                <span className="font-mono text-xl md:text-2xl font-bold text-[#60a5fa] tracking-wider">
-                  TF•••••••
-                </span>
-              </div>
+              {/* Step 3: Skills */}
+              {step === 2 && (
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-text-primary">Suggested skills</span>
+                    <span className="text-xs tabular-nums text-text-muted" aria-live="polite">
+                      {skills.length} of {MAX_SKILLS} selected
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {COMMON_SKILLS.map((skill) => {
+                      const selected = skills.includes(skill);
+                      const full = !selected && skills.length >= MAX_SKILLS;
+                      return (
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() => toggleSkill(skill)}
+                          aria-pressed={selected}
+                          disabled={full}
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                            selected
+                              ? "border-accent-blue bg-accent-blue text-white"
+                              : "border-border-glass text-text-secondary hover:border-border-glass-hover hover:text-text-primary",
+                            full && "cursor-not-allowed opacity-40 hover:border-border-glass hover:text-text-secondary"
+                          )}
+                        >
+                          {selected && <Check size={12} aria-hidden="true" />}
+                          {skill}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              {/* Live Full Name & Role */}
-              <div className="relative z-10 mb-5">
-                <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-snug">
-                  {formData.fullName.trim() || "Your Name Here"}
-                </h3>
-                <div className="flex items-center gap-2 text-xs text-[#93c5fd] font-medium mt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span>{formData.role || "Primary Engineering Role"}</span>
-                  {formData.country && (
+                  <div>
+                    <label htmlFor="skill" className={labelClass}>Add another skill</label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="skill"
+                        placeholder="e.g. Kotlin, Figma, Solidity"
+                        value={customSkill}
+                        onChange={(e) => {
+                          setCustomSkill(e.target.value);
+                          if (errors.skill) setErrors((prev) => ({ ...prev, skill: undefined }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCustomSkill();
+                          }
+                        }}
+                        aria-invalid={Boolean(errors.skill)}
+                        aria-describedby={errors.skill ? "skill-error" : undefined}
+                        className="h-11"
+                      />
+                      <Button type="button" variant="outline" className="h-11 shrink-0 px-4" onClick={addCustomSkill}>
+                        <Plus size={16} />
+                        Add
+                      </Button>
+                    </div>
+                    {errors.skill && <p id="skill-error" className={fieldErrorClass}>{errors.skill}</p>}
+                  </div>
+
+                  {skills.some((s) => !COMMON_SKILLS.includes(s)) && (
+                    <div className="flex flex-wrap gap-2">
+                      {skills
+                        .filter((s) => !COMMON_SKILLS.includes(s))
+                        .map((s) => (
+                          <span
+                            key={s}
+                            className="inline-flex items-center gap-1 rounded-full border border-accent-blue bg-accent-blue py-1.5 pl-3 pr-1.5 text-xs font-medium text-white"
+                          >
+                            {s}
+                            <button
+                              type="button"
+                              onClick={() => toggleSkill(s)}
+                              aria-label={`Remove ${s}`}
+                              className="rounded-full p-0.5 hover:bg-white/20"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                    </div>
+                  )}
+
+                  <p className="text-xs text-text-muted">Skills are optional and you can skip this step.</p>
+                </div>
+              )}
+
+              {/* Step 4: Review */}
+              {step === 3 && (
+                <div className="flex flex-col gap-4">
+                  {submitError && (
+                    <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+                      {submitError}
+                    </div>
+                  )}
+
+                  {[
+                    {
+                      title: "About you",
+                      step: 0,
+                      rows: [
+                        ["Full name", formData.fullName.trim()],
+                        ["Email", formData.email.trim()],
+                        ["Country", formData.country.trim() || "Not provided"],
+                      ],
+                    },
+                    {
+                      title: "Your role",
+                      step: 1,
+                      rows: [
+                        ["Primary role", formData.role],
+                        ["GitHub or portfolio", formData.githubUrl.trim() || "Not provided"],
+                      ],
+                    },
+                  ].map((section) => (
+                    <div key={section.title} className="rounded-lg border border-border-glass">
+                      <div className="flex items-center justify-between border-b border-border-glass px-4 py-2.5">
+                        <h3 className="text-sm font-semibold text-text-primary">{section.title}</h3>
+                        <button
+                          type="button"
+                          onClick={() => goTo(section.step)}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue-light hover:underline"
+                        >
+                          <Pencil size={12} aria-hidden="true" />
+                          Edit<span className="sr-only"> {section.title.toLowerCase()}</span>
+                        </button>
+                      </div>
+                      <dl className="divide-y divide-border-glass">
+                        {section.rows.map(([label, value]) => (
+                          <div key={label} className="flex flex-col gap-0.5 px-4 py-2.5 sm:flex-row sm:gap-4">
+                            <dt className="w-40 shrink-0 text-xs text-text-muted sm:text-sm">{label}</dt>
+                            <dd className="min-w-0 break-words text-sm text-text-primary">{value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  ))}
+
+                  <div className="rounded-lg border border-border-glass">
+                    <div className="flex items-center justify-between border-b border-border-glass px-4 py-2.5">
+                      <h3 className="text-sm font-semibold text-text-primary">Your skills</h3>
+                      <button
+                        type="button"
+                        onClick={() => goTo(2)}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue-light hover:underline"
+                      >
+                        <Pencil size={12} aria-hidden="true" />
+                        Edit<span className="sr-only"> skills</span>
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 px-4 py-3">
+                      {skills.length > 0 ? (
+                        skills.map((s) => (
+                          <span key={s} className="rounded-full border border-border-glass px-2.5 py-1 text-xs text-text-secondary">
+                            {s}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-text-muted">No skills selected</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-lg bg-bg-secondary px-4 py-3">
+                    <Lock className="mt-0.5 h-4 w-4 shrink-0 text-accent-blue" aria-hidden="true" />
+                    <p className="text-xs leading-relaxed text-text-muted">
+                      Once issued, your TID is permanently linked to your profile. Anyone can confirm it on your public Techfamz page or by scanning the QR code on your card. Your email is never shown publicly.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between gap-3 border-t border-border-glass px-5 py-4 md:px-7">
+              {step > 0 ? (
+                <Button type="button" variant="outline" onClick={() => goTo(step - 1)} disabled={loading}>
+                  <ArrowLeft size={16} />
+                  Back
+                </Button>
+              ) : (
+                <span className="text-xs text-text-muted">Takes about a minute</span>
+              )}
+
+              {isLast ? (
+                <Button type="submit" variant="cta" disabled={loading} className="group">
+                  {loading ? (
                     <>
-                      <span className="text-white/30">•</span>
-                      <span className="text-white/70 uppercase">{formData.country}</span>
+                      <Loader2 size={16} className="animate-spin" />
+                      Creating your TID...
+                    </>
+                  ) : (
+                    <>
+                      Mint Your Developer Passport
+                      <ArrowRight size={16} className="transition-transform duration-150 group-hover:translate-x-0.5" />
                     </>
                   )}
-                </div>
-              </div>
-
-              {/* Selected Skills Chips */}
-              <div className="relative z-10 mb-4">
-                <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block mb-1.5">
-                  Skills ({selectedSkills.length}/5)
-                </span>
-                <div className="flex flex-wrap gap-1.5 min-h-[28px]">
-                  {selectedSkills.length > 0 ? (
-                    selectedSkills.map((s) => (
-                      <span key={s} className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-white/10 border border-white/15 text-white">
-                        {s}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-[11px] font-mono text-white/40 italic">
-                      Select up to 5 skills below...
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Card Footer Bar */}
-              <div className="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-white/50">
-                <span>AFRICAN DEVELOPER REGISTRY</span>
-                <span className="text-cta-yellow font-bold">TECHFAMZ.COM/TID</span>
-              </div>
+                </Button>
+              ) : (
+                <Button type="button" variant="cta" onClick={handleContinue} className="group">
+                  {step === 2 && skills.length === 0 ? "Skip for now" : "Continue"}
+                  <ArrowRight size={16} className="transition-transform duration-150 group-hover:translate-x-0.5" />
+                </Button>
+              )}
             </div>
-          </div>
-        </div>
-
-        {/* Security badges */}
-        <div className="relative z-10 pt-8 mt-6 border-t border-border-glass hidden md:grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-lg bg-bg-card border border-border-glass">
-            <Shield className="w-5 h-5 text-accent-blue mb-1.5" />
-            <h4 className="text-xs font-bold text-text-primary mb-0.5">Public Verification</h4>
-            <p className="text-[11px] text-text-muted leading-relaxed">Anyone can confirm your TID on its public Techfamz page.</p>
-          </div>
-          <div className="p-4 rounded-lg bg-bg-card border border-border-glass">
-            <Lock className="w-5 h-5 text-accent-blue mb-1.5" />
-            <h4 className="text-xs font-bold text-text-primary mb-0.5">Private Email</h4>
-            <p className="text-[11px] text-text-muted leading-relaxed">Your email is never shown on your public profile.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT PANEL - The Form Flow */}
-      <div className="lg:w-[52%] bg-bg-primary min-h-screen flex items-center justify-center px-6 py-12 md:px-12 lg:px-16 lg:pt-28 relative z-0">
-        <div className="w-full max-w-[560px]">
-          
-          <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight">
-              Developer Profile
-            </h2>
-            <p className="text-sm text-text-secondary mt-1">
-              Complete your information to generate and claim your unique passport.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {error && (
-              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
-                {error}
-              </div>
-            )}
-
-            {/* Section 1: Personal Details */}
-            <div className="space-y-5">
-              <div className="pb-3 border-b border-border-glass flex items-center justify-between">
-                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">1. Personal Details</h3>
-                <span className="text-[11px] font-mono text-text-muted">Required fields *</span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-text-primary text-xs font-semibold">Full Name *</Label>
-                  <Input
-                    id="fullName"
-                    required
-                    placeholder="e.g. Chinua Achebe"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-text-primary text-xs font-semibold">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="name@domain.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="rounded-lg"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <Label htmlFor="country" className="text-text-primary text-xs font-semibold">Country</Label>
-                  <Input
-                    id="country"
-                    placeholder="e.g. Ghana, Kenya, Nigeria"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="githubUrl" className="text-text-primary text-xs font-semibold">GitHub / Portfolio</Label>
-                  <Input
-                    id="githubUrl"
-                    placeholder="github.com/yourhandle"
-                    value={formData.githubUrl}
-                    onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                    className="rounded-lg"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: Technical Profile */}
-            <div className="space-y-5 pt-4">
-              <div className="pb-3 border-b border-border-glass flex items-center justify-between">
-                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">2. Technical Track</h3>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="role" className="text-text-primary text-xs font-semibold">Primary Engineering Role *</Label>
-                <div className="relative">
-                  <select
-                    id="role"
-                    required
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="flex h-11 w-full items-center justify-between rounded-lg border border-border-glass bg-bg-card px-4 py-2 text-sm text-text-primary transition-colors duration-150 outline-none hover:border-border-glass-hover focus:border-accent-blue focus:ring-[3px] focus:ring-accent-blue-glow-soft appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>Select your primary discipline</option>
-                    {ROLES.map((role) => (
-                      <option key={role} value={role}>{role}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-text-primary text-xs font-semibold">Core Stack (Select up to 5)</Label>
-                  <span className="text-xs font-mono font-bold text-accent-blue-light">{selectedSkills.length}/5 Selected</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_SKILLS.map((skill) => {
-                    const isSelected = selectedSkills.includes(skill);
-                    return (
-                      <button
-                        key={skill}
-                        type="button"
-                        onClick={() => toggleSkill(skill)}
-                        aria-pressed={isSelected}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 border ${
-                          isSelected
-                            ? "bg-accent-blue text-white border-accent-blue"
-                            : "bg-bg-card text-text-secondary border-border-glass hover:border-border-glass-hover hover:text-text-primary"
-                        }`}
-                      >
-                        {isSelected && <CheckCircle2 size={12} className="inline mr-1 -mt-0.5" />}
-                        {skill}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Submission */}
-            <div className="pt-6">
-              <Button 
-                type="submit" 
-                variant="cta"
-                size="lg"
-                className="group w-full text-base"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating your TID...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Mint Your Developer Passport
-                    <ArrowRight className="w-5 h-5 transition-transform duration-150 group-hover:translate-x-0.5" />
-                  </span>
-                )}
-              </Button>
-              <div className="mt-5 flex items-start gap-3 p-4 rounded-lg bg-bg-secondary border border-border-glass">
-                <Lock className="w-4 h-4 text-accent-blue shrink-0 mt-0.5" />
-                <p className="text-xs text-text-muted leading-relaxed">
-                  Once issued, your TID is permanently linked to your profile. Anyone can confirm it on your public Techfamz page or by scanning the QR code on your card.
-                </p>
-              </div>
-            </div>
-
           </form>
-        </div>
+        </section>
+
+        {/* Live preview + reassurance */}
+        <aside className="lg:sticky lg:top-28 lg:col-start-1 lg:row-start-2 lg:self-start" aria-label="Passport preview">
+          <PassportPreview fullName={formData.fullName} role={formData.role} country={formData.country} skills={skills} />
+
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-border-glass bg-bg-card p-4">
+              <Shield className="mb-1.5 h-5 w-5 text-accent-blue" aria-hidden="true" />
+              <h4 className="mb-0.5 text-xs font-bold text-text-primary">Public Verification</h4>
+              <p className="text-[11px] leading-relaxed text-text-muted">Anyone can confirm your TID on its public Techfamz page.</p>
+            </div>
+            <div className="rounded-lg border border-border-glass bg-bg-card p-4">
+              <Lock className="mb-1.5 h-5 w-5 text-accent-blue" aria-hidden="true" />
+              <h4 className="mb-0.5 text-xs font-bold text-text-primary">Private Email</h4>
+              <p className="text-[11px] leading-relaxed text-text-muted">Your email is never shown on your public profile.</p>
+            </div>
+          </div>
+        </aside>
       </div>
     </main>
   );
