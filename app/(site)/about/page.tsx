@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "About Techfamz — Vision, Mission & Legal Foundation",
@@ -42,44 +41,40 @@ export default function AboutPage() {
   return (
     <main>
       {/* ═══ Hero ═══ */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-15%] right-[-10%] w-[500px] h-[500px] rounded-full bg-accent-blue opacity-[0.06] blur-3xl" />
-          <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-[#1e3a8a] opacity-[0.08] blur-3xl" />
-        </div>
-        <div className="relative z-10 text-center max-w-[800px] px-6 py-32">
-          <span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-accent-blue-light mb-5 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
-            About Techfamz
-          </span>
-          <h1 className="mb-6 text-[clamp(2rem,5vw,3.5rem)] leading-[1.1] tracking-[-0.02em] font-[800]">
-            Building the Infrastructure
-            <br />
-            <span className="bg-[linear-gradient(135deg,#60a5fa,#3b82f6,#93c5fd)] bg-clip-text text-transparent">
-              for African Tech Talent
+      <section className="bg-bg-brand border-b border-border-glass">
+        <div className="max-w-[1140px] mx-auto px-5 md:px-8 pt-36 pb-20 md:pt-44 md:pb-24">
+          <div className="max-w-[800px]">
+            <span className="eyebrow">
+              About Techfamz
             </span>
-          </h1>
-          <p className="max-w-[600px] mx-auto text-text-secondary text-[1.05rem] leading-relaxed">
-            From community roots to technology infrastructure — here is the story, the vision, and
-            the foundation behind Techfamz.
-          </p>
+            <h1 className="mb-6 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.08] tracking-[-0.03em] font-extrabold">
+              Building the Infrastructure
+              <br />
+              <span className="text-accent-blue-light">
+                for African Tech Talent
+              </span>
+            </h1>
+            <p className="max-w-[600px] text-text-secondary text-[1.1rem] leading-relaxed">
+              From community roots to technology infrastructure — here is the story, the vision, and
+              the foundation behind Techfamz.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ═══ Vision Section ═══ */}
-      <section className="relative bg-bg-primary overflow-hidden">
-        <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.05] blur-3xl pointer-events-none" />
-        <div className="divider" />
-        <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[900px] mx-auto text-center">
-          <div className="animate-fade-in-up-delay-1">
-            <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
+      <section className="bg-bg-primary border-b border-border-glass">
+        <div className="py-20 px-5 md:py-28 md:px-8 max-w-[1140px] mx-auto grid gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            <span className="eyebrow">
               The Vision
             </span>
-            <h2 className="mb-6 max-w-[700px] mx-auto">
+            <h2 className="mb-6 max-w-[520px] tracking-[-0.03em]">
               A Unified Technology Network for Africa
             </h2>
           </div>
 
-          <div className="animate-fade-in-up-delay-2 max-w-[680px] mx-auto">
+          <div>
             <p className="text-[1.1rem] mb-6">
               Africa holds extraordinary technical potential. Techfamz exists to help organize it.
             </p>
@@ -88,7 +83,7 @@ export default function AboutPage() {
               innovation, and opportunity intersect seamlessly — locally and globally.
             </p>
 
-            <div className="bg-bg-card border border-[rgba(59,130,246,0.15)] rounded-lg px-10 py-8  text-center">
+            <div className="border-l-2 border-accent-blue pl-5">
               <p className="text-[1.1rem] text-text-primary font-medium m-0 leading-relaxed">
                 This is not just a platform.
                 <br />
@@ -102,66 +97,52 @@ export default function AboutPage() {
       </section>
 
       {/* ═══ Timeline Section ═══ */}
-      <section className="relative" style={{ background: "var(--gradient-section-alt)" }}>
-        <div className="divider" />
-        <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[700px] mx-auto">
-          <div className="animate-fade-in-up-delay-1 text-center mb-14">
-            <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
+      <section className="bg-bg-secondary border-b border-border-glass">
+        <div className="py-20 px-5 md:py-28 md:px-8 max-w-[1140px] mx-auto grid gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            <span className="eyebrow">
               Our Journey
             </span>
-            <h2 className="mb-4">The Road So Far</h2>
+            <h2 className="mb-4 tracking-[-0.03em]">The Road So Far</h2>
           </div>
 
-          <div className="relative pl-8 border-l border-border-glass">
+          <ol className="relative pl-8 border-l border-border-glass">
             {timeline.map((item, i) => (
-              <div
-                key={i}
-                className="animate-fade-in-up-delay-1 mb-10 last:mb-0 relative"
-                style={{ transitionDelay: `${i * 0.1}s` }}
-              >
+              <li key={i} className="mb-10 last:mb-0 relative">
                 {/* Dot */}
-                <div className="absolute -left-[calc(2rem+5px)] top-1 w-2.5 h-2.5 rounded-full bg-accent-blue shadow-[0_0_8px_var(--color-accent-blue-glow)]" />
+                <div className="absolute -left-[calc(2rem+5px)] top-1.5 w-2.5 h-2.5 rounded-full bg-accent-blue" aria-hidden="true" />
                 <span className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-accent-blue-light">
                   {item.year}
                 </span>
                 <p className="text-text-secondary mt-1 m-0">{item.event}</p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
       {/* ═══ Legal Foundation ═══ */}
-      <section className="relative bg-bg-primary">
-        <div className="divider" />
-        <div className="relative py-20 px-5 md:py-[100px] md:px-6 max-w-[1200px] mx-auto text-center">
-          <div className="animate-fade-in-up-delay-1">
-            <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">
+      <section className="bg-bg-primary">
+        <div className="py-20 px-5 md:py-28 md:px-8 max-w-[1140px] mx-auto">
+          <div className="max-w-[760px] mb-12">
+            <span className="eyebrow">
               Legal & Structural Foundation
             </span>
-            <h2 className="mb-6">Built With Legitimacy. Built to Scale.</h2>
-            <p className="max-w-[680px] text-lg text-text-secondary mx-auto mb-12">
+            <h2 className="mb-6 tracking-[-0.03em]">Built With Legitimacy. Built to Scale.</h2>
+            <p className="max-w-[680px] text-lg text-text-secondary">
               Techfamz Limited is undergoing structured legal and organizational development to ensure
               durability, not temporary growth.
             </p>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 max-w-[900px] mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
             {pillars.map((p, i) => (
-              <Card
-                key={i}
-                className="bg-bg-card border-border-glass rounded-lg  transition-all duration-400 ease-premium hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-border-glass-hover text-left p-0"
-                style={{ transitionDelay: `${i * 0.1}s` }}
-              >
-                <CardHeader className="p-8 pb-2">
-                  <CardTitle className="text-[1.05rem] font-semibold text-accent-blue-light">
-                    {p.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-8 pt-0">
-                  <p className="text-[0.9rem] m-0">{p.desc}</p>
-                </CardContent>
-              </Card>
+              <div key={i} className="border-t border-border-glass pt-6">
+                <div className="text-[1.05rem] font-semibold text-text-primary mb-2">
+                  {p.title}
+                </div>
+                <p className="text-[0.95rem] m-0">{p.desc}</p>
+              </div>
             ))}
           </div>
         </div>

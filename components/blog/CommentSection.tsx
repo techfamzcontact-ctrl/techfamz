@@ -100,7 +100,7 @@ export default function CommentSection({ postId }: { postId: string }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Share your thoughts..."
-            className="w-full min-h-[120px] rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-3 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft mb-4 resize-none"
+            className="w-full min-h-[120px] rounded-lg border border-border-glass bg-bg-primary px-4 py-3 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft mb-4 resize-none"
             required
           />
 
@@ -110,7 +110,7 @@ export default function CommentSection({ postId }: { postId: string }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
-              className="w-full h-12 rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
+              className="w-full h-11 rounded-lg border border-border-glass bg-bg-primary px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
               required
             />
             <input
@@ -118,19 +118,19 @@ export default function CommentSection({ postId }: { postId: string }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email (will not be published)"
-              className="w-full h-12 rounded-xl border border-border-glass bg-bg-primary/30 px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
+              className="w-full h-11 rounded-lg border border-border-glass bg-bg-primary px-4 py-2 text-[0.95rem] text-text-primary transition-all duration-200 outline-none placeholder:text-text-muted hover:border-border-glass-hover focus-visible:border-accent-blue focus-visible:ring-[3px] focus-visible:ring-accent-blue-glow-soft"
               required
             />
           </div>
 
           <div className="flex items-center justify-between mt-4">
-            <p className="text-[0.7rem] text-text-muted">
+            <p className="text-xs text-text-muted">
               {name.trim() ? `Posting as ${name.trim()}` : "Posting anonymously"}
             </p>
             <button
               type="submit"
               disabled={submitting || !content.trim()}
-              className="inline-flex items-center gap-2 py-2.5 px-6 text-sm font-semibold text-white bg-accent-blue rounded-lg transition-all duration-300 hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(59,130,246,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="inline-flex items-center gap-2 h-10 px-5 text-sm font-semibold text-white bg-accent-blue rounded-lg transition-colors duration-150 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -150,10 +150,10 @@ export default function CommentSection({ postId }: { postId: string }) {
           </div>
 
           {error && (
-            <p className="mt-3 text-sm text-red-400">{error}</p>
+            <p className="mt-3 text-sm text-red-500 dark:text-red-400">{error}</p>
           )}
           {success && (
-            <p className="mt-3 text-sm text-green-400">Comment posted successfully!</p>
+            <p className="mt-3 text-sm text-green-600 dark:text-green-400">Comment posted successfully!</p>
           )}
         </div>
       </form>
@@ -186,7 +186,7 @@ export default function CommentSection({ postId }: { postId: string }) {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="bg-bg-card border border-border-glass rounded-xl p-5  transition-all duration-300 hover:border-border-glass-hover"
+              className="bg-bg-card border border-border-glass rounded-xl p-5"
             >
               <div className="flex items-center gap-3 mb-3">
                 {/* Avatar */}
@@ -203,7 +203,7 @@ export default function CommentSection({ postId }: { postId: string }) {
                   </time>
                 </div>
               </div>
-              <p className="text-[0.9rem] text-text-secondary leading-relaxed whitespace-pre-wrap">
+              <p className="text-[0.95rem] text-text-secondary leading-relaxed whitespace-pre-wrap">
                 {comment.content}
               </p>
             </div>

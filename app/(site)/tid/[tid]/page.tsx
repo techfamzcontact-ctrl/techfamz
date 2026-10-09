@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ShieldCheck, Server, Lock, Activity, Download } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { TIDCard } from "@/components/tid/TIDCard";
 import { DownloadCardButton } from "@/components/tid/DownloadCardButton";
 import { ShareButtons } from "@/components/tid/ShareButtons";
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ tid: stri
   const resolvedParams = await params;
   const developer = await getDeveloperData(resolvedParams.tid);
 
-  if (!developer) return { title: "TID Not Found | Techfamz" };
+  if (!developer) return { title: "TID Not Found" };
 
   const title = `${developer.fullName} - Techfamz Identity (${developer.tid})`;
   const description = `Verify ${developer.fullName}'s Techfamz Developer Identity (${developer.role}). Join the ecosystem.`;
@@ -65,53 +65,45 @@ export default async function TIDVerificationPage({ params, searchParams }: { pa
   const isExisting = resolvedSearchParams.existing === "true";
 
   return (
-    <main className="min-h-screen bg-bg-primary pt-24 pb-20 relative flex flex-col items-center overflow-hidden font-sans">
-      
-      {/* Terminal Background */}
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(var(--color-border-glass) 1px, transparent 1px), linear-gradient(90deg, var(--color-border-glass) 1px, transparent 1px)', backgroundSize: '32px 32px' }} 
-      />
-      <div className="absolute top-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-40 z-0" />
-      <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[800px] h-[400px] bg-accent-blue opacity-[0.06] blur-[120px] rounded-full pointer-events-none z-0" />
-
-      <div className="container max-w-4xl mx-auto px-4 relative z-10 flex flex-col items-center">
+    <main className="min-h-screen bg-bg-primary pt-28 pb-20 flex flex-col items-center">
+      <div className="container max-w-4xl mx-auto px-4 flex flex-col items-center">
         
         {/* Terminal Header */}
-        <div className="w-full max-w-2xl mb-10 animate-fade-in-up-delay-1">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-bg-card/80 border border-border-glass backdrop-blur-md shadow-xs">
+        <div className="w-full max-w-2xl mb-10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 rounded-lg bg-bg-card border border-border-glass">
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-              <span className="text-xs font-mono text-text-muted uppercase tracking-widest">Techfamz Registry // Authenticated</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-xs font-mono text-text-muted uppercase tracking-widest">Techfamz Registry // Public Record</span>
             </div>
             <div className="flex items-center gap-4 text-xs font-mono text-text-muted">
-              <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-accent-blue" /> SECURE</div>
-              <div className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5 text-accent-blue" /> NODE: TX-9</div>
-              <div className="flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-emerald-500" /> ONLINE</div>
+              <div className="flex items-center gap-1.5">
+                <CalendarDays className="w-3.5 h-3.5 text-accent-blue" />
+                ISSUED {new Date(developer.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }).toUpperCase()}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Status Messages */}
         {isNew && (
-          <div className="mb-8 w-full max-w-2xl px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-medium animate-slide-up-1 text-center shadow-md">
-            🎉 Identity successfully minted! Your digital passport has been securely registered. We&apos;ve sent the credentials to your email.
+          <div className="mb-8 w-full max-w-2xl px-6 py-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium text-center">
+            🎉 Your TID has been created and added to the Techfamz registry. A welcome email with your details is on its way.
           </div>
         )}
         
         {isExisting && (
-          <div className="mb-8 w-full max-w-2xl px-6 py-4 rounded-2xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue-light text-sm font-medium animate-slide-up-1 text-center">
-            👋 Welcome back. Your developer identity is verified and recognized across the ecosystem.
+          <div className="mb-8 w-full max-w-2xl px-6 py-4 rounded-lg bg-accent-blue-glow-soft border border-accent-blue/20 text-accent-blue-light text-sm font-medium text-center">
+            👋 Welcome back. This email already has a TID, so here is your existing passport.
           </div>
         )}
 
         {/* The Card on Pedestal */}
-        <div className="w-full animate-slide-up-1 mb-12 relative perspective-1000">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-accent-blue opacity-15 blur-[90px] pointer-events-none rounded-full" />
+        <div className="w-full mb-12">
           <TIDCard developer={developer} baseUrl={baseUrl} />
         </div>
 
         {/* Control Panel */}
-        <div className="w-full max-w-2xl bg-bg-card border border-border-glass rounded-3xl p-6 md:p-8 shadow-xl shadow-black/10 animate-slide-up-2 backdrop-blur-md">
+        <div className="w-full max-w-2xl bg-bg-card border border-border-glass rounded-xl p-6 md:p-8">
           <div className="text-center mb-6">
             <h3 className="text-lg font-bold text-text-primary mb-1">Passport Control Panel</h3>
             <p className="text-sm text-text-secondary">Export your credentials or share your verification badge.</p>

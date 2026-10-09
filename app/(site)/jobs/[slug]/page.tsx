@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, MapPin, Briefcase, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, Briefcase, Banknote, Clock } from "lucide-react";
 import sanitizeHtml from "sanitize-html";
 import type { Metadata, ResolvingMetadata } from "next";
 import { ApplyButtons } from "@/components/jobs/ApplyButtons";
@@ -108,50 +108,50 @@ async function JobDetail({ slug }: { slug: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-[900px] mx-auto px-5 md:px-8">
+      <div className="max-w-[820px] mx-auto px-5 md:px-8">
         <Link
           href="/jobs"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted hover:text-accent-blue-light transition-colors mb-8 group"
+          className="inline-flex items-center gap-2 text-sm font-medium text-text-muted hover:text-text-primary transition-colors mb-8 group"
         >
           <ArrowLeft size={16} className="transform transition-transform group-hover:-translate-x-1" />
           Back to Tech Jobs
         </Link>
 
         {/* Job Header Card */}
-        <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10 mb-8">
+        <div className="bg-bg-card border border-border-glass rounded-xl p-6 md:p-10 mb-10">
           <div className="flex flex-col sm:flex-row gap-6 items-start">
             {/* Company Badge */}
-            <div className="shrink-0 w-16 h-16 rounded-xl bg-accent-blue-glow-soft border border-accent-blue-glow flex items-center justify-center">
-              <span className="text-2xl font-bold text-accent-blue-light">
+            <div className="shrink-0 w-14 h-14 rounded-lg bg-bg-primary border border-border-glass flex items-center justify-center">
+              <span className="text-xl font-bold text-accent-blue-light">
                 {job.company.charAt(0).toUpperCase()}
               </span>
             </div>
 
             <div className="flex-1">
-              <h1 className="text-2xl md:text-4xl font-[800] leading-[1.15] tracking-tight text-text-primary mb-3">
+              <h1 className="text-[clamp(1.75rem,4vw,2.5rem)] font-extrabold leading-[1.15] tracking-[-0.025em] text-text-primary mb-2">
                 {job.title}
               </h1>
-              <p className="text-lg text-text-secondary mb-5">{job.company}</p>
+              <p className="text-lg font-medium text-text-secondary mb-5">{job.company}</p>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-text-secondary">
                 {job.location && (
                   <span className="flex items-center gap-2">
-                    <MapPin size={16} className="text-accent-blue-light" />
+                    <MapPin size={16} className="text-text-muted" />
                     {job.location}
                   </span>
                 )}
                 <span className="flex items-center gap-2">
-                  <Briefcase size={16} className="text-accent-blue-light" />
+                  <Briefcase size={16} className="text-text-muted" />
                   {job.type}
                 </span>
                 {job.salary && (
                   <span className="flex items-center gap-2">
-                    <DollarSign size={16} className="text-accent-blue-light" />
+                    <Banknote size={16} className="text-text-muted" />
                     {job.salary}
                   </span>
                 )}
                 <span className="flex items-center gap-2">
-                  <Clock size={16} className="text-accent-blue-light" />
+                  <Clock size={16} className="text-text-muted" />
                   Posted {format(job.createdAt, "MMMM d, yyyy")}
                 </span>
               </div>
@@ -175,12 +175,13 @@ async function JobDetail({ slug }: { slug: string }) {
         </div>
 
         {/* Job Description */}
-        <div className="bg-bg-card border border-border-glass rounded-2xl  p-8 md:p-10">
-          <h2 className="text-xl font-bold text-text-primary mb-6">About This Role</h2>
+        <div className="px-1">
+          <h2 className="text-2xl font-bold text-text-primary mb-6">About This Role</h2>
           <div
-            className="prose dark:prose-invert prose-base md:prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-blue-light hover:prose-a:text-accent-blue prose-hr:border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em]"
+            className="prose article"
             dangerouslySetInnerHTML={{
               __html: sanitizeHtml(job.description, {
+                transformTags: { h1: "h2" },
                 allowedTags: [
                   "h1","h2","h3","h4","h5","h6",
                   "p","br","strong","em","u","s","del","mark","code","pre","blockquote","hr",
@@ -204,8 +205,8 @@ async function JobDetail({ slug }: { slug: string }) {
           />
 
           {/* Bottom Apply CTA */}
-          <div className="mt-10 pt-6 border-t border-border-glass flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-text-secondary text-sm">Interested in this role?</p>
+          <div className="mt-12 p-6 rounded-xl bg-bg-card border border-border-glass flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p className="text-text-primary font-medium">Interested in this role?</p>
             <div className="shrink-0">
               <ApplyButtons 
                 applyUrl={job.applyUrl} 
@@ -227,7 +228,7 @@ export default async function JobDetailPage({ params }: Props) {
   // We only wrap the content area in suspense. 
   // Note: the background gradient still renders immediately while the user waits
   return (
-    <main className="min-h-screen pt-24 pb-20" style={{ background: "var(--gradient-hero)" }}>
+    <main className="min-h-screen pt-28 pb-24 bg-bg-primary">
       <Suspense fallback={<JobDetailSkeleton />}>
         <JobDetail slug={resolvedParams.slug} />
       </Suspense>

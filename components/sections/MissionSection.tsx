@@ -1,15 +1,12 @@
-"use client";
-
 export default function MissionSection() {
   return (
-    <section className="relative bg-bg-primary">
-      <div className="divider" />
-      <div className="relative py-20 px-5 md:py-[120px] md:px-6 max-w-[1200px] mx-auto">
+    <section className="bg-bg-primary border-b border-border-glass">
+      <div className="py-20 px-5 md:py-28 md:px-8 max-w-[1140px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
           {/* Left */}
-          <div className="animate-fade-in-up-delay-1">
-            <span className="inline-block text-xs font-semibold tracking-[0.15em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft">Our Mission</span>
-            <h2 className="mb-5">
+          <div>
+            <span className="eyebrow">Our Mission</span>
+            <h2 className="mb-5 tracking-[-0.03em]">
               Empower Talent.
               <br />
               Engineer Systems.
@@ -19,7 +16,7 @@ export default function MissionSection() {
           </div>
 
           {/* Right */}
-          <div className="animate-fade-in-up-delay-2">
+          <div>
             <p className="text-lg mb-6">
               Our mission is simple but ambitious: to design a platform that strengthens the identity,
               credibility, and global relevance of African tech talent.
@@ -28,7 +25,7 @@ export default function MissionSection() {
               We are engineering systems that remove barriers between skilled developers and meaningful
               opportunities.
             </p>
-            <div className="flex gap-8 flex-wrap">
+            <div className="flex gap-x-8 gap-y-2 flex-wrap">
               {["Not noise.", "Not hype.", "But structure, access, and long-term value."].map(
                 (text, i) => (
                   <span

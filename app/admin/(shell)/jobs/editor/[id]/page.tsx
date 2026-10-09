@@ -65,7 +65,7 @@ export default function JobEditorPage({ params }: { params: Promise<{ id: string
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert prose-base max-w-none min-h-[300px] max-h-[500px] overflow-y-auto p-5 focus:outline-none bg-bg-primary border border-border-glass rounded-b-xl",
+          "prose article min-h-[300px] max-h-[500px] overflow-y-auto p-5 focus:outline-none bg-bg-primary border border-border-glass rounded-b-xl",
       },
     },
   });

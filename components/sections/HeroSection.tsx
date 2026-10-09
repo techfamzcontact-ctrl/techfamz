@@ -1,227 +1,55 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export default function HeroSection() {
-  const particlesRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = particlesRef.current;
-    if (!container) return;
-
-    const PARTICLE_COUNT = 24;
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const particle = document.createElement("div");
-      particle.className = "particle";
-
-      const size = Math.random() * 2 + 2; // 2px – 4px
-      const left = Math.random() * 100; // 0% – 100%
-      const duration = Math.random() * 10 + 6; // 6s – 16s
-      const delay = -(Math.random() * duration); // negative so mid-flight on load
-      const dx = Math.random() * 120 - 60; // -60px to 60px
-      const color = "#4A9EFF";
-
-      particle.style.cssText = `
-        position: absolute;
-        bottom: -10px;
-        left: ${left}%;
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: 50%;
-        background: ${color};
-        --dx: ${dx}px;
-        animation: floatUp ${duration}s linear ${delay}s infinite;
-        will-change: transform, opacity;
-      `;
-
-      container.appendChild(particle);
-    }
-
-    return () => {
-      container.innerHTML = "";
-    };
-  }, []);
-
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ background: "var(--gradient-hero)" }}
+      className="relative bg-bg-brand border-b border-border-glass"
     >
-      {/* ═══ LAYER 1: Deep space fog ═══ */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-15%] w-[700px] h-[700px] rounded-full bg-accent-blue blur-3xl animate-pulse-glow" style={{ opacity: "var(--glow-opacity)" }} />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#1e3a8a] blur-3xl animate-pulse-glow-navy" style={{ opacity: "var(--glow-opacity)" }} />
-        <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-accent-blue opacity-[0.04] blur-3xl" />
-      </div>
+      <div className="max-w-[1140px] mx-auto px-5 md:px-8 pt-36 pb-20 md:pt-44 md:pb-28">
+        <div className="max-w-[860px]">
+          {/* Status line */}
+          <p className="eyebrow mb-6 flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-blue-light" aria-hidden="true" />
+            <span>500+ Community Members Across Africa</span>
+          </p>
 
-      {/* ═══ LAYER 2: Subtle grid ═══ */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--grid-opacity)" }}>
-        <defs>
-          <pattern id="heroGrid" width="80" height="80" patternUnits="userSpaceOnUse">
-            <path d="M 80 0 L 0 0 0 80" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-text-muted" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#heroGrid)" />
-      </svg>
-
-      {/* ═══ LAYER 3: Floating orbital rings ═══ */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Outer ring */}
-        <div
-          className="absolute w-[600px] h-[600px] md:w-[800px] md:h-[800px] rounded-full border border-accent-blue"
-          style={{ opacity: "var(--ring-opacity)", animation: "spin 80s linear infinite" }}
-        />
-        {/* Middle ring */}
-        <div
-          className="absolute w-[400px] h-[400px] md:w-[550px] md:h-[550px] rounded-full border border-accent-blue-light opacity-[0.04]"
-          style={{ animation: "spin 60s linear infinite reverse" }}
-        />
-        {/* Inner ring */}
-        <div
-          className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-accent-blue"
-          style={{ opacity: "var(--ring-opacity)", animation: "spin 40s linear infinite" }}
-        />
-      </div>
-
-      {/* ═══ LAYER 4: Floating particles ═══ */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--particle-opacity)" }}>
-        {[
-          { cx: "12%", cy: "18%", r: 1.5, delay: "0s" },
-          { cx: "25%", cy: "72%", r: 2, delay: "1.5s" },
-          { cx: "38%", cy: "28%", r: 1, delay: "0.8s" },
-          { cx: "52%", cy: "85%", r: 1.5, delay: "2s" },
-          { cx: "65%", cy: "15%", r: 2, delay: "0.5s" },
-          { cx: "78%", cy: "62%", r: 1, delay: "3s" },
-          { cx: "88%", cy: "35%", r: 1.5, delay: "1.2s" },
-          { cx: "42%", cy: "55%", r: 1, delay: "2.5s" },
-          { cx: "18%", cy: "45%", r: 2, delay: "1.8s" },
-          { cx: "72%", cy: "42%", r: 1, delay: "0.3s" },
-          { cx: "92%", cy: "78%", r: 1.5, delay: "2.2s" },
-          { cx: "8%", cy: "88%", r: 1, delay: "3.5s" },
-        ].map((p, i) => (
-          <circle
-            key={i}
-            cx={p.cx}
-            cy={p.cy}
-            r={p.r}
-            className="fill-accent-blue-light"
-            style={{
-              animation: `networkPulse 4s ease-in-out infinite`,
-              animationDelay: p.delay,
-            }}
-          />
-        ))}
-      </svg>
-
-      {/* ═══ LAYER 5: Connector lines ═══ */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: "var(--ring-opacity)" }}>
-        <line x1="12%" y1="18%" x2="38%" y2="28%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="38%" y1="28%" x2="65%" y2="15%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="65%" y1="15%" x2="88%" y2="35%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="25%" y1="72%" x2="52%" y2="85%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="18%" y1="45%" x2="42%" y2="55%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="42%" y1="55%" x2="72%" y2="42%" className="stroke-accent-blue stroke-[0.5]" />
-        <line x1="72%" y1="42%" x2="78%" y2="62%" className="stroke-accent-blue stroke-[0.5]" />
-      </svg>
-
-      {/* ═══ LAYER 6: Top vignette & bottom fade ═══ */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "var(--gradient-vignette)" }} />
-      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: "var(--gradient-bottom-fade)" }} />
-
-      {/* ═══ LAYER 7: Dynamic floating particles ═══ */}
-      <div
-        ref={particlesRef}
-        id="particles"
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ zIndex: 2 }}
-      />
-
-      {/* ═══ CONTENT ═══ */}
-      <div className="relative z-10 text-center max-w-[880px] px-6 py-24">
-        {/* Status badge */}
-        <div className="animate-fade-in-up-delay-1 mb-8 flex justify-center">
-          <Badge variant="glow" className="shadow-md">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-accent-blue-light opacity-75 animate-ping" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-blue-light" />
+          {/* Main headline */}
+          <h1 className="mb-6 text-[clamp(2.5rem,6vw,4.75rem)] leading-[1.04] tracking-[-0.035em] font-extrabold">
+            Engineering the Future
+            <br />
+            <span className="text-accent-blue-light">
+              of African Technology
             </span>
-            <span>500+ Verified Engineers Across Africa</span>
-          </Badge>
-        </div>
+          </h1>
 
-        {/* Main headline */}
-        <h1 className="mb-6 animate-fade-in-up-delay-1 text-[clamp(2.4rem,6vw,4.5rem)] leading-[1.06] tracking-[-0.03em] font-black">
-          Engineering the Future
-          <br />
-          <span className="text-gradient-blue">
-            of African Technology
-          </span>
-        </h1>
+          {/* Sub headline */}
+          <p className="max-w-[660px] mb-4 text-text-secondary leading-[1.7] text-[clamp(1.05rem,2.2vw,1.25rem)] font-normal">
+            Techfamz is building a structured technology ecosystem designed to unify developers, engineers,
+            and forward-thinking companies across Africa and beyond.
+          </p>
 
-        {/* Sub headline */}
-        <p className="max-w-[660px] mx-auto mb-4 text-text-secondary leading-[1.7] text-[clamp(1.05rem,2.2vw,1.25rem)] font-normal animate-fade-in-up-delay-2">
-          Techfamz is building a structured technology ecosystem designed to unify developers, engineers,
-          and forward-thinking companies across Africa and beyond.
-        </p>
+          <p className="max-w-[560px] mb-10 text-text-muted leading-relaxed text-[0.95rem]">
+            What began as a community is evolving into digital infrastructure — built for talent, built for
+            opportunity, built for scale.
+          </p>
 
-        {/* Mystery line */}
-        <p className="max-w-[540px] mx-auto mb-10 text-text-muted leading-relaxed text-[0.95rem] opacity-0 animate-[fadeInUp_0.7s_cubic-bezier(0.16,1,0.3,1)_0.55s_both]">
-          What began as a community is evolving into digital infrastructure — built for talent, built for
-          opportunity, built for scale.
-        </p>
-
-        {/* CTA buttons */}
-        <div className="flex justify-center items-center gap-4 flex-wrap animate-slide-up-1">
-          <Button variant="cta" size="lg" asChild className="relative overflow-hidden group shadow-lg shadow-amber-500/20 rounded-xl px-8 h-13 font-bold text-sm">
-            <Link href="/identity/claim" className="flex items-center gap-2">
-              Claim Your Developer TID
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transition-transform duration-300 ease-premium group-hover:translate-x-1">
-                <path d="M3.333 8h9.334M8.667 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-          </Button>
-          <Button variant="outline-glow" size="lg" asChild className="rounded-xl px-8 h-13 font-semibold text-sm">
-            <Link href="#shift">Explore the Vision</Link>
-          </Button>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="mt-16 opacity-0 animate-[fadeInUp_0.7s_cubic-bezier(0.16,1,0.3,1)_1.2s_both]">
-          <div className="flex flex-col items-center gap-2 text-text-muted">
-            <span className="text-[0.65rem] uppercase tracking-[0.2em] font-medium">Scroll to explore</span>
-            <div className="w-[1px] h-8 bg-[linear-gradient(to_bottom,var(--color-text-muted),transparent)] animate-pulse" />
+          {/* CTA buttons */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button variant="cta" size="lg" asChild className="group">
+              <Link href="/identity/claim" className="flex items-center gap-2">
+                Claim Your Developer TID
+                <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link href="#shift">Explore the Vision</Link>
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Inline keyframe for ring spin */}
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes floatUp {
-          0% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-          8% {
-            opacity: 0.8;
-          }
-          90% {
-            opacity: 0.6;
-          }
-          100% {
-            transform: translateY(-100vh) translateX(var(--dx, 0px));
-            opacity: 0;
-          }
-        }
-      `}</style>
     </section>
   );
 }

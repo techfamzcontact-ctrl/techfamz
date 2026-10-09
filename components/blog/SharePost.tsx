@@ -1,6 +1,6 @@
 "use client";
 
-import { Twitter,X, Linkedin, Facebook, Link as LinkIcon, Check } from "lucide-react";
+import { Linkedin, Facebook, Link as LinkIcon, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface SharePostProps {
@@ -37,14 +37,15 @@ export function SharePost({ title, path, className }: SharePostProps) {
 
   return (
     <div className={`flex items-center gap-3 border-border-glass ${className || "py-4 mt-6 border-t"}`}>
-      <span className="text-sm font-semibold text-text-muted uppercase tracking-wider">Share this post:</span>
+      <span className="text-xs font-semibold text-text-muted uppercase tracking-[0.14em]">Share this post:</span>
       <div className="flex items-center gap-2">
         <a 
           href={shareLinks.twitter} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 rounded-full bg-bg-card border border-border-glass text-text-secondary hover:text-white hover:border-white/30 hover:bg-white/10 transition-colors flex items-center justify-center w-[36px] h-[36px]"
+          className="p-2 rounded-full border border-border-glass text-text-secondary hover:text-text-primary hover:border-border-glass-hover transition-colors flex items-center justify-center w-[36px] h-[36px]"
           title="Share on X"
+          aria-label="Share on X"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="w-[18px] h-[18px] fill-current">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
@@ -54,8 +55,9 @@ export function SharePost({ title, path, className }: SharePostProps) {
           href={shareLinks.linkedin} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 rounded-full bg-bg-card border border-border-glass text-text-secondary hover:text-[#0A66C2] hover:border-[#0A66C2]/30 hover:bg-[#0A66C2]/10 transition-colors"
+          className="p-2 rounded-full border border-border-glass text-text-secondary hover:text-[#0A66C2] hover:border-[#0A66C2]/40 transition-colors"
           title="Share on LinkedIn"
+          aria-label="Share on LinkedIn"
         >
           <Linkedin size={18} />
         </a>
@@ -63,15 +65,17 @@ export function SharePost({ title, path, className }: SharePostProps) {
           href={shareLinks.facebook} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 rounded-full bg-bg-card border border-border-glass text-text-secondary hover:text-[#1877F2] hover:border-[#1877F2]/30 hover:bg-[#1877F2]/10 transition-colors"
+          className="p-2 rounded-full border border-border-glass text-text-secondary hover:text-[#1877F2] hover:border-[#1877F2]/40 transition-colors"
           title="Share on Facebook"
+          aria-label="Share on Facebook"
         >
           <Facebook size={18} />
         </a>
         <button 
           onClick={copyToClipboard}
-          className="p-2 rounded-full bg-bg-card border border-border-glass text-text-secondary hover:text-accent-blue hover:border-accent-blue/30 hover:bg-accent-blue/10 transition-colors ml-2"
+          className="p-2 rounded-full border border-border-glass text-text-secondary hover:text-accent-blue-light hover:border-accent-blue/40 transition-colors ml-2"
           title="Copy Link"
+          aria-label="Copy link"
         >
           {copied ? <Check size={18} className="text-green-500" /> : <LinkIcon size={18} />}
         </button>

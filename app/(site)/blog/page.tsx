@@ -71,16 +71,55 @@ async function getCategories(): Promise<string[]> {
   }
 }
 
+type PublishedPost = NonNullable<Awaited<ReturnType<typeof getPublishedPosts>>>[number];
+
+function PostMeta({ post }: { post: PublishedPost }) {
+  return (
+    <div className="flex items-center gap-2 text-xs text-text-muted mb-3">
+      {post.category && (
+        <>
+          <span className="font-semibold text-accent-blue-light">{post.category}</span>
+          <span aria-hidden="true">·</span>
+        </>
+      )}
+      <time dateTime={post.createdAt.toISOString()}>
+        {format(new Date(post.createdAt), "MMM d, yyyy")}
+      </time>
+    </div>
+  );
+}
+
+function CoverImage({ post, sizes, priority }: { post: PublishedPost; sizes: string; priority?: boolean }) {
+  return (
+    <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-border-glass bg-bg-secondary">
+      {post.coverImage ? (
+        <Image
+          src={post.coverImage}
+          alt={post.title}
+          fill
+          sizes={sizes}
+          priority={priority}
+          className="object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image src="/logo.png" alt="Techfamz logo" width={48} height={48} className="object-contain opacity-30 grayscale" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 async function PostsList({ category }: { category?: string }) {
   const posts = await getPublishedPosts();
 
   if (posts === null) {
     return (
-      <div className="text-center py-20 border border-red-500/20 rounded-2xl bg-[rgba(127,29,29,0.15)] ">
+      <div className="py-16 px-6 text-center border border-border-glass rounded-xl bg-bg-card">
         <h3 className="text-xl font-semibold text-text-primary mb-2">Something went wrong</h3>
         <p className="text-text-secondary mb-6">We couldn&apos;t load the blog posts right now. Please try again later.</p>
-        <Link 
-          href="/blog" 
+        <Link
+          href="/blog"
           className="inline-flex items-center gap-2 py-2.5 px-5 bg-accent-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
         >
           Retry
@@ -112,63 +151,54 @@ async function PostsList({ category }: { category?: string }) {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {filteredPosts.map((post) => (
-        <Link 
-          href={`/blog/${post.slug}`} 
-          key={post.id}
-          className="group flex flex-col bg-bg-card border border-border-glass rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-blue/5 hover:border-accent-blue/40 shadow-xs"
-        >
-          <div className="relative aspect-[16/10] overflow-hidden bg-bg-primary/50">
-            {post.coverImage ? (
-              <Image 
-                src={post.coverImage} 
-                alt={post.title} 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-bg-secondary">
-                <Image src="/logo.png" alt="Techfamz logo" width={48} height={48} className="object-contain opacity-30 grayscale" />
-              </div>
-            )}
-            {post.category && (
-              <div className="absolute top-4 left-4 z-10">
-                <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-sm">
-                  {post.category}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex flex-col flex-1 p-6 md:p-7 relative">
-            <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-text-muted mb-3">
-              <time dateTime={post.createdAt.toISOString()}>
-                {format(new Date(post.createdAt), "MMM d, yyyy")}
-              </time>
-              <span>•</span>
-              <span>4 min read</span>
-            </div>
-            
-            <h2 className="text-xl font-bold leading-snug tracking-tight text-text-primary mb-3 group-hover:text-accent-blue-light transition-colors line-clamp-2">
-              {post.title}
-            </h2>
+  const [featured, ...rest] = filteredPosts;
 
-            {post.excerpt && (
-              <p className="text-sm text-text-secondary line-clamp-2 mb-6 leading-relaxed">
-                {post.excerpt}
-              </p>
-            )}
-            
-            <div className="flex items-center gap-2 text-xs font-bold text-accent-blue-light group-hover:text-accent-blue transition-colors mt-auto pt-4 border-t border-border-glass">
-              Read Deep Dive
-              <ArrowRight size={14} className="transform transition-transform duration-300 group-hover:translate-x-1" />
-            </div>
-          </div>
-        </Link>
-      ))}
-    </div>
+  return (
+    <>
+      {/* Featured story: the newest post */}
+      <Link
+        href={`/blog/${featured.slug}`}
+        className="group grid gap-6 md:grid-cols-[1.35fr_1fr] md:gap-10 md:items-center pb-12 mb-12 border-b border-border-glass"
+      >
+        <CoverImage post={featured} sizes="(min-width: 1024px) 640px, (min-width: 768px) 55vw, 100vw" priority />
+        <div>
+          <PostMeta post={featured} />
+          <h2 className="text-[clamp(1.6rem,3vw,2.25rem)] font-extrabold leading-[1.2] tracking-[-0.02em] text-text-primary mb-4 group-hover:text-accent-blue-light transition-colors">
+            {featured.title}
+          </h2>
+          {featured.excerpt && (
+            <p className="text-base md:text-lg text-text-secondary leading-relaxed line-clamp-3 mb-5">
+              {featured.excerpt}
+            </p>
+          )}
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-blue-light">
+            Read article
+            <ArrowRight size={15} className="transition-transform duration-150 group-hover:translate-x-0.5" />
+          </span>
+        </div>
+      </Link>
+
+      {rest.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {rest.map((post) => (
+            <Link href={`/blog/${post.slug}`} key={post.id} className="group flex flex-col">
+              <CoverImage post={post} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" />
+              <div className="pt-5">
+                <PostMeta post={post} />
+                <h2 className="text-lg font-bold leading-snug tracking-tight text-text-primary mb-2 group-hover:text-accent-blue-light transition-colors line-clamp-2">
+                  {post.title}
+                </h2>
+                {post.excerpt && (
+                  <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -181,16 +211,16 @@ export default async function BlogIndexPage({
   const categories = await getCategories();
 
   return (
-    <main className="min-h-screen pt-32 pb-24" style={{ background: "var(--gradient-hero)" }}>
-      <div className="max-w-[1200px] mx-auto px-5 md:px-8">
-        
+    <main className="min-h-screen pt-32 pb-24 bg-bg-primary">
+      <div className="max-w-[1140px] mx-auto px-5 md:px-8">
+
         {/* Header */}
-        <div className="text-center mb-14 max-w-[760px] mx-auto">
-          <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-accent-blue-light mb-4 py-1.5 px-4 border border-accent-blue-glow rounded-full bg-accent-blue-glow-soft shadow-xs">
+        <div className="mb-10 max-w-[720px]">
+          <span className="eyebrow">
             Ecosystem Insights
           </span>
-          <h1 className="text-[clamp(2.4rem,5vw,4.2rem)] font-black leading-[1.08] tracking-tight text-text-primary mb-4">
-            The Techfamz <span className="text-gradient-blue">Journal</span>
+          <h1 className="text-[clamp(2.4rem,5vw,3.75rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-text-primary mb-4">
+            The Techfamz <span className="text-accent-blue-light">Journal</span>
           </h1>
           <p className="text-base md:text-lg text-text-secondary leading-relaxed">
             Engineering perspectives, platform evolution, and architectural deep dives from the builders shaping African tech.
@@ -199,7 +229,7 @@ export default async function BlogIndexPage({
 
         {/* Category Filters */}
         {categories.length > 0 && (
-          <div className="mb-12">
+          <div className="mb-12 pb-6 border-b border-border-glass">
             <Suspense>
               <CategoryFilter categories={categories} />
             </Suspense>

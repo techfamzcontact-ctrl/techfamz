@@ -24,8 +24,8 @@ export function ApplyButtons({ applyUrl, isEmail, applyHref, size = "large" }: A
   const isLarge = size === "large";
 
   const primaryBtnClass = isLarge
-    ? "inline-flex items-center gap-2 py-3 px-8 bg-accent-blue text-white text-base font-semibold rounded-xl hover:bg-blue-600 transition-all duration-300 shadow-[0_0_20px_var(--color-accent-blue-glow-soft)] hover:shadow-[0_0_30px_var(--color-accent-blue-glow-soft)] hover:-translate-y-0.5"
-    : "inline-flex items-center gap-2 py-2.5 px-6 bg-accent-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors";
+    ? "inline-flex items-center gap-2 h-11 px-6 bg-cta-yellow text-on-cta text-[15px] font-semibold rounded-lg hover:bg-cta-yellow-hover transition-colors duration-150"
+    : "inline-flex items-center gap-2 h-10 px-5 bg-cta-yellow text-on-cta text-sm font-semibold rounded-lg hover:bg-cta-yellow-hover transition-colors duration-150";
 
   if (!isEmail) {
     return (
@@ -58,12 +58,12 @@ export function ApplyButtons({ applyUrl, isEmail, applyHref, size = "large" }: A
         title="Copy email address"
         className={`inline-flex items-center gap-2 font-semibold transition-colors border ${
           isLarge
-            ? "py-3 px-5 text-sm rounded-xl"
-            : "py-2.5 px-4 text-xs rounded-lg"
+            ? "h-11 px-5 text-sm rounded-lg"
+            : "h-10 px-4 text-xs rounded-lg"
         } ${
           copied
-            ? "bg-green-500/10 text-green-400 border-green-500/30"
-            : "bg-bg-primary text-text-secondary border-border-glass hover:text-text-primary hover:bg-bg-card"
+            ? "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30"
+            : "bg-transparent text-text-secondary border-border-glass hover:text-text-primary hover:border-border-glass-hover"
         }`}
       >
         {copied ? (

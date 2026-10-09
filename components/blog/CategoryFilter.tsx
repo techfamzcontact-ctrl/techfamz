@@ -20,12 +20,12 @@ export function CategoryFilter({ categories }: CategoryFilterProps) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 justify-center">
+    <div className="flex flex-wrap items-center gap-2">
       <button
         onClick={() => handleFilter(null)}
-        className={`py-2 px-4 rounded-full text-sm font-medium border transition-all duration-300 cursor-pointer ${
+        className={`py-1.5 px-3.5 rounded-full text-sm font-medium border transition-colors duration-150 cursor-pointer ${
           !activeCategory
-            ? "bg-accent-blue text-white border-accent-blue shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]"
+            ? "bg-text-primary text-bg-primary border-text-primary"
             : "bg-transparent text-text-secondary border-border-glass hover:text-text-primary hover:border-border-glass-hover"
         }`}
       >
@@ -35,9 +35,9 @@ export function CategoryFilter({ categories }: CategoryFilterProps) {
         <button
           key={cat}
           onClick={() => handleFilter(cat)}
-          className={`py-2 px-4 rounded-full text-sm font-medium border transition-all duration-300 cursor-pointer ${
+          className={`py-1.5 px-3.5 rounded-full text-sm font-medium border transition-colors duration-150 cursor-pointer ${
             activeCategory === cat
-              ? "bg-accent-blue text-white border-accent-blue shadow-[0_0_15px_var(--color-accent-blue-glow-soft)]"
+              ? "bg-text-primary text-bg-primary border-text-primary"
               : "bg-transparent text-text-secondary border-border-glass hover:text-text-primary hover:border-border-glass-hover"
           }`}
         >

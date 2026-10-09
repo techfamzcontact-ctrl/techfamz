@@ -115,7 +115,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert max-w-none focus:outline-none min-h-[400px] max-h-[600px] overflow-y-auto p-6 md:p-8 bg-bg-primary/50 border border-border-glass [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-0.5 [&_li_p]:my-0 [&_ul]:my-2 [&_ol]:my-2 [&_p]:m-0 [&_p]:min-h-[1.5em] [&_h1]:mt-8 [&_h1]:mb-4 [&_h2]:mt-8 [&_h2]:mb-4 [&_h3]:mt-6 [&_h3]:mb-3 [&_blockquote]:border-l-4 [&_blockquote]:border-accent-blue [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-text-secondary w-full",
+          "prose article focus:outline-none min-h-[400px] max-h-[600px] overflow-y-auto p-6 md:p-8 bg-bg-primary border border-border-glass w-full",
       },
     },
     onUpdate: ({ editor }) => {
@@ -781,7 +781,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           )}
 
           <div
-            className="prose dark:prose-invert max-w-none text-text-secondary mt-4 leading-relaxed [&_p]:my-2 [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5"
+            className="prose article mt-4"
             dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "<p>No content yet...</p>" }}
           />
         </DialogContent>

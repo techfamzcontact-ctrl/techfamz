@@ -57,10 +57,7 @@ export default function ComingSoonDialog({
           {/* Status badge */}
           <div className="mb-5">
             <Badge variant="warning">
-              <span className="relative flex h-1.5 w-1.5 mr-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-cta-yellow opacity-75 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cta-yellow" />
-              </span>
+              <span className="inline-flex h-1.5 w-1.5 mr-2 rounded-full bg-cta-yellow" />
               In Development
             </Badge>
           </div>

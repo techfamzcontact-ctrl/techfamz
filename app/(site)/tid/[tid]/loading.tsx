@@ -3,10 +3,9 @@ import { ShieldCheck, Download, Copy, Twitter, Linkedin } from "lucide-react";
 
 export default function LoadingTIDCard() {
   return (
-    <main className="min-h-screen pt-24 pb-20 relative flex flex-col items-center justify-center overflow-hidden">
+    <main className="min-h-screen pt-28 pb-20 flex flex-col items-center">
       {/* Background gradients */}
-      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-accent-blue opacity-5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500 opacity-[0.03] rounded-full blur-3xl pointer-events-none" />
+
 
       <div className="container max-w-4xl mx-auto px-4 relative z-10 flex flex-col items-center">
         <div className="text-center mb-8">
@@ -18,10 +17,10 @@ export default function LoadingTIDCard() {
 
         {/* Skeleton Card */}
         <div className="w-full max-w-lg mx-auto mb-10">
-          <div className="relative w-full overflow-hidden rounded-2xl border border-border-glass bg-bg-primary/50  shadow-2xl animate-pulse">
+          <div className="relative w-full overflow-hidden rounded-2xl border border-border-glass bg-bg-card animate-pulse">
             
             {/* Header */}
-            <div className="p-6 md:p-8 flex items-start justify-between border-b border-border-glass/50 bg-gradient-to-r from-bg-card to-transparent">
+            <div className="p-6 md:p-8 flex items-start justify-between border-b border-border-glass/50 ">
               <div>
                 <div className="h-4 w-32 bg-border-glass rounded mb-2"></div>
                 <div className="h-8 w-48 bg-border-glass rounded"></div>

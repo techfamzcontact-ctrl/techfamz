@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowRight, Shield, Fingerprint, Lock, Sparkles, Cpu, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowRight, Shield, Fingerprint, Lock, Cpu, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,74 +82,58 @@ export default function ClaimTIDPage() {
   return (
     <main className="min-h-screen bg-bg-primary flex flex-col lg:flex-row relative">
       {/* LEFT PANEL - Live Holographic Passport Card Preview */}
-      <div className="lg:w-[48%] lg:sticky lg:top-0 lg:h-screen bg-bg-secondary border-r border-border-glass relative overflow-y-auto overflow-x-hidden p-6 md:p-10 lg:p-14 flex flex-col justify-between z-10">
-        {/* Subtle grid background */}
-        <div 
-          className="absolute inset-0 z-0 opacity-15 pointer-events-none" 
-          style={{ backgroundImage: 'radial-gradient(var(--color-border-glass) 1px, transparent 1px)', backgroundSize: '24px 24px' }} 
-        />
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-accent-blue/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="lg:w-[48%] lg:sticky lg:top-0 lg:h-screen bg-bg-secondary border-r border-border-glass relative overflow-y-auto overflow-x-hidden px-6 pb-10 pt-24 md:px-10 lg:px-14 lg:pt-28 flex flex-col justify-between z-10">
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/20 text-accent-blue-light text-xs font-semibold tracking-wider uppercase mb-5">
+          <div className="eyebrow flex items-center gap-2 mb-4">
             <Fingerprint className="w-3.5 h-3.5" />
             Developer Registry
           </div>
 
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-text-primary leading-[1.08] tracking-tight mb-4">
-            Mint Your <span className="text-gradient-blue">Developer Passport</span>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-text-primary leading-[1.08] tracking-[-0.03em] mb-4">
+            Mint Your <span className="text-accent-blue-light">Developer Passport</span>
           </h1>
           <p className="text-sm md:text-base text-text-secondary max-w-md leading-relaxed mb-8">
-            Your permanent, cryptographically verified identity in the African tech ecosystem. Preview your card in real-time as you complete your profile.
+            Your permanent developer identity in the African tech ecosystem, with a public page anyone can check. Preview your card in real time as you complete your profile.
           </p>
 
           {/* LIVE VIRTUAL PASSPORT CARD */}
-          <div className="w-full max-w-md mx-auto my-4 relative group">
-            {/* Ambient Card Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-accent-blue/30 via-amber-400/20 to-accent-blue-light/30 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition duration-500 pointer-events-none" />
-
-            <div className="relative rounded-3xl border border-accent-blue/40 bg-gradient-to-b from-[#0B1528] via-[#070D1B] to-[#040812] text-white p-6 shadow-2xl overflow-hidden">
-              {/* Circuit dots */}
-              <div 
-                className="absolute inset-0 z-0 opacity-15 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(rgba(96, 165, 250, 0.4) 1px, transparent 1px)', backgroundSize: '16px 16px' }}
-              />
+          <div className="w-full max-w-md mx-auto my-4">
+            <div className="relative rounded-xl border border-white/10 bg-brand-navy text-white p-6 shadow-lg overflow-hidden">
 
               {/* Card Header */}
               <div className="relative z-10 flex items-center justify-between pb-4 mb-4 border-b border-white/10">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-7 rounded-md bg-gradient-to-br from-amber-400/30 to-amber-600/30 border border-amber-400/40 flex items-center justify-center">
-                    <Cpu size={15} className="text-amber-300" />
+                  <div className="w-9 h-7 rounded-md bg-cta-yellow/20 border border-cta-yellow/40 flex items-center justify-center">
+                    <Cpu size={15} className="text-cta-yellow" />
                   </div>
                   <div>
-                    <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-accent-blue-light font-bold">
-                      Techfamz Verified ID
+                    <span className="block text-[9px] font-mono uppercase tracking-[0.2em] text-[#60a5fa] font-bold">
+                      Techfamz Developer ID
                     </span>
                     <span className="text-[10px] font-mono text-white/50">LIVE PREVIEW</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-accent-blue/20 border border-accent-blue/40 text-[10px] font-mono text-accent-blue-light font-bold">
-                  <Sparkles size={11} />
-                  <span>ACTIVE MINT</span>
+                <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/10 text-[10px] font-mono text-[#93c5fd] font-bold">
+                  <span>DRAFT</span>
                 </div>
               </div>
 
               {/* ID Number */}
               <div className="relative z-10 mb-5">
-                <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">Assigned Hash</span>
-                <span className="font-mono text-xl md:text-2xl font-black text-gradient-blue tracking-wider">
-                  TID-TF-LIVE
+                <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block">TID Number · assigned when you submit</span>
+                <span className="font-mono text-xl md:text-2xl font-bold text-[#60a5fa] tracking-wider">
+                  TF•••••••
                 </span>
               </div>
 
               {/* Live Full Name & Role */}
               <div className="relative z-10 mb-5">
-                <h3 className="text-xl md:text-2xl font-black text-white tracking-tight leading-snug">
+                <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-snug">
                   {formData.fullName.trim() || "Your Name Here"}
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-accent-blue-light font-medium mt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="flex items-center gap-2 text-xs text-[#93c5fd] font-medium mt-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span>{formData.role || "Primary Engineering Role"}</span>
                   {formData.country && (
                     <>
@@ -163,7 +147,7 @@ export default function ClaimTIDPage() {
               {/* Selected Skills Chips */}
               <div className="relative z-10 mb-4">
                 <span className="text-[9px] font-mono uppercase tracking-widest text-white/40 block mb-1.5">
-                  Verified Skills ({selectedSkills.length}/5)
+                  Skills ({selectedSkills.length}/5)
                 </span>
                 <div className="flex flex-wrap gap-1.5 min-h-[28px]">
                   {selectedSkills.length > 0 ? (
@@ -183,7 +167,7 @@ export default function ClaimTIDPage() {
               {/* Card Footer Bar */}
               <div className="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-white/50">
                 <span>AFRICAN DEVELOPER REGISTRY</span>
-                <span className="text-amber-400 font-bold">SECURE ENCLAVE</span>
+                <span className="text-cta-yellow font-bold">TECHFAMZ.COM/TID</span>
               </div>
             </div>
           </div>
@@ -191,25 +175,25 @@ export default function ClaimTIDPage() {
 
         {/* Security badges */}
         <div className="relative z-10 pt-8 mt-6 border-t border-border-glass hidden md:grid grid-cols-2 gap-4">
-          <div className="p-3.5 rounded-2xl bg-bg-card/70 border border-border-glass backdrop-blur-sm">
+          <div className="p-4 rounded-lg bg-bg-card border border-border-glass">
             <Shield className="w-5 h-5 text-accent-blue mb-1.5" />
-            <h4 className="text-xs font-bold text-text-primary mb-0.5">Verifiable Hash</h4>
-            <p className="text-[11px] text-text-muted leading-relaxed">Cryptographic validation on the Techfamz registry.</p>
+            <h4 className="text-xs font-bold text-text-primary mb-0.5">Public Verification</h4>
+            <p className="text-[11px] text-text-muted leading-relaxed">Anyone can confirm your TID on its public Techfamz page.</p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-bg-card/70 border border-border-glass backdrop-blur-sm">
+          <div className="p-4 rounded-lg bg-bg-card border border-border-glass">
             <Lock className="w-5 h-5 text-accent-blue mb-1.5" />
-            <h4 className="text-xs font-bold text-text-primary mb-0.5">Privacy Guard</h4>
-            <p className="text-[11px] text-text-muted leading-relaxed">Your email is encrypted and never exposed publicly.</p>
+            <h4 className="text-xs font-bold text-text-primary mb-0.5">Private Email</h4>
+            <p className="text-[11px] text-text-muted leading-relaxed">Your email is never shown on your public profile.</p>
           </div>
         </div>
       </div>
 
       {/* RIGHT PANEL - The Form Flow */}
-      <div className="lg:w-[52%] bg-bg-primary min-h-screen flex items-center justify-center p-6 md:p-12 lg:p-16 relative z-0">
-        <div className="w-full max-w-[560px] animate-slide-up-1">
+      <div className="lg:w-[52%] bg-bg-primary min-h-screen flex items-center justify-center px-6 py-12 md:px-12 lg:px-16 lg:pt-28 relative z-0">
+        <div className="w-full max-w-[560px]">
           
           <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-black text-text-primary tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary tracking-tight">
               Developer Profile
             </h2>
             <p className="text-sm text-text-secondary mt-1">
@@ -219,7 +203,7 @@ export default function ClaimTIDPage() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {error && (
-              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
+              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
                 {error}
               </div>
             )}
@@ -227,7 +211,7 @@ export default function ClaimTIDPage() {
             {/* Section 1: Personal Details */}
             <div className="space-y-5">
               <div className="pb-3 border-b border-border-glass flex items-center justify-between">
-                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">1. Identity Verification</h3>
+                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">1. Personal Details</h3>
                 <span className="text-[11px] font-mono text-text-muted">Required fields *</span>
               </div>
               
@@ -240,7 +224,7 @@ export default function ClaimTIDPage() {
                     placeholder="e.g. Chinua Achebe"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
                 </div>
                 <div className="space-y-2">
@@ -252,7 +236,7 @@ export default function ClaimTIDPage() {
                     placeholder="name@domain.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
                 </div>
               </div>
@@ -265,7 +249,7 @@ export default function ClaimTIDPage() {
                     placeholder="e.g. Ghana, Kenya, Nigeria"
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
                 </div>
                 <div className="space-y-2">
@@ -275,7 +259,7 @@ export default function ClaimTIDPage() {
                     placeholder="github.com/yourhandle"
                     value={formData.githubUrl}
                     onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
                 </div>
               </div>
@@ -295,7 +279,7 @@ export default function ClaimTIDPage() {
                     required
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="flex h-12 w-full items-center justify-between rounded-xl border border-border-glass bg-bg-card px-4 py-2 text-sm text-text-primary transition-all duration-200 outline-none hover:border-border-glass-hover focus:border-accent-blue focus:ring-[3px] focus:ring-accent-blue-glow-soft appearance-none cursor-pointer shadow-xs"
+                    className="flex h-11 w-full items-center justify-between rounded-lg border border-border-glass bg-bg-card px-4 py-2 text-sm text-text-primary transition-colors duration-150 outline-none hover:border-border-glass-hover focus:border-accent-blue focus:ring-[3px] focus:ring-accent-blue-glow-soft appearance-none cursor-pointer"
                   >
                     <option value="" disabled>Select your primary discipline</option>
                     {ROLES.map((role) => (
@@ -323,10 +307,11 @@ export default function ClaimTIDPage() {
                         key={skill}
                         type="button"
                         onClick={() => toggleSkill(skill)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border ${
+                        aria-pressed={isSelected}
+                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 border ${
                           isSelected
-                            ? "bg-accent-blue text-white border-accent-blue shadow-md shadow-accent-blue/20 scale-[1.02]"
-                            : "bg-bg-card text-text-secondary border-border-glass hover:border-accent-blue/50 hover:text-text-primary"
+                            ? "bg-accent-blue text-white border-accent-blue"
+                            : "bg-bg-card text-text-secondary border-border-glass hover:border-border-glass-hover hover:text-text-primary"
                         }`}
                       >
                         {isSelected && <CheckCircle2 size={12} className="inline mr-1 -mt-0.5" />}
@@ -344,25 +329,25 @@ export default function ClaimTIDPage() {
                 type="submit" 
                 variant="cta"
                 size="lg"
-                className="w-full h-14 rounded-2xl text-base font-black shadow-xl shadow-amber-500/20 transition-all duration-300 hover:scale-[1.01]"
+                className="group w-full text-base"
                 disabled={loading}
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Minting Registry Record...
+                    Creating your TID...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
                     Mint Your Developer Passport
-                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-5 h-5 transition-transform duration-150 group-hover:translate-x-0.5" />
                   </span>
                 )}
               </Button>
-              <div className="mt-5 flex items-start gap-3 p-4 rounded-2xl bg-accent-blue/5 border border-accent-blue/10">
+              <div className="mt-5 flex items-start gap-3 p-4 rounded-lg bg-bg-secondary border border-border-glass">
                 <Lock className="w-4 h-4 text-accent-blue shrink-0 mt-0.5" />
                 <p className="text-xs text-text-muted leading-relaxed">
-                  Your identity is cryptographically minted. Once issued, your TID is permanently linked to your profile and can be verified across all Techfamz partner platforms.
+                  Once issued, your TID is permanently linked to your profile. Anyone can confirm it on your public Techfamz page or by scanning the QR code on your card.
                 </p>
               </div>
             </div>
